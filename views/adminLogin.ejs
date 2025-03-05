@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | University Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(to right, #3b82f6, #9333ea);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+        }
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+        }
+        .input-field {
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .input-field:focus {
+            border-color: #6366f1;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+        .university-logo {
+            width: 100px;
+            margin-bottom: 16px;
+        }
+        .login-heading {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .forgot-password {
+            font-size: 14px;
+            color: #3b82f6;
+            transition: color 0.3s;
+        }
+        .forgot-password:hover {
+            color: #9333ea;
+        }
+        .login-button {
+            background: #3b82f6;
+            transition: background 0.3s ease;
+        }
+        .login-button:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- <img src="/images/university-logo.png" alt="University Logo" class="university-logo"> -->
+        <h2 class="login-heading mb-2">Admin Login</h2>
+        <p class="text-gray-600 mb-6 text-sm">Sign in with your email and password</p>
+        <form class="space-y-4" action="/admin/login" method="post">
+            <div>
+                <input type="email" name="email" placeholder="Email"
+                    class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" required>
+            </div>
+            <div>
+                <input type="password" name="password" placeholder="Password"
+                    class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" required>
+            </div>
+            <div class="text-right">
+                <a href="/admin/changepassword" class="forgot-password">Forgot password?</a>
+            </div>
+            <button type="submit"
+                class="w-full text-white font-semibold py-3 rounded-lg login-button">
+                LOGIN TO DASHBOARD
+            </button>
+            <p class="text-center text-xs text-gray-500 mt-6">
+                Unauthorized access is prohibited. This system is monitored.
+            </p>
+        </form>
+    </div>
+</body>
+</html>

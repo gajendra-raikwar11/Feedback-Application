@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faculty Login | University Portal</title>
+  <link rel="shortcut icon" href="/images/university-logo.png" type="image/x-icon">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(to right, #4f46e5, #9333ea);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      padding: 40px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .input-field {
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .input-field:focus {
+      border-color: #6366f1;
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+    }
+
+    .university-logo {
+      width: 100px;
+      margin-bottom: 16px;
+    }
+
+    .login-heading {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .forgot-password {
+      font-size: 14px;
+      color: #4f46e5;
+      transition: color 0.3s;
+    }
+
+    .forgot-password:hover {
+      color: #9333ea;
+    }
+
+    .login-button {
+      background: #4f46e5;
+      transition: background 0.3s ease;
+    }
+
+    .login-button:hover {
+      background: #4338ca;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <!-- <img src="/images/university-logo.png" alt="University Logo" class="university-logo"> -->
+    <h2 class="login-heading mb-2">Faculty Login</h2>
+    <p class="text-gray-600 mb-6 text-sm">Sign in with your Faculty ID and password</p>
+    <form class="space-y-4" action="/faculty/login" method="post">
+      <div>
+        <input type="text" name="faculty_id" placeholder="Faculty ID"
+          class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" required>
+      </div>
+      <div>
+        <input type="password" name="password" placeholder="Password"
+          class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" required>
+      </div>
+      <div class="text-right">
+        <a href="/faculty/changepassword" class="forgot-password">Forgot password?</a>
+      </div>
+      <button type="submit"
+        class="w-full text-white font-semibold py-3 rounded-lg login-button">
+        Login
+      </button>
+    </form>
+  </div>
+</body>
+</html>
