@@ -1,0 +1,236 @@
+[
+  {
+    "SNo": 1,
+    "StudentName": "Aakash  Tiwari",
+    "Email": "aakashtiwari@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "a",
+    "Enroll": "0187CS221001"
+  },
+  {
+    "SNo": 2,
+    "StudentName": "Aaryan  Chandel",
+    "Email": "aaryanchandel@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "a",
+    "Enroll": "0187CS221002"
+  },
+  {
+    "SNo": 3,
+    "StudentName": "Aavi  Agrawal",
+    "Email": "aaviagrawal@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "a",
+    "Enroll": "0187CS221003"
+  },
+  {
+    "SNo": 4,
+    "StudentName": "Aayush  Tiwari",
+    "Email": "aayushtiwari@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "a",
+    "Enroll": "0187CS221004"
+  },
+  {
+    "SNo": 5,
+    "StudentName": "Abdul  Toufik",
+    "Email": "abdultoufik@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "a",
+    "Enroll": "0187CS221005"
+  },
+  {
+    "SNo": 6,
+    "StudentName": "Atharv Rao Rege",
+    "Email": "atharvrege722@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "a",
+    "Enroll": "0187CS221064"
+  },
+  {
+    "SNo": 7,
+    "StudentName": "Priya Sharma",
+    "Email": "priya.sharma@gmail.com",
+    "Section": "B",
+    "Year": 3,
+    "Password": "b",
+    "Enroll": "0187CS221065"
+  },
+  {
+    "SNo": 8,
+    "StudentName": "Rahul Verma",
+    "Email": "rahul.verma@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "c",
+    "Enroll": "0187CS221066"
+  },
+  {
+    "SNo": 10,
+    "StudentName": "Sneha Patel",
+    "Email": "sneha.patel@gmail.com",
+    "Section": "B",
+    "Year": 3,
+    "Password": "d",
+    "Enroll": "0187CS221067"
+  },
+  {
+    "SNo": 11,
+    "StudentName": "Aditya Kumar",
+    "Email": "aditya.kumar@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "e",
+    "Enroll": "0187CS221068"
+  },
+  {
+    "SNo": 12,
+    "StudentName": "Neha Singh",
+    "Email": "neha.singh@gmail.com",
+    "Section": "B",
+    "Year": 3,
+    "Password": "f",
+    "Enroll": "0187CS221069"
+  },
+  {
+    "SNo": 13,
+    "StudentName": "Arjun Malhotra",
+    "Email": "arjun.malhotra@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "g",
+    "Enroll": "0187CS221070"
+  },
+  {
+    "SNo": 14,
+    "StudentName": "Riya Kapoor",
+    "Email": "riya.kapoor@gmail.com",
+    "Section": "B",
+    "Year": 3,
+    "Password": "h",
+    "Enroll": "0187CS221071"
+  },
+  {
+    "SNo": 15,
+    "StudentName": "Varun Mehta",
+    "Email": "varun.mehta@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "i",
+    "Enroll": "0187CS221072"
+  },
+  {
+    "SNo": 16,
+    "StudentName": "Ananya Gupta",
+    "Email": "ananya.gupta@gmail.com",
+    "Section": "B",
+    "Year": 3,
+    "Password": "j",
+    "Enroll": "0187CS221073"
+  },
+  {
+    "SNo": 17,
+    "StudentName": "Rohan Joshi",
+    "Email": "rohan.joshi@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "k",
+    "Enroll": "0187CS221074"
+  },
+  {
+    "SNo": 18,
+    "StudentName": "Nisha Reddy",
+    "Email": "nisha.reddy@gmail.com",
+    "Section": "B",
+    "Year": 3,
+    "Password": "l",
+    "Enroll": "0187CS221075"
+  },
+  {
+    "SNo": 19,
+    "StudentName": "Karan Shah",
+    "Email": "karan.shah@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "m",
+    "Enroll": "0187CS221076"
+  },
+  {
+    "SNo": 20,
+    "StudentName": "Pooja Desai",
+    "Email": "pooja.desai@gmail.com",
+    "Section": "B",
+    "Year": 3,
+    "Password": "n",
+    "Enroll": "0187CS221077"
+  },
+  {
+    "SNo": 21,
+    "StudentName": "Vikram Choudhury",
+    "Email": "vikram.choudhury@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "o",
+    "Enroll": "0187CS221078"
+  },
+  {
+    "SNo": 22,
+    "StudentName": "Meera Iyer",
+    "Email": "meera.iyer@gmail.com",
+    "Section": "B",
+    "Year": 3,
+    "Password": "p",
+    "Enroll": "0187CS221079"
+  },
+  {
+    "SNo": 23,
+    "StudentName": "Gaurav Menon",
+    "Email": "gaurav.menon@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "q",
+    "Enroll": "0187CS221080"
+  },
+  {
+    "SNo": 24,
+    "StudentName": "Tanya Khanna",
+    "Email": "tanya.khanna@gmail.com",
+    "Section": "B",
+    "Year": 3,
+    "Password": "r",
+    "Enroll": "0187CS221081"
+  },
+  {
+    "SNo": 25,
+    "StudentName": "Mohit Agarwal",
+    "Email": "mohit.agarwal@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "s",
+    "Enroll": "0187CS221082"
+  },
+  {
+    "SNo": 26,
+    "StudentName": "Divya Nair",
+    "Email": "divya.nair@gmail.com",
+    "Section": "B",
+    "Year": 3,
+    "Password": "t",
+    "Enroll": "0187CS221083"
+  },
+  {
+    "SNo": 27,
+    "StudentName": "Aman  Chandravanshi",
+    "Email": "amanchandra1c7662@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "aman",
+    "Enroll": "0187CS221035"
+  }
+]
