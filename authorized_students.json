@@ -232,5 +232,14 @@
     "Year": 3,
     "Password": "aman",
     "Enroll": "0187CS221035"
+  },
+  {
+    "SNo": 1,
+    "StudentName": "Gajendra",
+    "Email": "gajendra.raikwar.11@gmail.com",
+    "Section": "A",
+    "Year": 3,
+    "Password": "g",
+    "Enroll": "0187CS221000"
   }
 ]

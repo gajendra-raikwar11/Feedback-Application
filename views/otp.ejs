@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Ensure inputs have consistent appearance across different browsers */
+        input[type="text"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center px-4">
+
+    <div class="bg-white shadow-lg rounded-lg p-6 w-full max-w-md">
+        <div class="mb-6 text-center">
+            <h2 class="text-xl md:text-2xl font-semibold text-purple-700">Email Verification</h2>
+        </div>
+
+        <div class="mb-6 text-center">
+            <h3 class="text-lg font-semibold text-gray-700">Get Your Code</h3>
+            <p class="text-sm text-gray-500 mt-2">Please enter the 6 digit code that was sent to your email address.</p>
+        </div>
+
+        <form action="/checkotp" method="POST" class="text-center">
+            <div class="flex justify-between mb-4">
+                <!-- Input fields for the 6 digit code -->
+                <input type="text" class="w-full h-12 text-xl text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required" name="otp" placeholder="Enter the otp">
+            </div>
+
+            <!-- Resend Code -->
+            <!-- <p class="text-sm text-gray-500">If you don't receive the code <a href="/resendotp" class="text-purple-700 hover:underline">Resend</a></p> -->
+
+            <!-- Submit Button -->
+            <button type="submit" class="w-full bg-purple-700 text-white font-semibold py-3 mt-6 rounded-lg hover:bg-purple-800 transition">
+                Verify and Proceed
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputs = document.querySelectorAll('.otp-input');
+            
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', function () {
+                    if (this.value.length === 1 && index < inputs.length - 1) {
+                        inputs[index + 1].focus(); // Move to next input
+                    }
+                });
+
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                        inputs[index - 1].focus(); // Move to previous input
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

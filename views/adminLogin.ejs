@@ -57,10 +57,24 @@
         .login-button:hover {
             background: #2563eb;
         }
+        .login-container .alert{
+            color: red;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
+        <% if (messages.error) { %>
+            <div class="alert alert-danger">
+                <%= messages.error[0] %>
+            </div>
+        <% } %>
+        
+        <% if (messages.success) { %>
+            <div class="alert alert-success">
+                <%= messages.success[0] %>
+            </div>
+        <% } %>        
         <!-- <img src="/images/university-logo.png" alt="University Logo" class="university-logo"> -->
         <h2 class="login-heading mb-2">Admin Login</h2>
         <p class="text-gray-600 mb-6 text-sm">Sign in with your email and password</p>
