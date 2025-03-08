@@ -388,7 +388,10 @@
                         <div class="profile-info">
                             <h4><%= student.StudentName %></h4>
                             <p class="text-muted mb-1"><%= student.Email %></p>
-                            <span class="badge bg-primary"><%= student.Program || 'Computer Science' %></span>
+                            <span class="badge bg-primary">
+                                <% let branch = student.Enroll.includes("CS") ? "Computer Science" : "Unknown Branch"; %>
+                                <%= branch %>
+                            </span>
                         </div>
                     </div>
                     
@@ -397,19 +400,40 @@
                     <div class="profile-details">
                         <div class="profile-detail-item">
                             <p>Student ID</p>
-                            <h6><%= student.StudentID || '2023CS1234' %></h6>
+                            <h6><%= student.Enroll %></h6>
                         </div>
                         <div class="profile-detail-item">
                             <p>Department</p>
-                            <h6><%= student.Department || 'Computer Science' %></h6>
+                            <h6>
+                            <%= branch %>
+                            </h6>
                         </div>
                         <div class="profile-detail-item">
                             <p>Semester</p>
-                            <h6><%= student.Semester || '4th' %></h6>
+                            <h6>
+                            <% let num = parseInt(student.Enroll.substring(6, 8));
+                            let subtractedValue = new Date().getFullYear() - (2000 + num) ;
+                            let currentMonth = new Date().getMonth() + 1
+                            let finalValue = (currentMonth >= 2 && currentMonth <= 6) ? subtractedValue *2  : subtractedValue *2  + 1; %> 
+                            <%= finalValue%>
+                            <% if (finalValue == 1) { %>
+                                <%= "st" %>
+                            <% } else if (finalValue == 2) { %>
+                                <%= "nd" %>
+                            <% } else if (finalValue == 3) { %>
+                                <%= "rd" %>
+                            <% } else if (finalValue >= 4) { %>
+                                <%= "th" %>
+                            <% } %>
+
+                            </h6>
                         </div>
                         <div class="profile-detail-item">
                             <p>Batch</p>
-                            <h6><%= student.Batch || '2023-2027' %></h6>
+                            <h6>
+                                <% let batch = parseInt(student.Enroll.substring(6, 8)); %>
+                                <%= 2000+batch %> - <%= 2000+batch+4 %>
+                            </h6>
                         </div>
                         <div class="profile-detail-item">
                             <p>Contact</p>
