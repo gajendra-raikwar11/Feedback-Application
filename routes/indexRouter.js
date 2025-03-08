@@ -12,6 +12,7 @@ const MongoStore = require("connect-mongo"); //store the session even after serv
 const authorizedStudentsPath = path.join(__dirname,"..","authorized_students.json");
 const authorizedStudents = JSON.parse(fs.readFileSync(authorizedStudentsPath, "utf-8"));
 const sendOTPByEmail = require("../config/NodeMailer");
+const isLoggedIn = require("../middlewares/isLoggedIn");
 
 router.use(
     session({
@@ -33,7 +34,7 @@ router.get("/", (req, res) => {
 });
 
 //student login page
-router.get("/studentLogin", (req, res) => {
+router.get("/studentLogin",isLoggedIn, (req, res) => {
     res.render("studentLogin");
 });
 //admin login page
@@ -165,13 +166,34 @@ router.post("/studentLogin", async (req, res) => {
         console.error("Student data is missing in the database.");
         return res.redirect("/studentLogin");
       }
-  
       res.render("StudentFormsPage", { student });
     } catch (error) {
       console.error("Error fetching student:", error);
       res.redirect("/studentLogin");
     }
   });
+
+  router.get("/studentLogout", async (req, res) => {
+    try {
+      if (!req.session.studentId) {
+        console.error("Student is not logged in.");
+        return res.redirect("/studentLogin");
+      }
+
+      const student = await Student.findById(req.session.studentId);
+
+      if (!student) {
+        console.error("Student data is missing in the database.");
+        return res.redirect("/studentLogin");
+      }
+      res.clearCookie("token");
+      res.render("/studentLogin", { student });
+    } catch (error) {
+      console.error("Error fetching student:", error);
+      res.redirect("/studentLogin");
+    }
+  });
+
 // router.get("/studentFormsPage",(req,res)=>{
 //   res.render("studentHomepage");
 // })
