@@ -3,9 +3,575 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Student Dashboard</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts - Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --info: #4895ef;
+            --warning: #f72585;
+            --danger: #e63946;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+            position: relative;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary) !important;
+        }
+        
+        .dashboard-container {
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        
+        .greeting-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+        
+        .greeting-card h2 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: calc(1.2rem + 0.6vw);
+        }
+        
+        .greeting-card p {
+            opacity: 0.9;
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            margin-bottom: 1.5rem;
+            height: 100%;
+            width: 100%;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            color: white;
+        }
+        
+        .stats-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stats-card p {
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+        
+        .profile-card, .feedback-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 1.5rem;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .profile-info h4 {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            font-size: 1.2rem;
+        }
+        
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+        
+        .profile-detail-item {
+            margin-bottom: 1rem;
+        }
+        
+        .profile-detail-item p {
+            margin-bottom: 0.25rem;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .profile-detail-item h6 {
+            font-weight: 600;
+            margin-bottom: 0;
+            font-size: 0.95rem;
+            word-break: break-word;
+        }
+        
+        .feedback-form textarea {
+            resize: none;
+            border-radius: 10px;
+        }
+        
+        .rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        
+        .rating > input {
+            display: none;
+        }
+        
+        .rating > label {
+            position: relative;
+            width: 1.5rem;
+            font-size: 2rem;
+            color: #ddd;
+            cursor: pointer;
+        }
+        
+        .rating > label::before {
+            content: "\2605";
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .rating > label:hover:before,
+        .rating > label:hover ~ label:before {
+            opacity: 1 !important;
+        }
+        
+        .rating > input:checked ~ label:before {
+            opacity: 1;
+        }
+        
+        .rating > input:checked ~ label {
+            color: #ffd700;
+        }
+        
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+        
+        .table-responsive::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .table-responsive::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 3px;
+        }
+        
+        .table th, .table td {
+            white-space: nowrap;
+            padding: 0.75rem 1rem;
+        }
+        
+        footer {
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        @media (max-width: 992px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+            
+            .greeting-card {
+                padding: 1.25rem;
+            }
+            
+            .stats-card, .profile-card, .feedback-card {
+                padding: 1.25rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .greeting-card h2 {
+                font-size: 1.4rem;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-avatar {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+            
+            .profile-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-card h3 {
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .dashboard-container {
+                padding: 0.75rem;
+            }
+            
+            .greeting-card {
+                padding: 1rem;
+            }
+            
+            .stats-card, .profile-card, .feedback-card {
+                padding: 1rem;
+            }
+            
+            .greeting-card h2 {
+                font-size: 1.2rem;
+            }
+            
+            .profile-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>student hoem page</h1>
+    
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="#">Campus Connect</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="/studentHomepage">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/studentFormspage">Forms</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Notifications</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i> <%= student.StudentName %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="container-fluid dashboard-container">
+        <div class="row">
+            <div class="col-12">
+                <!-- Greeting Section -->
+                <div class="greeting-card">
+                    <h2>
+                        <% 
+                        const hour = new Date().getHours();
+                        let greeting;
+                        if (hour < 12) greeting = "Good Morning";
+                        else if (hour < 18) greeting = "Good Afternoon";
+                        else greeting = "Good Evening";
+                        %>
+                        <%= greeting %>, <%= student.StudentName %>!
+                    </h2>
+                    <p><i class="far fa-calendar-alt me-2"></i> <%= new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background-color: var(--primary);">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3>12</h3>
+                    <p>Available Forms</p>
+                    <a href="/studentFormsPage" class="btn btn-sm btn-outline-primary mt-3">View All <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background-color: var(--warning);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>3</h3>
+                    <p>Pending Forms</p>
+                    <a href="#" class="btn btn-sm btn-outline-warning mt-3">Check Status <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background-color: var(--success);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>8</h3>
+                    <p>Completed Forms</p>
+                    <a href="#" class="btn btn-sm btn-outline-success mt-3">View History <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile & Feedback Section -->
+        <div class="row g-3">
+            <!-- Profile Section -->
+            <div class="col-12 col-lg-8">
+                <div class="profile-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i> My Profile</h4>
+                        <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit me-1"></i> Edit</a>
+                    </div>
+                    
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <%= student.StudentName ? student.StudentName.charAt(0).toUpperCase() : 'S' %>
+                        </div>
+                        <div class="profile-info">
+                            <h4><%= student.StudentName %></h4>
+                            <p class="text-muted mb-1"><%= student.Email %></p>
+                            <span class="badge bg-primary"><%= student.Program || 'Computer Science' %></span>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="profile-details">
+                        <div class="profile-detail-item">
+                            <p>Student ID</p>
+                            <h6><%= student.StudentID || '2023CS1234' %></h6>
+                        </div>
+                        <div class="profile-detail-item">
+                            <p>Department</p>
+                            <h6><%= student.Department || 'Computer Science' %></h6>
+                        </div>
+                        <div class="profile-detail-item">
+                            <p>Semester</p>
+                            <h6><%= student.Semester || '4th' %></h6>
+                        </div>
+                        <div class="profile-detail-item">
+                            <p>Batch</p>
+                            <h6><%= student.Batch || '2023-2027' %></h6>
+                        </div>
+                        <div class="profile-detail-item">
+                            <p>Contact</p>
+                            <h6><%= student.ContactNumber || '+91 9876543210' %></h6>
+                        </div>
+                        <div class="profile-detail-item">
+                            <p>Address</p>
+                            <h6><%= student.Address || 'University Campus, Building 4, Room 101' %></h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feedback Section -->
+            <div class="col-12 col-lg-4">
+                <div class="feedback-card">
+                    <h4 class="mb-4"><i class="fas fa-comment-dots me-2"></i> Feedback</h4>
+                    <form class="feedback-form">
+                        <div class="mb-3">
+                            <label class="form-label">How would you rate your experience?</label>
+                            <div class="rating">
+                                <input type="radio" name="rating" id="star5" value="5" /><label for="star5"></label>
+                                <input type="radio" name="rating" id="star4" value="4" /><label for="star4"></label>
+                                <input type="radio" name="rating" id="star3" value="3" /><label for="star3"></label>
+                                <input type="radio" name="rating" id="star2" value="2" /><label for="star2"></label>
+                                <input type="radio" name="rating" id="star1" value="1" /><label for="star1"></label>
+                            </div>
+                            <div class="rating-labels">
+                                <span>Poor</span>
+                                <span>Excellent</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="feedbackMessage" class="form-label">Your feedback</label>
+                            <textarea class="form-control" id="feedbackMessage" rows="4" placeholder="Tell us what you think..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Submit Feedback</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity Section -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="stats-card">
+                    <h4 class="mb-4"><i class="fas fa-history me-2"></i> Recent Activity</h4>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Activity</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>March 7, 2025</td>
+                                    <td>Submitted Leave Application</td>
+                                    <td><span class="badge bg-warning text-dark">Pending</span></td>
+                                    <td><a href="#" class="btn btn-sm btn-outline-primary">View</a></td>
+                                </tr>
+                                <tr>
+                                    <td>March 5, 2025</td>
+                                    <td>Updated Profile Information</td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                    <td><a href="#" class="btn btn-sm btn-outline-primary">View</a></td>
+                                </tr>
+                                <tr>
+                                    <td>March 2, 2025</td>
+                                    <td>Fee Receipt Download</td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                    <td><a href="#" class="btn btn-sm btn-outline-primary">View</a></td>
+                                </tr>
+                                <tr>
+                                    <td>February 28, 2025</td>
+                                    <td>Course Registration Form</td>
+                                    <td><span class="badge bg-info">Approved</span></td>
+                                    <td><a href="#" class="btn btn-sm btn-outline-primary">View</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white py-4 mt-4 border-top">
+        <div class="container-fluid px-4">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <p class="mb-0">© 2025 Campus Connect. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-decoration-none text-muted me-3">Privacy Policy</a>
+                    <a href="#" class="text-decoration-none text-muted me-3">Terms of Service</a>
+                    <a href="#" class="text-decoration-none text-muted">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+        
+        // Feedback stars functionality
+        document.querySelectorAll('.rating > label').forEach(label => {
+            label.addEventListener('mouseover', function() {
+                this.style.color = '#ffd700';
+                let prevSibling = this.previousElementSibling;
+                while(prevSibling) {
+                    prevSibling = prevSibling.previousElementSibling;
+                    if(prevSibling && prevSibling.tagName === 'LABEL') {
+                        prevSibling.style.color = '#ffd700';
+                    }
+                }
+            });
+            
+            label.addEventListener('mouseout', function() {
+                document.querySelectorAll('.rating > label').forEach(l => {
+                    if(!l.previousElementSibling || !l.previousElementSibling.checked) {
+                        l.style.color = '#ddd';
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

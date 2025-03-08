@@ -129,11 +129,52 @@ router.post("/studentLogin", async (req, res) => {
         .send("Invalid email or password. You are not an authorized student.");
     }
   });
+
+  router.get("/studentHomepage", async (req, res) => {
+    try {
+      if (!req.session.studentId) {
+        console.error("Student is not logged in.");
+        return res.redirect("/studentLogin");
+      }
   
-//student login page
-router.get("/studentHomepage", (req, res) => {
-    res.render("studentHomepage");
-});
+      const student = await Student.findById(req.session.studentId);
+      
+      if (!student) {
+        console.error("Student data is missing in the database.");
+        return res.redirect("/studentLogin");
+      }
+  
+      res.render("studentHomepage", { student });
+    } catch (error) {
+      console.error("Error fetching student:", error);
+      res.redirect("/studentLogin");
+    }
+  });
+  
+
+  router.get("/studentFormsPage", async (req, res) => {
+    try {
+      if (!req.session.studentId) {
+        console.error("Student is not logged in.");
+        return res.redirect("/studentLogin");
+      }
+  
+      const student = await Student.findById(req.session.studentId);
+      
+      if (!student) {
+        console.error("Student data is missing in the database.");
+        return res.redirect("/studentLogin");
+      }
+  
+      res.render("StudentFormsPage", { student });
+    } catch (error) {
+      console.error("Error fetching student:", error);
+      res.redirect("/studentLogin");
+    }
+  });
+// router.get("/studentFormsPage",(req,res)=>{
+//   res.render("studentHomepage");
+// })
 
 //password update setup
 function updateStudentPassword(email, newPassword) {
