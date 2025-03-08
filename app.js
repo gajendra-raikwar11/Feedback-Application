@@ -30,6 +30,7 @@ app.use("/" ,indexRouter);
 app.use("/admin", adminDeshboard);
 
 
+
 app.listen("3000",()=>{
     console.log("server is runnig on port 3000.....");
     

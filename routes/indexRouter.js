@@ -42,7 +42,7 @@ router.get("/adminLogin", (req, res) => {
 });
 
 //faculty login page
-router.get("/facultyLogin", (req, res) => {
+router.get("/faculty/login", (req, res) => {
     res.render("facultyLogin");
 });
 router.post("/redirect", (req, res) => {
@@ -53,7 +53,7 @@ router.post("/redirect", (req, res) => {
     } else if (role === "admin") {
       return res.redirect("/adminLogin"); // Redirect to admin route
     }else if (role === "faculty") {
-    return res.redirect("/facultyLogin"); // Redirect to admin route
+    return res.redirect("/faculty/login"); // Redirect to admin route
     }
   
     // If no valid role is selected

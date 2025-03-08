@@ -1,96 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Faculty Login | University Portal</title>
-  <link rel="shortcut icon" href="/images/university-logo.png" type="image/x-icon">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      background: linear-gradient(to right, #4f46e5, #9333ea);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      padding: 20px;
-    }
-
-    .login-container {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-      padding: 40px;
-      max-width: 420px;
-      width: 100%;
-      text-align: center;
-    }
-
-    .input-field {
-      background: #f9fafb;
-      border: 1px solid #d1d5db;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .input-field:focus {
-      border-color: #6366f1;
-      outline: none;
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
-    }
-
-    .university-logo {
-      width: 100px;
-      margin-bottom: 16px;
-    }
-
-    .login-heading {
-      font-size: 24px;
-      font-weight: 600;
-      color: #1f2937;
-    }
-
-    .forgot-password {
-      font-size: 14px;
-      color: #4f46e5;
-      transition: color 0.3s;
-    }
-
-    .forgot-password:hover {
-      color: #9333ea;
-    }
-
-    .login-button {
-      background: #4f46e5;
-      transition: background 0.3s ease;
-    }
-
-    .login-button:hover {
-      background: #4338ca;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>faculty login</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            max-width: 450px;
+            width: 100%;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .form-switch-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .form-switch-btn {
+            background: none;
+            border: none;
+            color: #6c757d;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+        }
+        .form-switch-btn.active {
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .hidden {
+            display: none;
+        }
+        .forgot-password {
+            text-align: right;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .remember-me {
+            margin-bottom: 1.5rem;
+        }
+    </style>
 </head>
 <body>
-  <div class="login-container">
-    <!-- <img src="/images/university-logo.png" alt="University Logo" class="university-logo"> -->
-    <h2 class="login-heading mb-2">Faculty Login</h2>
-    <p class="text-gray-600 mb-6 text-sm">Sign in with your Faculty ID and password</p>
-    <form class="space-y-4" action="/faculty/login" method="post">
-      <div>
-        <input type="text" name="faculty_id" placeholder="Faculty ID"
-          class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" required>
-      </div>
-      <div>
-        <input type="password" name="password" placeholder="Password"
-          class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" required>
-      </div>
-      <div class="text-right">
-        <a href="/faculty/changepassword" class="forgot-password">Forgot password?</a>
-      </div>
-      <button type="submit"
-        class="w-full text-white font-semibold py-3 rounded-lg login-button">
-        Login
-      </button>
-    </form>
-  </div>
+    <div class="login-container">
+        <div class="logo">
+            <h2>Faculty Portal</h2>
+            <p>Please login to continue</p>
+        </div>
+
+        <% if (messages && messages.error) { %>
+            <div class="alert alert-danger" role="alert">
+                <%= messages.error %>
+            </div>
+        <% } %>
+
+        <div class="form-switch-container">
+            <button id="emailLoginBtn" class="form-switch-btn active">Login with Email</button>
+            <button id="idLoginBtn" class="form-switch-btn">Login with ID Number</button>
+        </div>
+
+        <form id="loginForm" action="/faculty/login" method="POST">
+            <div id="emailLoginFields">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input 
+                        type="email" 
+                        class="form-control" 
+                        id="email" 
+                        name="email" 
+                        placeholder="Enter your email address"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div id="idLoginFields" class="hidden">
+                <div class="mb-3">
+                    <label for="idNumber" class="form-label">ID Number</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        id="idNumber" 
+                        name="idNumber" 
+                        placeholder="Enter your ID number"
+                    >
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input 
+                    type="password" 
+                    class="form-control" 
+                    id="password" 
+                    name="password" 
+                    placeholder="Enter your password"
+                    required
+                >
+            </div>
+
+            <div class="forgot-password">
+                <a href="/forgot-password">Forgot Password?</a>
+            </div>
+
+            <div class="remember-me form-check">
+                <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe">
+                <label class="form-check-label" for="rememberMe">
+                    Remember me
+                </label>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="/" class="btn btn-link">Back to Home</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- JavaScript for form switching -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailLoginBtn = document.getElementById('emailLoginBtn');
+            const idLoginBtn = document.getElementById('idLoginBtn');
+            const emailLoginFields = document.getElementById('emailLoginFields');
+            const idLoginFields = document.getElementById('idLoginFields');
+            const emailInput = document.getElementById('email');
+            const idNumberInput = document.getElementById('idNumber');
+
+            emailLoginBtn.addEventListener('click', function() {
+                emailLoginBtn.classList.add('active');
+                idLoginBtn.classList.remove('active');
+                emailLoginFields.classList.remove('hidden');
+                idLoginFields.classList.add('hidden');
+                emailInput.setAttribute('required', '');
+                idNumberInput.removeAttribute('required');
+                idNumberInput.value = '';
+            });
+
+            idLoginBtn.addEventListener('click', function() {
+                idLoginBtn.classList.add('active');
+                emailLoginBtn.classList.remove('active');
+                idLoginFields.classList.remove('hidden');
+                emailLoginFields.classList.add('hidden');
+                idNumberInput.setAttribute('required', '');
+                emailInput.removeAttribute('required');
+                emailInput.value = '';
+            });
+
+            // Form submission handling
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                // Add device info if needed
+                const deviceInfo = {
+                    browser: navigator.userAgent,
+                    screenWidth: window.screen.width,
+                    screenHeight: window.screen.height
+                };
+                
+                const deviceInfoInput = document.createElement('input');
+                deviceInfoInput.type = 'hidden';
+                deviceInfoInput.name = 'deviceInfo';
+                deviceInfoInput.value = JSON.stringify(deviceInfo);
+                this.appendChild(deviceInfoInput);
+            });
+        });
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
