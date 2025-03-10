@@ -1,105 +1,6 @@
 <!-- views/partials/navbar.ejs -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container-fluid px-4">
-<<<<<<< HEAD
-      <!-- Brand logo -->
-      <a class="navbar-brand d-flex align-items-center" href="#">
-        <i class="fas fa-graduation-cap fs-4 text-primary me-2"></i>
-        <span class="fw-bold">Campus Connect</span>
-      </a>
-      
-      <!-- Mobile toggle button -->
-      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
-              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      
-      <!-- Navigation items and user dropdown in collapsible area -->
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <!-- Main navigation links - now centered with mx-auto -->
-        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-          <li class="nav-item mx-2">
-            <a class="nav-link px-3 <%= currentPage === 'dashboard' ? 'active text-primary fw-medium' : '' %>" href="/studentHomepage">
-              <i class="fas fa-th-large me-1"></i> Dashboard
-            </a>
-          </li>
-          <li class="nav-item mx-2">
-            <a class="nav-link px-3 <%= currentPage === 'forms' ? 'active text-primary fw-medium' : '' %>" href="/studentFormspage">
-              <i class="fas fa-file-alt me-1"></i> Forms
-            </a>
-          </li>
-          <li class="nav-item mx-2">
-            <a class="nav-link px-3 <%= currentPage === 'notifications' ? 'active text-primary fw-medium' : '' %>" href="/studentNotificationspage">
-              <i class="fas fa-bell me-1"></i> Notifications
-            </a>
-          </li>
-          <li class="nav-item mx-2">
-            <a class="nav-link px-3 <%= currentPage === 'calendar' ? 'active text-primary fw-medium' : '' %>" href="#">
-              <i class="fas fa-calendar me-1"></i> Calendar
-            </a>
-          </li>
-        </ul>
-        
-        <!-- Mobile-optimized user dropdown - now ms-lg-auto to push to right -->
-        <div class="nav-item dropdown ms-lg-auto">
-          <a class="d-flex align-items-center text-decoration-none dropdown-toggle nav-link" href="#" 
-             id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <div class="avatar me-2 rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0" 
-                 style="width: 38px; height: 38px; font-size: 16px;">
-              <span class="text-white"><%= student.StudentName.charAt(0).toUpperCase() %></span>
-            </div>
-            <span class="fw-medium text-dark"><%= student.StudentName %></span>
-          </a>
-          
-          <!-- Dropdown menu - positioned differently for mobile -->
-          <ul class="dropdown-menu dropdown-menu-lg-end shadow-sm border-0 mt-2 rounded-3">
-            <!-- User info section -->
-            <li class="px-3 py-3">
-              <div class="d-flex align-items-center">
-                <div class="avatar me-3 rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0" 
-                     style="width: 42px; height: 42px; font-size: 16px;">
-                  <span class="text-white"><%= student.StudentName.charAt(0).toUpperCase() %></span>
-                </div>
-                <div class="overflow-hidden">
-                  <h6 class="mb-0 fw-semibold text-truncate"><%= student.StudentName %></h6>
-                  <small class="text-secondary">Student ID: <%= student.StudentID || 'CS12345' %></small>
-                </div>
-              </div>
-            </li>
-            
-            <li><hr class="dropdown-divider mx-3 my-1"></li>
-            
-            <!-- Menu items -->
-            <li>
-              <a class="dropdown-item d-flex align-items-center px-3 py-2 text-secondary" href="#">
-                <i class="fas fa-user me-3 text-secondary" style="width: 16px; text-align: center;"></i> 
-                <span>My Profile</span>
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item d-flex align-items-center px-3 py-2 text-secondary" href="#">
-                <i class="fas fa-cog me-3 text-secondary" style="width: 16px; text-align: center;"></i> 
-                <span>Account Settings</span>
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item d-flex align-items-center px-3 py-2 text-secondary" href="#">
-                <i class="fas fa-question-circle me-3 text-secondary" style="width: 16px; text-align: center;"></i> 
-                <span>Help Center</span>
-              </a>
-            </li>
-            
-            <li><hr class="dropdown-divider mx-3 my-1"></li>
-            
-            <!-- Logout -->
-            <li class="mb-1">
-              <a class="dropdown-item d-flex align-items-center px-3 py-2 text-danger" href="/logout">
-                <i class="fas fa-sign-out-alt me-3 text-danger" style="width: 16px; text-align: center;"></i> 
-                <span>Logout</span>
-              </a>
-            </li>
-          </ul>
-=======
         <a class="navbar-brand" href="#">Campus Connect</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -121,7 +22,6 @@
                     </ul>
                 </li>
             </ul>
->>>>>>> 2a0dad959ea3dff74f4af502db38b20da1f88550
         </div>
       </div>
     </div>
