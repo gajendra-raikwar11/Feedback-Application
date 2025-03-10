@@ -1,6 +1,7 @@
 <!-- views/partials/navbar.ejs -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container-fluid px-4">
+<<<<<<< HEAD
       <!-- Brand logo -->
       <a class="navbar-brand d-flex align-items-center" href="#">
         <i class="fas fa-graduation-cap fs-4 text-primary me-2"></i>
@@ -98,6 +99,29 @@
               </a>
             </li>
           </ul>
+=======
+        <a class="navbar-brand" href="#">Campus Connect</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link <%= activePage === 'dashboard' ? 'active' : '' %>" href="/studentHomepage">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link <%= activePage === 'forms' ? 'active' : '' %>" href="/studentFormspage">Forms</a></li>
+                <li class="nav-item"><a class="nav-link <%= activePage === 'notifications' ? 'active' : '' %>" href="#">Notifications</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i> <%= student.StudentName %>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/studentLogin"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+>>>>>>> 2a0dad959ea3dff74f4af502db38b20da1f88550
         </div>
       </div>
     </div>
