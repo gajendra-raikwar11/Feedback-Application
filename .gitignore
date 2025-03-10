@@ -4,4 +4,5 @@
 /ToBeDone.yaml
 /.gitignore
 package-lock.json
+.package-lock.json
 package.json
