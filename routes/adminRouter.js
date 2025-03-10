@@ -85,9 +85,32 @@ const LOCK_TIME = 5 * 60 * 1000; // Lock duration in milliseconds (5 min)
 router.get('/', (req, res) => {
     res.render("adminLogin",{ messages: req.flash() });
 });
-router.get('/adminHome', (req, res) => {
-    res.render("adminHome");
+
+router.get(["/adminHome", "/dashboard"], (req, res) => {
+    const adminData = {
+        name: "Gajendra",
+        image: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/..."
+    };
+
+    // Determine the current path dynamically
+    const currentPath = req.path; 
+
+    // Render the same view (adminHome) for both routes
+    res.render("adminHome", { currentPath, adminData });
 });
+
+router.get("/adminFaculty",(req,res)=>{
+    const adminData = {
+        name: "Gajendra",
+        image: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/..."
+    };
+
+    // Determine the current path dynamically
+    const currentPath = req.path; 
+
+    // Render the same view (adminHome) for both routes
+    res.render("facultyManagement", { currentPath, adminData });
+})
 
 
 // Admin login route

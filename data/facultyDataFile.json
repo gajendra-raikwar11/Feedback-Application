@@ -1,0 +1,30 @@
+[
+    {
+      "empId": "CSE100",
+      "name": "Dr. John Smith",
+      "department": "Computer Science",
+      "email": "john.smith@example.com",
+      "phone": "+1234567890",
+      "subjects": ["Data Structures", "Algorithms"],
+      "password": "aaaaaa"
+    },
+    {
+      "empId": "CSE101",
+      "name": "Prof. Emily Johnson",
+      "department": "Mathematics",
+      "email": "emily.johnson@example.com",
+      "phone": "+0987654321",
+      "subjects": ["Linear Algebra", "Calculus"],
+      "password": "aaaaaa"
+    },
+    {
+      "empId": "CSE102",
+      "name": "Dr. Mark Williams",
+      "department": "Physics",
+      "email": "mark.williams@example.com",
+      "phone": "+1122334455",
+      "subjects": ["Quantum Mechanics", "Thermodynamics"],
+      "password": "aaaaaa"
+    }
+  ]
+  

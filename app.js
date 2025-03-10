@@ -3,9 +3,10 @@ const app=express();
 const path=require("path");
 const cookieParser = require('cookie-parser');
 const indexRouter=require("./routes/indexRouter")
-const adminDeshboard=require("./routes/adminRouter")
+const adminDashboard=require("./routes/adminRouter")
 const flash = require('connect-flash');
-const { adminModel } = require('./models/adminSchema')
+const facultyRouter=require("./routes/facultyRouter")
+
 require("dotenv").config();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -27,7 +28,8 @@ app.use((req, res, next) => {
 });
 
 app.use("/" ,indexRouter);
-app.use("/admin", adminDeshboard);
+app.use("/admin", adminDashboard);
+app.use("/faculty",facultyRouter);
 
 
 

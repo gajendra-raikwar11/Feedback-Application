@@ -1,0 +1,192 @@
+:root {
+    --transition-speed: 0.3s;
+    --sidebar-width: 250px;
+    --topnav-height: 70px;
+    --sidebar-bg: #f8f9fc;
+    --sidebar-text: #5a5c69;
+    --sidebar-hover: #eaecf4;
+    --sidebar-active: #4e73df;
+    --topnav-bg: #ffffff;
+    --topnav-border: #e3e6f0;
+    --dropdown-header: #f8f9fc;
+}
+
+body {
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Top Navbar Styles */
+.topbar {
+    height: var(--topnav-height);
+    background-color: var(--topnav-bg);
+    border-bottom: 1px solid var(--topnav-border);
+    transition: transform var(--transition-speed);
+    z-index: 1030;
+}
+
+.topbar.nav-up {
+    transform: translateY(-100%);
+}
+
+.dropdown-header {
+    background-color: var(--dropdown-header);
+    color: #4e73df;
+}
+
+.icon-circle {
+    height: 2.5rem;
+    width: 2.5rem;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Sidebar Styles */
+.sidebar-wrapper {
+    position: relative;
+}
+
+.sidebar {
+    height: 100vh;
+    width: var(--sidebar-width);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1040;
+    background-color: var(--sidebar-bg);
+    overflow-y: auto;
+    transition: transform var(--transition-speed) ease;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.sidebar-header {
+    padding: 1rem;
+    background-color: #4e73df;
+}
+
+.sidebar-brand {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.sidebar-divider {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin: 0 1rem;
+}
+
+.nav-item {
+    position: relative;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    color: #4e73df;
+    background-color: var(--sidebar-hover);
+}
+
+.nav-link.active {
+    font-weight: 700;
+    color: white;
+    background-color: var(--sidebar-active);
+}
+
+.nav-link i {
+    margin-right: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.nav-link span {
+    font-size: 0.85rem;
+}
+
+/* Toggle button styles */
+#sidebarToggleBtn {
+    color: #5a5c69;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.25rem;
+    margin-right: 0.5rem;
+}
+
+#sidebarCloseBtn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.2rem;
+}
+
+/* Overlay for sidebar */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1035;
+}
+
+/* Content wrapper */
+.content-wrapper {
+    transition: margin-left var(--transition-speed), padding-top var(--transition-speed);
+    padding-top: var(--topnav-height);
+}
+
+/* Initial state for mobile */
+@media (max-width: 767.98px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .content-wrapper {
+        margin-left: 0;
+    }
+
+    body.sidebar-open {
+        overflow: hidden;
+    }
+}
+
+/* Content margin adjustment for larger screens */
+@media (min-width: 768px) {
+    .sidebar {
+        transform: translateX(0);
+    }
+    
+    .content-wrapper {
+        margin-left: var(--sidebar-width);
+    }
+
+    /* When sidebar is closed on desktop */
+    body.sidebar-closed .sidebar {
+        transform: translateX(-100%);
+    }
+
+    body.sidebar-closed .content-wrapper {
+        margin-left: 0;
+    }
+}
+
+/* Transition states */
+body.sidebar-animating #topNav {
+    transform: translateY(-100%);
+}
+
+body.sidebar-open .sidebar {
+    transform: translateX(0);
+}
+
+body.sidebar-open .sidebar-overlay {
+    display: block;
+}

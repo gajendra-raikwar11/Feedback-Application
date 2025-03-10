@@ -1,0 +1,68 @@
+<!-- adminBottomNavbar.ejs -->
+<footer class="admin-footer">
+    <div class="footer-container">
+      <div class="copyright">
+        Copyright © Your Website 2025
+      </div>
+      <div class="footer-links">
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+        <a href="/support">Support</a>
+      </div>
+    </div>
+  </footer>
+  
+  <style>
+    .admin-footer {
+      background-color: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+      width: 100%;
+      padding: 15px 20px;
+      margin-top: auto;
+    }
+    
+    .footer-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .copyright {
+      color: #6c757d;
+      font-size: 14px;
+    }
+    
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .footer-links a {
+      color: #495057;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s ease;
+    }
+    
+    .footer-links a:hover {
+      color: #212529;
+      text-decoration: underline;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .footer-container {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .footer-links {
+        margin-top: 10px;
+        justify-content: center;
+      }
+    }
+  </style>

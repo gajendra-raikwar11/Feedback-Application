@@ -144,13 +144,12 @@ router.post("/studentLogin", async (req, res) => {
         return res.redirect("/studentLogin");
       }
   
-      res.render("studentHomepage", { student });
+      res.render("studentHomepage", { student ,currentPage: 'dashboard' });
     } catch (error) {
       console.error("Error fetching student:", error);
       res.redirect("/studentLogin");
     }
   });
-  
 
   router.get("/studentFormsPage", async (req, res) => {
     try {
@@ -166,16 +165,26 @@ router.post("/studentLogin", async (req, res) => {
         return res.redirect("/studentLogin");
       }
   
-      res.render("StudentFormsPage", { student });
+      res.render("StudentFormsPage", { student ,currentPage: 'forms'  });
     } catch (error) {
       console.error("Error fetching student:", error);
       res.redirect("/studentLogin");
     }
   });
-// router.get("/studentFormsPage",(req,res)=>{
-//   res.render("studentHomepage");
-// })
 
+  router.get('/studentNotificationspage',async (req, res) => {
+    const student = await Student.findById(req.session.studentId);
+    res.render('studentNotificationspage', {
+      student , // Pass student data from session
+      currentPage: 'notifications'  // Pass currentPage to highlight active link
+    });
+  });
+
+//logout route
+router.get("/logout", function (req, res) {
+  res.clearCookie("token");
+  res.redirect("/");
+});
 //password update setup
 function updateStudentPassword(email, newPassword) {
     // Read the JSON file into authorizedStudents

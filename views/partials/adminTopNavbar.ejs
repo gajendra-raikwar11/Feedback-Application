@@ -1,0 +1,80 @@
+<!-- adminTopNavbar.ejs -->
+<nav class="navbar navbar-expand navbar-light bg-primary topbar mb-4 px-5 static-top shadow">
+    
+    <!-- Branding & Toggle Button -->
+    <div class="d-flex align-items-center justify-content-between w-100">
+        <h5 class="mb-0 text-white font-weight-bold  d-md">Welcome, <%= admin ? admin.name : 'Admin' %>!</h5>
+        
+        <!-- Topbar Navbar -->
+        <ul class="navbar-nav ml-auto d-flex align-items-center w-100 justify-content-center justify-content-md-end">
+            <!-- Alerts Dropdown -->
+            <li class="nav-item dropdown no-arrow mx-2">
+                <a class="nav-link dropdown-toggle text-white" href="#" id="alertsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-bell fa-fw"></i>
+                    <span class="badge rounded-pill bg-danger badge-counter">3+</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-lg animated--grow-in" aria-labelledby="alertsDropdown">
+                    <h6 class="dropdown-header bg-primary text-white py-2">Alerts Center</h6>
+                    <a class="dropdown-item d-flex align-items-center py-2" href="#">
+                        <div class="me-3">
+                            <div class="icon-circle bg-primary">
+                                <i class="fas fa-file-alt text-white"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="small text-gray-500">March 9, 2025</div>
+                            <span class="fw-bold">New feedback forms waiting for review!</span>
+                        </div>
+                    </a>
+                    <a class="dropdown-item text-center small text-primary py-2" href="#">Show All Alerts</a>
+                </div>
+            </li>
+            
+            <!-- Messages Dropdown -->
+            <li class="nav-item dropdown no-arrow mx-2">
+                <a class="nav-link dropdown-toggle text-white" href="#" id="messagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-envelope fa-fw"></i>
+                    <span class="badge rounded-pill bg-danger badge-counter">7</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-lg animated--grow-in" aria-labelledby="messagesDropdown">
+                    <h6 class="dropdown-header bg-primary text-white py-2">Message Center</h6>
+                    <a class="dropdown-item d-flex align-items-center py-2" href="#">
+                        <div class="dropdown-list-image me-3">
+                            <img class="rounded-circle" src="https://source.unsplash.com/Mv9hjnEUHR4/60x60" alt="User">
+                            <div class="status-indicator bg-success"></div>
+                        </div>
+                        <div>
+                            <div class="text-truncate">Student feedback requires attention</div>
+                            <div class="small text-gray-500">Prof. Smith · 58m</div>
+                        </div>
+                    </a>
+                    <a class="dropdown-item text-center small text-primary py-2" href="#">Read More Messages</a>
+                </div>
+            </li>
+            
+            <div class="topbar-divider d-none d-md-block mx-2"></div>
+            
+            <!-- User Information -->
+            <li class="nav-item dropdown no-arrow">
+                <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img class="img-profile rounded-circle" src="<%= admin && admin.profileImage ? admin.profileImage : 'https://source.unsplash.com/QAB-WJcbgJk/60x60' %>" style="height: 38px; width: 38px; object-fit: cover; border: 2px solid white;">
+                </a>
+                <div class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-lg animated--grow-in" aria-labelledby="userDropdown">
+                    <a class="dropdown-item py-2" href="/admin/profile">
+                        <i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>
+                        Profile
+                    </a>
+                    <a class="dropdown-item py-2" href="/admin/settings">
+                        <i class="fas fa-cogs fa-sm fa-fw me-2 text-gray-400"></i>
+                        Settings
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item py-2" href="/logout">
+                        <i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>
+                        Logout
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
