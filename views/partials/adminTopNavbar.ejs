@@ -1,80 +1,291 @@
 <!-- adminTopNavbar.ejs -->
-<nav class="navbar navbar-expand navbar-light bg-primary topbar mb-4 px-5 static-top shadow">
-    
-    <!-- Branding & Toggle Button -->
+<nav class="navbar navbar-expand navbar-light bg-primary topbar mb-4 px-3 px-md-5 static-top shadow" id="mainNavbar">
     <div class="d-flex align-items-center justify-content-between w-100">
-        <h5 class="mb-0 text-white font-weight-bold  d-md">Welcome, <%= admin ? admin.name : 'Admin' %>!</h5>
+        <!-- Animated College Name - Centered -->
+        <div class="marquee-container">
+            <div class="marquee-content d-none d-md-block">
+                <span class="text-white college-name">Sagar Institute of Science and Technology (SISTec) Gandhi Nagar Bhopal</span>
+            </div>
+            
+            <!-- Mobile Version - Only Show SISTec GN Bhopal -->
+            <div class="d-block d-md-none">
+                <span class="text-white college-name">SISTec GN Bhopal</span>
+            </div>
+        </div>
         
-        <!-- Topbar Navbar -->
-        <ul class="navbar-nav ml-auto d-flex align-items-center w-100 justify-content-center justify-content-md-end">
-            <!-- Alerts Dropdown -->
-            <li class="nav-item dropdown no-arrow mx-2">
-                <a class="nav-link dropdown-toggle text-white" href="#" id="alertsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-bell fa-fw"></i>
-                    <span class="badge rounded-pill bg-danger badge-counter">3+</span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-lg animated--grow-in" aria-labelledby="alertsDropdown">
-                    <h6 class="dropdown-header bg-primary text-white py-2">Alerts Center</h6>
-                    <a class="dropdown-item d-flex align-items-center py-2" href="#">
-                        <div class="me-3">
-                            <div class="icon-circle bg-primary">
-                                <i class="fas fa-file-alt text-white"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="small text-gray-500">March 9, 2025</div>
-                            <span class="fw-bold">New feedback forms waiting for review!</span>
-                        </div>
-                    </a>
-                    <a class="dropdown-item text-center small text-primary py-2" href="#">Show All Alerts</a>
-                </div>
-            </li>
-            
-            <!-- Messages Dropdown -->
-            <li class="nav-item dropdown no-arrow mx-2">
-                <a class="nav-link dropdown-toggle text-white" href="#" id="messagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-envelope fa-fw"></i>
-                    <span class="badge rounded-pill bg-danger badge-counter">7</span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-lg animated--grow-in" aria-labelledby="messagesDropdown">
-                    <h6 class="dropdown-header bg-primary text-white py-2">Message Center</h6>
-                    <a class="dropdown-item d-flex align-items-center py-2" href="#">
-                        <div class="dropdown-list-image me-3">
-                            <img class="rounded-circle" src="https://source.unsplash.com/Mv9hjnEUHR4/60x60" alt="User">
-                            <div class="status-indicator bg-success"></div>
-                        </div>
-                        <div>
-                            <div class="text-truncate">Student feedback requires attention</div>
-                            <div class="small text-gray-500">Prof. Smith · 58m</div>
-                        </div>
-                    </a>
-                    <a class="dropdown-item text-center small text-primary py-2" href="#">Read More Messages</a>
-                </div>
-            </li>
-            
-            <div class="topbar-divider d-none d-md-block mx-2"></div>
-            
-            <!-- User Information -->
-            <li class="nav-item dropdown no-arrow">
-                <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img class="img-profile rounded-circle" src="<%= admin && admin.profileImage ? admin.profileImage : 'https://source.unsplash.com/QAB-WJcbgJk/60x60' %>" style="height: 38px; width: 38px; object-fit: cover; border: 2px solid white;">
-                </a>
-                <div class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-lg animated--grow-in" aria-labelledby="userDropdown">
-                    <a class="dropdown-item py-2" href="/admin/profile">
-                        <i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>
-                        Profile
-                    </a>
-                    <a class="dropdown-item py-2" href="/admin/settings">
-                        <i class="fas fa-cogs fa-sm fa-fw me-2 text-gray-400"></i>
-                        Settings
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item py-2" href="/logout">
-                        <i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>
-                        Logout
-                    </a>
-                </div>
-            </li>
-        </ul>
+        <!-- Toggle Button with Animation -->
+        <button id="navbarToggleBtn" class="navbar-toggler" type="button">
+            <span class="toggle-icon"></span>
+            <span class="toggle-icon"></span>
+            <span class="toggle-icon"></span>
+        </button>
     </div>
 </nav>
+
+<style>
+    /* Styling for college name */
+    .college-name {
+        font-weight: 800 !important;
+        font-size: 1.35rem;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Animation for the centered marquee effect */
+    .marquee-container {
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .marquee-content {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .marquee-content span {
+        display: inline-block;
+        position: relative;
+        animation: bounce 3s ease-in-out infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateX(0);
+        }
+        50% {
+            transform: translateX(20px);
+        }
+    }
+    
+    /* Increased navbar height by 1.8px */
+    .navbar {
+        height: calc(60px + 1.8px);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1; /* Lower z-index to keep behind sidebar */
+        transition: transform 0.4s ease;
+        background: #4048D8 !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        padding-top: 0.9rem;
+        padding-bottom: 0.9rem;
+    }
+    
+    /* Fix content position */
+    body {
+        padding-top: calc(56px + 1.8px + 1rem);
+    }
+    
+    /* Hide navbar on scroll down - ONLY for desktop */
+    @media (min-width: 769px) {
+        .navbar-hidden {
+            transform: translateY(-100%);
+        }
+    }
+    
+    /* For mobile - always keep navbar visible */
+    @media (max-width: 768px) {
+        .navbar-hidden {
+            transform: translateY(0) !important;
+        }
+        
+        .navbar {
+            transform: translateY(0) !important;
+        }
+    }
+    
+    /* Animated hamburger toggle button */
+    .navbar-toggler {
+        background: transparent;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        position: relative;
+        margin-left: 10px;
+        width: 40px;
+        height: 34px;
+        transition: all 0.3s ease;
+    }
+    
+    .navbar-toggler:focus {
+        outline: none;
+        box-shadow: none;
+    }
+    
+    /* Toggle icon bars */
+    .toggle-icon {
+        display: block;
+        position: absolute;
+        height: 2px;
+        width: 25px;
+        background-color: white;
+        border-radius: 1px;
+        left: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    /* Position the toggle icon bars */
+    .toggle-icon:nth-child(1) {
+        top: 8px;
+    }
+    
+    .toggle-icon:nth-child(2) {
+        top: 16px;
+    }
+    
+    .toggle-icon:nth-child(3) {
+        top: 24px;
+    }
+    
+    /* Animated toggle icon when navbar is hidden - only for desktop */
+    @media (min-width: 769px) {
+        .navbar-hidden .toggle-icon:nth-child(1) {
+            transform: rotate(45deg);
+            top: 16px;
+        }
+        
+        .navbar-hidden .toggle-icon:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .navbar-hidden .toggle-icon:nth-child(3) {
+            transform: rotate(-45deg);
+            top: 16px;
+        }
+    }
+    
+    /* Responsive styling */
+    @media (max-width: 768px) {
+        .navbar {
+            padding: 0.85rem 1rem;
+            height: calc(50px + 1.8px);
+        }
+        
+        body {
+            padding-top: calc(50px + 1.8px + 1rem);
+        }
+        
+        .topbar {
+            margin-bottom: 1rem !important;
+        }
+        
+        .college-name {
+            font-size: 1.1rem;
+        }
+        
+        /* Make toggle button more visible on mobile */
+        .navbar-toggler {
+            margin-right: 5px;
+        }
+    }
+    
+    .text-white {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Ensure sidebar has higher z-index */
+    .sidebar {
+        z-index: 1030;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const navbar = document.getElementById('mainNavbar');
+        const toggleBtn = document.getElementById('navbarToggleBtn');
+        let lastScrollTop = 0;
+        let isNavVisible = true;
+        let scrollTimeout = null;
+        
+        // Function to show navbar
+        function showNavbar() {
+            navbar.classList.remove('navbar-hidden');
+            isNavVisible = true;
+        }
+        
+        // Function to hide navbar
+        function hideNavbar() {
+            // Only hide navbar if not on mobile
+            if (window.innerWidth > 768) {
+                navbar.classList.add('navbar-hidden');
+                isNavVisible = false;
+            }
+        }
+        
+        // Handle scroll events - only for desktop
+        window.addEventListener('scroll', function() {
+            // Skip all scroll handling for mobile devices
+            if (window.innerWidth <= 768) {
+                return;
+            }
+            
+            // Clear the previous timeout
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
+            
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 20) {
+                // Scrolling down - hide navbar
+                hideNavbar();
+            } else {
+                // Scrolling up - show navbar
+                showNavbar();
+            }
+            
+            lastScrollTop = scrollTop;
+            
+            // Set a timeout to show navbar after user stops scrolling (3 seconds)
+            scrollTimeout = setTimeout(function() {
+                showNavbar();
+            }, 3000);
+        });
+        
+        // Show navbar when user is idle (not scrolling) - only for desktop
+        document.addEventListener('mousemove', function() {
+            // Skip for mobile devices
+            if (window.innerWidth <= 768) {
+                return;
+            }
+            
+            if (!isNavVisible) {
+                // If user moves mouse and navbar is hidden, show it
+                if (scrollTimeout) {
+                    clearTimeout(scrollTimeout);
+                }
+                
+                scrollTimeout = setTimeout(function() {
+                    showNavbar();
+                }, 1500);
+            }
+        });
+        
+        // Toggle button functionality
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                // For mobile, do nothing with the hide/show animation
+                if (window.innerWidth <= 768) {
+                    return;
+                }
+                
+                if (isNavVisible) {
+                    hideNavbar();
+                } else {
+                    showNavbar();
+                }
+            });
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            // If resized to mobile size, ensure navbar is visible
+            if (window.innerWidth <= 768) {
+                showNavbar();
+            }
+        });
+    });
+</script>
