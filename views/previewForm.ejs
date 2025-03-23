@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title><%= title %> | Student Feedback System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-bg: #f8f9fa;
+            --border-radius: 0.75rem;
+            --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f7f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            border-bottom: none;
+            padding: 1.25rem 1.5rem;
+        }
+        
+        .preview-banner {
+            background-color: rgba(67, 97, 238, 0.1);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        .preview-banner i {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+        
+        .question-container {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            background-color: #fff;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+        
+        .question-container:hover {
+            box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.12);
+        }
+        
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 1.25rem;
+            color: #333;
+            line-height: 1.4;
+        }
+        
+        .question-type-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+        
+        .form-check {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-check-input {
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .form-check-label {
+            cursor: pointer;
+        }
+        
+        .text-question textarea {
+            resize: vertical;
+            border-radius: 0.5rem;
+            border: 1px solid #dee2e6;
+            padding: 0.75rem;
+            transition: var(--transition);
+        }
+        
+        .text-question textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+        }
+        
+        .rating-options {
+            gap: 1rem;
+        }
+        
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0.5rem 0;
+            margin-bottom: 1.5rem;
+        }
+        
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .breadcrumb-item a:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+        
+        .btn {
+            border-radius: 0.5rem;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .badge {
+            padding: 0.5rem 0.75rem;
+            font-weight: 500;
+            border-radius: 0.375rem;
+        }
+        
+        .bg-info {
+            background-color: var(--accent-color) !important;
+        }
+        
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        
+        @media (max-width: 768px) {
+            .question-container {
+                padding: 1.25rem;
+            }
+            
+            .preview-banner {
+                padding: 0.75rem 1rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .preview-banner i {
+                margin-bottom: 0.5rem;
+            }
+            
+            .rating-options {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .rating-options .form-check {
+                margin-right: 0;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+  
+    <%- include('partials/navbar', { activePage:currentPage , student:user }) %>
+    <div class="container mt-4 mb-5">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/student/studentFormsPage"><i class="bi bi-house-door me-1"></i>Forms</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Preview Form</li>
+                    </ol>
+                </nav>
+                
+                <div class="preview-banner">
+                    <i class="bi bi-eye-fill me-2"></i>
+                    <div>
+                        <strong>Preview Mode:</strong>
+                        <span class="ms-1">This is a preview of the form. No responses will be submitted.</span>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0"><%= form.title %></h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <p><strong>Form Type:</strong> <span class="badge bg-info"><%= form.formType %></span></p>
+                                <% if (user && user.section) { %>
+                                    <p><strong>Your Section:</strong> <%= user.section %></p>
+                                <% } %>
+                                <!-- Removed Form Section display -->
+                            </div>
+                            <div class="col-md-6">
+                                <!-- Faculty display - now showing name instead of ID -->
+                                <p><strong>Faculty:</strong> <%= form.facultyForCurrentStudent %></p>
+                                <p><strong>Semester:</strong> <%= form.semester %></p>
+                                <p><strong>Deadline:</strong> <span class="badge bg-warning text-dark"><%= new Date(form.deadline).toLocaleDateString() %></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="previewForm">
+                    <input type="hidden" name="formId" value="<%= form._id %>">
+                    <input type="hidden" name="studentId" value="<%= user ? user._id : '' %>">
+                    
+                    <% if (form.questions && form.questions.length > 0) { %>
+                        <% form.questions.forEach((question, index) => { %>
+                            <div class="question-container">
+                                <div class="question-header">
+                                    <h5 class="question-text">
+                                        <%= index + 1 %>. <%= question.questionText %>
+                                        <!-- Added question type badge -->
+                                        <% 
+                                          let badgeColor = '';
+                                          switch(question.questionType) {
+                                            case 'mcq': badgeColor = 'bg-primary'; break;
+                                            case 'checkbox': badgeColor = 'bg-success'; break;
+                                            case 'rating': badgeColor = 'bg-warning text-dark'; break;
+                                            case 'text': badgeColor = 'bg-info'; break;
+                                            default: badgeColor = 'bg-secondary';
+                                          }
+                                        %>
+                                        <span class="badge <%= badgeColor %> question-type-badge">
+                                            <%= question.questionType.toUpperCase() %>
+                                        </span>
+                                        <% if (question.required) { %>
+                                            <span class="text-danger">*</span>
+                                        <% } %>
+                                    </h5>
+                                </div>
+                                
+                                <div class="question-body">
+                                    <% if (question.type === 'mcq') { %>
+                                        <div class="mcq-options">
+                                            <% question.options.forEach((option, optIndex) => { %>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" 
+                                                        name="question_<%= question._id %>" 
+                                                        id="option_<%= question._id %>_<%= optIndex %>" 
+                                                        value="<%= option %>" disabled>
+                                                    <label class="form-check-label" for="option_<%= question._id %>_<%= optIndex %>">
+                                                        <%= option %>
+                                                    </label>
+                                                </div>
+                                            <% }); %>
+                                        </div>
+                                    <% } else if (question.type === 'checkbox') { %>
+                                        <div class="checkbox-options">
+                                            <% question.options.forEach((option, optIndex) => { %>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" 
+                                                        name="question_<%= question._id %>_<%= optIndex %>" 
+                                                        id="option_<%= question._id %>_<%= optIndex %>" 
+                                                        value="<%= option %>" disabled>
+                                                    <label class="form-check-label" for="option_<%= question._id %>_<%= optIndex %>">
+                                                        <%= option %>
+                                                    </label>
+                                                </div>
+                                            <% }); %>
+                                        </div>
+                                    <% } else if (question.type === 'rating') { %>
+                                        <div class="rating-options d-flex flex-wrap">
+                                            <% for(let i = 1; i <= 5; i++) { %>
+                                                <div class="form-check me-4">
+                                                    <input class="form-check-input" type="radio" 
+                                                        name="question_<%= question._id %>" 
+                                                        id="rating_<%= question._id %>_<%= i %>" 
+                                                        value="<%= i %>" disabled>
+                                                    <label class="form-check-label" for="rating_<%= question._id %>_<%= i %>">
+                                                        <%= i %>
+                                                    </label>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                    <% } else if (question.type === 'text') { %>
+                                        <div class="text-question">
+                                            <textarea class="form-control" 
+                                                name="question_<%= question._id %>" 
+                                                id="text_<%= question._id %>" 
+                                                rows="3" 
+                                                placeholder="Your answer here..." 
+                                                disabled></textarea>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="alert alert-info rounded-3">
+                            <p class="mb-0"><i class="bi bi-info-circle me-2"></i>This form does not contain any questions.</p>
+                        </div>
+                    <% } %>
+                    
+                    <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4 mt-4">
+                        <a href="/student/studentFormsPage" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Forms
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Preview mode JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add a warning if users try to submit the preview form
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('This is a preview mode. No responses will be submitted.');
+                });
+            });
+            
+            // Add subtle animation for question containers
+            const questionContainers = document.querySelectorAll('.question-container');
+            questionContainers.forEach((container, index) => {
+                container.style.opacity = '0';
+                container.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    container.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    container.style.opacity = '1';
+                    container.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -136,7 +136,14 @@
         .table-responsive {
             max-height: 400px;
             overflow-y: auto;
+            position: relative;
         }
+        .table thead {
+    position: sticky;
+    top: 0;
+    background: white; /* Background white rakho taki content overlap na ho */
+    z-index: 10;
+}
         
         .filter-section {
             background-color: #fff;
@@ -173,7 +180,7 @@
 
 <div id="wrapper">
     <!-- Sidebar -->
-    <%- include('./partials/adminSideNavbar', { path: currentPath }) %>
+    <%- include('./partials/adminSideNavbar', { path: currentPath ,admin: adminData  }) %>
     <!-- Content Wrapper -->
     <div id="content-wrapper" class="d-flex flex-column">
         <!-- Main Content -->
@@ -198,20 +205,18 @@
                             <div class="card-body">
                                 <div class="row align-items-center">
                                     <div class="col">
-                                        <h4 class="font-weight-bold text-primary text-uppercase mb-1">
-                                            Faculty Members
-                                        </h4>
-                                        <div class="number mb-0">4444</div>
+                                        <h4 class="font-weight-bold text-primary text-uppercase mb-1">Faculty Members</h4>
+                                        <div class="number mb-0"><%= faculties.length %></div>
+                                    
                                         <div class="dropdown mt-2">
                                             <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="facultyDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                                 Filter by Subject
                                             </button>
                                             <ul class="dropdown-menu" aria-labelledby="facultyDropdown">
-                                                <li><a class="dropdown-item" href="#">All Subjects</a></li>
-                                                <li><a class="dropdown-item" href="#">Computer Science</a></li>
-                                                <li><a class="dropdown-item" href="#">Mathematics</a></li>
-                                                <li><a class="dropdown-item" href="#">Physics</a></li>
-                                                <li><a class="dropdown-item" href="#">Chemistry</a></li>
+                                                <li><a class="dropdown-item" href="/adminHome">All Subjects</a></li>
+                                                <% uniqueSubjects.forEach(subject => { %>
+                                                    <li><a class="dropdown-item" href="/adminHome?subject=<%= subject %>"><%= subject %></a></li>
+                                                <% }); %>
                                             </ul>
                                         </div>
                                     </div>
@@ -232,20 +237,25 @@
                                         <h4 class="font-weight-bold text-success text-uppercase mb-1">
                                             Students
                                         </h4>
-                                        <div class="number mb-0">44444</div>
+                                        <div class="number mb-0"><%= students.length %></div> <!-- Dynamic Total Count -->
+                                        
                                         <div class="dropdown mt-2">
                                             <button class="btn btn-sm btn-outline-success dropdown-toggle" type="button" id="sectionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                                 Filter by Section
                                             </button>
                                             <ul class="dropdown-menu" aria-labelledby="sectionDropdown">
-                                                <li><a class="dropdown-item" href="#">All Sections</a></li>
-                                                <li><a class="dropdown-item" href="#">Section A</a></li>
-                                                <li><a class="dropdown-item" href="#">Section B</a></li>
-                                                <li><a class="dropdown-item" href="#">Section C</a></li>
-                                                <li><a class="dropdown-item" href="#">Section D</a></li>
+                                                <li><a class="dropdown-item" href="/adminHome">All Sections</a></li>
+                                                <% if (uniqueSections.length > 0) { %>
+                                                    <% uniqueSections.forEach(section => { %>
+                                                        <li><a class="dropdown-item" href="/adminHome?section=<%= section %>"><%= section %></a></li>
+                                                    <% }); %>
+                                                <% } else { %>
+                                                    <li class="dropdown-item text-muted">No Sections Available</li>
+                                                <% } %>
                                             </ul>
                                         </div>
                                     </div>
+                                    
                                     <div class="col-auto">
                                         <i class="fas fa-user-graduate fa-2x text-gray-300"></i>
                                     </div>
@@ -253,6 +263,7 @@
                             </div>
                         </div>
                     </div>
+                    
                     
                     <!-- Feedback Submitted Card -->
                     <div class="col-xl-3 col-md-6 mb-4">
@@ -297,21 +308,19 @@
                 
                 <!-- Content Row -->
                 <div class="row">
-                    <!-- Create Feedback Forms Section -->
                     <div class="col-lg-6 mb-4">
                         <div class="card shadow mb-4">
                             <div class="card-header py-4">
                                 <h6 class="m-0 font-weight-bold text-primary">Create Feedback Forms</h6>
                             </div>
                             <div class="card-body py-16">
-                                <!-- <p>Create new feedback forms using templates or manual entry.</p> -->
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
                                         <div class="card form-card">
                                             <div class="card-body text-center">
                                                 <i class="fas fa-book fa-3x mb-3 text-primary"></i>
                                                 <h5>Academic</h5>
-                                                <a href="#" class="btn btn-sm btn-primary mt-2">Create</a>
+                                                <a href="/admin/adminHome/forms/create/Academic" class="btn btn-sm btn-primary mt-2 form-create-btn" data-form-type="academic">Create</a>
                                             </div>
                                         </div>
                                     </div>
@@ -320,7 +329,7 @@
                                             <div class="card-body text-center">
                                                 <i class="fas fa-university fa-3x mb-3 text-success"></i>
                                                 <h5>Institutional</h5>
-                                                <a href="#" class="btn btn-sm btn-success mt-2">Create</a>
+                                                <a href="/admin/adminHome/forms/create/Institutional" class="btn btn-sm btn-success mt-2 form-create-btn" data-form-type="institutional">Create</a>
                                             </div>
                                         </div>
                                     </div>
@@ -329,13 +338,13 @@
                                             <div class="card-body text-center">
                                                 <i class="fas fa-laptop-code fa-3x mb-3 text-info"></i>
                                                 <h5>Training</h5>
-                                                <a href="#" class="btn btn-sm btn-info mt-2">Create</a>
+                                                <a href="/admin/adminHome/forms/create/Training" class="btn btn-sm btn-info mt-2 form-create-btn" data-form-type="training">Create</a>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="text-center mt-3">
-                                    <a href="#" class="btn btn-primary">
+                                    <a href="/adminadminHome//forms/create/custom-template-use" class="btn btn-primary form-create-btn" data-form-type="custom">
                                         <i class="fas fa-plus mr-2"></i>Create Custom Form
                                     </a>
                                 </div>
@@ -344,101 +353,72 @@
                     </div>
                     
                     <!-- Manage Forms Section -->
-                    <div class="col-lg-6 mb-4">
-                        <div class="card shadow mb-4">
-                            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                                <h6 class="m-0 font-weight-bold text-primary">Manage Feedback Forms</h6>
-                                <div class="input-group" style="width: 200px;">
-                                    <select class="form-select form-select-sm" id="formStatusFilter">
-                                        <option value="all">All Forms</option>
-                                        <option value="active">Active</option>
-                                        <option value="inactive">Inactive</option>
-                                        <option value="pending">Pending</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Form Title</th>
-                                                <th>Type</th>
-                                                <th>Status</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>End Semester Feedback</td>
-                                                <td>Academic</td>
-                                                <td><span class="badge bg-success">Active</span></td>
-                                                <td>
-                                                    <div class="btn-group">
-                                                        <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
-                                                        <button class="btn btn-sm btn-danger"><i class="fas fa-power-off"></i></button>
-                                                        <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Faculty Evaluation</td>
-                                                <td>Academic</td>
-                                                <td><span class="badge bg-success">Active</span></td>
-                                                <td>
-                                                    <div class="btn-group">
-                                                        <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
-                                                        <button class="btn btn-sm btn-danger"><i class="fas fa-power-off"></i></button>
-                                                        <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Infrastructure Feedback</td>
-                                                <td>Institutional</td>
-                                                <td><span class="badge bg-danger">Inactive</span></td>
-                                                <td>
-                                                    <div class="btn-group">
-                                                        <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
-                                                        <button class="btn btn-sm btn-success"><i class="fas fa-power-off"></i></button>
-                                                        <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Workshop Feedback</td>
-                                                <td>Training</td>
-                                                <td><span class="badge bg-warning text-dark">Pending</span></td>
-                                                <td>
-                                                    <div class="btn-group">
-                                                        <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
-                                                        <button class="btn btn-sm btn-success"><i class="fas fa-power-off"></i></button>
-                                                        <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Lab Equipment Feedback</td>
-                                                <td>Institutional</td>
-                                                <td><span class="badge bg-success">Active</span></td>
-                                                <td>
-                                                    <div class="btn-group">
-                                                        <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
-                                                        <button class="btn btn-sm btn-danger"><i class="fas fa-power-off"></i></button>
-                                                        <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="d-flex justify-content-between mt-3">
-                                    <a href="#" class="btn btn-outline-primary">Assign Forms</a>
-                                    <a href="#" class="btn btn-outline-secondary">View All Forms</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Manage Forms Section -->
+<div class="col-lg-6 mb-4">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Manage Feedback Forms</h6>
+            <div class="input-group" style="width: 200px;">
+                <select class="form-select form-select-sm" id="formStatusFilter">
+                    <option value="all">All Forms</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+
+                <table class="table table-hover">
+                    <thead  style="position: sticky; top: 0; background: white; z-index: 10;">
+                        <tr>
+                            <th>Form Title</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if(forms && forms.length > 0) { %>
+                            <% forms.forEach(form => { %>
+                                <tr>
+                                    <td><%= form.title %></td>
+                                    <td><%= form.formType %></td>
+                                    <td>
+                                        <% if(form.isActive) { %>
+                                            <span class="badge bg-success">Active</span>
+                                        <% } else { %>
+                                            <span class="badge bg-danger">Inactive</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-primary" onclick="editForm('<%= form._id %>')"><i class="fas fa-edit"></i></button>
+                                            <% if(form.isActive) { %>
+                                                <button class="btn btn-sm btn-danger" onclick="toggleFormStatus('<%= form._id %>', false)"><i class="fas fa-power-off"></i></button>
+                                            <% } else { %>
+                                                <button class="btn btn-sm btn-success" onclick="toggleFormStatus('<%= form._id %>', true)"><i class="fas fa-power-off"></i></button>
+                                            <% } %>
+                                            <button class="btn btn-sm btn-info" onclick="viewForm('<%= form._id %>')"><i class="fas fa-eye"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="4" class="text-center">No forms available</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-between mt-3">
+                <a href="/admin/assign-forms" class="btn btn-outline-primary">Assign Forms</a>
+                <a href="/admin/all-forms" class="btn btn-outline-secondary">View All Forms</a>
+            </div>
+        </div>
+    </div>
+</div>
                 </div>
                 
                 <!-- Content Row -->
@@ -549,74 +529,154 @@
             <!-- /.container-fluid -->
         </div>
         <!-- Data Visualization -->
-        <main class="flex-1 p-10 overflow-y-auto">
+        <!-- Data Visualization Section -->
+<main class="flex-1 p-4 md:p-6 lg:p-10 overflow-y-auto">
+    <div class="mb-6 md:mb-8">
+        <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 text-center mt-4 md:mt-6">FACULTY FEEDBACK VISUALIZATION</h1>
+        <p class="text-center text-gray-600 mt-2" id="facultyInfo">
+            <span id="currentFaculty">Loading...</span> | <span id="currentSection">Loading...</span>
+        </p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+        <!-- Course Organization and Delivery -->
+        <div class="bg-white p-3 md:p-5 rounded shadow">
+            <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Course Organization</h3>
+            <canvas id="courseOrganizationChart"></canvas>
+        </div>
+        
+        <!-- Teacher Effectiveness -->
+        <div class="bg-white p-3 md:p-5 rounded shadow">
+            <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Teacher Effectiveness</h3>
+            <canvas id="teacherEffectivenessChart"></canvas>
+        </div>
+        
+        <!-- Student Learning Experience -->
+        <div class="bg-white p-3 md:p-5 rounded shadow">
+            <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Student Learning Experience</h3>
+            <canvas id="studentExperienceChart"></canvas>
+        </div>
+        
+        <!-- Exams and Evaluation -->
+        <div class="bg-white p-3 md:p-5 rounded shadow">
+            <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Exams and Evaluation</h3>
+            <canvas id="examsEvaluationChart"></canvas>
+        </div>
+        
+        <!-- General Course Questions -->
+        <div class="bg-white p-3 md:p-5 rounded shadow">
+            <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">General Course Questions</h3>
+            <canvas id="generalQuestionsChart"></canvas>
+        </div>
+        
+        <!-- Tutorial & Lab Components -->
+        <div class="bg-white p-3 md:p-5 rounded shadow">
+            <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Tutorial & Lab Components</h3>
+            <canvas id="tutorialLabChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Metadata display -->
+    <div class="mt-8 bg-white p-4 rounded shadow">
+        <h3 class="text-lg font-semibold mb-3">Feedback Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gray-50 p-3 rounded">
+                <p class="text-sm text-gray-500">Form ID</p>
+                <p class="font-medium" id="formID">Loading...</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded">
+                <p class="text-sm text-gray-500">Responses</p>
+                <p class="font-medium" id="responseCount">Loading...</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded">
+                <p class="text-sm text-gray-500">Last Updated</p>
+                <p class="font-medium" id="lastUpdated">Loading...</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex justify-center mt-6 md:mt-8 lg:mt-10">
+        <button id="downloadExcel"
+            class="bg-green-300 hover:bg-green-200 text-green-800 font-semibold py-2 md:py-3 px-4 md:px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-download">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" x2="12" y1="15" y2="3"></line>
+            </svg>
+            <span>Download Feedback Data</span>
+        </button>
+    </div>
+</main>
 
-            <div class="mb-8">
-                <h1 class="text-4xl font-bold text-gray-800 text-center mt-6">DATA VISUALIZATION</h1>
-              
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Course Organization and Delivery -->
-                <div class="bg-white p-5 rounded shadow">
-                    <h3 class="text-lg font-semibold mb-4">Course Organization and Delivery</h3>
-                    <canvas id="genderPreferencesChart"></canvas>
-                </div>
-        
-                <!-- Teacher Effectiveness -->
-                <div class="bg-white p-5 rounded shadow">
-                    <h3 class="text-lg font-semibold mb-4">Teacher Effectiveness</h3>
-                    <canvas id="teacherEffectivenessChart"></canvas>
-                </div>
-        
-                <!-- Student Learning Experience -->
-                <div class="bg-white p-5 rounded shadow">
-                    <h3 class="text-lg font-semibold mb-4">Student Learning Experience</h3>
-                    <canvas id="studentExperienceChart"></canvas>
-                </div>
-        
-                <!-- Exams and Evaluation -->
-                <div class="bg-white p-5 rounded shadow">
-                    <h3 class="text-lg font-semibold mb-4">Exams and Evaluation</h3>
-                    <canvas id="examsEvaluationChart"></canvas>
-                </div>
-        
-                <!-- General Course Questions -->
-                <div class="bg-white p-5 rounded shadow">
-                    <h3 class="text-lg font-semibold mb-4">General Course Questions</h3>
-                    <canvas id="generalQuestionsChart"></canvas>
-                </div>
-        
-                <!-- Tutorial & Lab Components -->
-                <div class="bg-white p-5 rounded shadow">
-                    <h3 class="text-lg font-semibold mb-4">Tutorial & Lab Components</h3>
-                    <canvas id="tutorialLabChart"></canvas>
-                </div>
-            </div>
-            <button id="downloadExcel"
-                class="mt-10 bg-green-300 hover:bg-green-200 text-green-800 font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center space-x-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="lucide lucide-download">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" x2="12" y1="15" y2="3"></line>
-                </svg>
-                <span>Download Excel</span>
-            </button>
-        </main>
         <!-- Footer -->
         <%- include('partials/adminBottomNavbar') %>
         <!-- End of Footer -->
     </div>
-    <!-- End of Content Wrapper -->
 </div>
 
-<!-- End of Page Wrapper -->
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <!-- Bootstrap core JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Custom scripts -->
 <script>
+
+     // Form status filter functionality
+     document.getElementById('formStatusFilter').addEventListener('change', function() {
+        const status = this.value;
+        const rows = document.querySelectorAll('.table tbody tr');
+        
+        rows.forEach(row => {
+            if (status === 'all') {
+                row.style.display = '';
+            } else {
+                const badgeText = row.querySelector('.badge').textContent.toLowerCase();
+                if (badgeText === status) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    });
+
+    // Function to edit form
+    function editForm(formId) {
+        window.location.href = `/admin/forms/${formId}/edit`;
+    }
+    
+    // Function to toggle form status
+    function toggleFormStatus(formId, isActive) {
+        // You can use fetch API to send AJAX request to update form status
+        fetch(`/admin/toggle-form-status/${formId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ isActive: isActive })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Refresh the page or update the UI
+                window.location.reload();
+            } else {
+                alert('Failed to update form status');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        });
+    }
+    
+    // Function to view form
+    function viewForm(formId) {
+        window.location.href = `/admin/forms/view/${formId}`;
+    }
     document.addEventListener('DOMContentLoaded', function() {
         // Toggle sidebar
         const toggleSidebar = document.querySelector('.toggle-sidebar');
@@ -640,304 +700,548 @@
 
 
      // Gender Preferences Chart
-                // Gender Preferences Chart
-                new Chart(document.getElementById('genderPreferencesChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: ['Math', 'Science', 'Literature', 'Art'],
-                        datasets: [{
-                            label: 'Person',
-                            data: [75, 80, 60, 55],
-                            backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                        }]
+       // Function to process MongoDB-style feedback data
+function processFeedbackData(feedbackResponses) {
+    // Initialize aggregated data structure
+    const aggregatedData = {
+        facultyInfo: {
+            name: "Loading...",
+            department: "Loading...",
+            courses: []
+        },
+        courseOrganization: [0, 0, 0, 0],
+        teacherEffectiveness: [0, 0, 0, 0],
+        studentExperience: [0, 0, 0, 0],
+        examsEvaluation: [0, 0, 0, 0],
+        generalQuestions: [0, 0, 0, 0, 0],
+        tutorialLabData: [
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0]
+        ]
+    };
+    
+    // If no feedback data, return default structure
+    if (!feedbackResponses || feedbackResponses.length === 0) {
+        console.warn("No feedback data available");
+        return aggregatedData;
+    }
+    
+    // Count for averaging
+    let responseCount = 0;
+    
+    // Process each feedback response
+    feedbackResponses.forEach(response => {
+        if (response.answers && Array.isArray(response.answers)) {
+            responseCount++;
+            
+            // Process answers array
+            // This assumes each answer corresponds to a specific feedback category
+            // You'll need to adjust this based on your actual data structure
+            response.answers.forEach((answer, index) => {
+                // Determine which category this answer belongs to
+                // This is a simplified example - adjust to match your actual data structure
+                if (index < 4) {
+                    // Course Organization (first 4 answers)
+                    aggregatedData.courseOrganization[index] += parseFloat(answer) || 0;
+                } else if (index < 8) {
+                    // Teacher Effectiveness (next 4 answers)
+                    aggregatedData.teacherEffectiveness[index - 4] += parseFloat(answer) || 0;
+                } else if (index < 12) {
+                    // Student Experience (next 4 answers)
+                    aggregatedData.studentExperience[index - 8] += parseFloat(answer) || 0;
+                } else if (index < 16) {
+                    // Exams Evaluation (next 4 answers)
+                    aggregatedData.examsEvaluation[index - 12] += parseFloat(answer) || 0;
+                } else if (index < 21) {
+                    // General Questions (next 5 answers)
+                    aggregatedData.generalQuestions[index - 16] += parseFloat(answer) || 0;
+                } else if (index < 26) {
+                    // Tutorial data (next 5 answers)
+                    aggregatedData.tutorialLabData[0][index - 21] += parseFloat(answer) || 0;
+                } else if (index < 31) {
+                    // Lab data (next 5 answers)
+                    aggregatedData.tutorialLabData[1][index - 26] += parseFloat(answer) || 0;
+                }
+            });
+        }
+    });
+    
+    // Average all values if we have responses
+    if (responseCount > 0) {
+        // Calculate averages for each category
+        aggregatedData.courseOrganization = aggregatedData.courseOrganization.map(val => val / responseCount);
+        aggregatedData.teacherEffectiveness = aggregatedData.teacherEffectiveness.map(val => val / responseCount);
+        aggregatedData.studentExperience = aggregatedData.studentExperience.map(val => val / responseCount);
+        aggregatedData.examsEvaluation = aggregatedData.examsEvaluation.map(val => val / responseCount);
+        aggregatedData.generalQuestions = aggregatedData.generalQuestions.map(val => val / responseCount);
+        aggregatedData.tutorialLabData[0] = aggregatedData.tutorialLabData[0].map(val => val / responseCount);
+        aggregatedData.tutorialLabData[1] = aggregatedData.tutorialLabData[1].map(val => val / responseCount);
+    }
+    
+    // Get faculty info from the first response
+    // You'll need to fetch this from your database or another source
+    if (feedbackResponses[0].facultyID) {
+        // You would typically fetch faculty details using this ID
+        // For now, we'll use a placeholder
+        aggregatedData.facultyInfo = {
+            name: `Faculty ID: ${feedbackResponses[0].facultyID}`,
+            department: feedbackResponses[0].section || "Unknown Department",
+            courses: [feedbackResponses[0].section || "Unknown Course"]
+        };
+    }
+    
+    return aggregatedData;
+}
+
+// Function to create responsive charts based on processed data
+function createResponsiveCharts(feedbackData) {
+    // Reset any existing charts
+    Chart.helpers.each(Chart.instances, function(instance) {
+        instance.destroy();
+    });
+    
+    // Update faculty name display
+    document.getElementById('currentFaculty').textContent = 
+        feedbackData.facultyInfo.name || "Unknown Faculty";
+        
+    // Course Organization Chart
+    new Chart(document.getElementById('courseOrganizationChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Content', 'Structure', 'Materials', 'Delivery'],
+            datasets: [{
+                label: 'Rating',
+                data: feedbackData.courseOrganization || [0, 0, 0, 0],
+                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5,
+                    title: {
+                        display: true,
+                        text: 'Average Score (0-5)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Teacher Effectiveness Chart
+    new Chart(document.getElementById('teacherEffectivenessChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Communication', 'Knowledge', 'Engagement', 'Feedback'],
+            datasets: [{
+                label: 'Effectiveness',
+                data: feedbackData.teacherEffectiveness || [0, 0, 0, 0],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)'
+                ],
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5,
+                    title: {
+                        display: true,
+                        text: 'Average Score (0-5)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Student Learning Experience Chart - Converting scores to percentages
+    const studentExpTotal = feedbackData.studentExperience.reduce((a, b) => a + b, 0);
+    const studentExpPercentages = studentExpTotal > 0 ? 
+        feedbackData.studentExperience.map(score => (score / studentExpTotal) * 100) : 
+        [25, 25, 25, 25];
+        
+    new Chart(document.getElementById('studentExperienceChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied'],
+            datasets: [{
+                data: studentExpPercentages,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)'
+                ],
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 12
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Overall Learning Experience'
+                }
+            }
+        }
+    });
+
+    // Exams and Evaluation Chart - Converting scores to percentages
+    const examsTotal = feedbackData.examsEvaluation.reduce((a, b) => a + b, 0);
+    const examsPercentages = examsTotal > 0 ? 
+        feedbackData.examsEvaluation.map(score => (score / examsTotal) * 100) : 
+        [25, 25, 25, 25];
+        
+    new Chart(document.getElementById('examsEvaluationChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Fair', 'Challenging', 'Well-structured', 'Needs Improvement'],
+            datasets: [{
+                data: examsPercentages,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)'
+                ],
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 12
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Exam and Evaluation Quality'
+                }
+            }
+        }
+    });
+
+    // General Course Questions Chart
+    new Chart(document.getElementById('generalQuestionsChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Course Relevance', 'Material Quality', 'Workload', 'Support Available', 'Overall Satisfaction'],
+            datasets: [{
+                label: 'Average Score',
+                data: feedbackData.generalQuestions || [0, 0, 0, 0, 0],
+                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 5,
+                    title: {
+                        display: true,
+                        text: 'Score (out of 5)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Tutorial & Lab Components Chart
+    new Chart(document.getElementById('tutorialLabChart'), {
+        type: 'radar',
+        data: {
+            labels: ['Clarity', 'Relevance', 'Equipment', 'Assistance', 'Time Allocation'],
+            datasets: [{
+                label: 'Tutorials',
+                data: feedbackData.tutorialLabData[0] || [0, 0, 0, 0, 0],
+                fill: true,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgb(255, 99, 132)',
+                pointBackgroundColor: 'rgb(255, 99, 132)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(255, 99, 132)'
+            }, {
+                label: 'Labs',
+                data: feedbackData.tutorialLabData[1] || [0, 0, 0, 0, 0],
+                fill: true,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgb(54, 162, 235)',
+                pointBackgroundColor: 'rgb(54, 162, 235)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(54, 162, 235)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            elements: {
+                line: {
+                    borderWidth: 3
+                }
+            },
+            scales: {
+                r: {
+                    angleLines: {
+                        display: false
                     },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Preference Score'
-                                }
-                            }
-                        }
+                    suggestedMin: 0,
+                    suggestedMax: 5
+                }
+            }
+        }
+    });
+}
+
+// Function to load feedback responses from API or static data
+async function loadFeedbackResponses() {
+    try {
+        // Example of how you might fetch data from your API
+        // const response = await fetch('/api/feedback-responses');
+        // const data = await response.json();
+        // return data;
+        
+        // For demonstration, we'll use static data that matches your MongoDB structure
+        return [{
+            "_id": ObjectId('67de9569a4d397927b10667b'),
+            "formID": ObjectId('67de8e79f662182314628b5c'),
+            "studentID": ObjectId('67dd68e0f675f5672111512d'),
+            "facultyID": ObjectId('67dd94fcf675f56721115247'),
+            "section": "CSE-A",
+            "answers": [4.5, 4.2, 4.3, 4.0, 4.8, 4.6, 4.5, 4.3, 4, 3, 2, 1, 4, 3, 2, 1, 4.5, 4.2, 3.8, 4.1, 4.3, 4.5, 4.2, 4.0, 4.3, 3.8, 4.2, 4.5, 4.1, 4.4, 4.0],
+            "timestamp": "2025-03-22T10:48:09.405+00:00",
+            "__v": 0
+        }];
+    } catch (error) {
+        console.error("Error loading feedback responses:", error);
+        return [];
+    }
+}
+
+// Function to set up Excel download with modified data structure
+function setupExcelDownload(feedbackData) {
+    document.getElementById('downloadExcel').addEventListener('click', function () {
+        // Get faculty information
+        const facultyInfo = feedbackData.facultyInfo || {
+            name: "Unknown Faculty",
+            department: "Unknown Department",
+            courses: ["Unknown Course"]
+        };
+        
+        // Create faculty information sheet
+        const facultyInfoData = [
+            ['Faculty Information'],
+            ['Name', facultyInfo.name],
+            ['Department', facultyInfo.department],
+            ['Section/Course', facultyInfo.courses.join(", ")]
+        ];
+
+        // Define data for each chart with appropriate scaling
+        const courseOrganizationData = [
+            ['Aspect', 'Rating (out of 5)'],
+            ['Content', feedbackData.courseOrganization[0] || 0],
+            ['Structure', feedbackData.courseOrganization[1] || 0],
+            ['Materials', feedbackData.courseOrganization[2] || 0],
+            ['Delivery', feedbackData.courseOrganization[3] || 0]
+        ];
+
+        const teacherEffectivenessData = [
+            ['Category', 'Effectiveness (out of 5)'],
+            ['Communication', feedbackData.teacherEffectiveness[0] || 0],
+            ['Knowledge', feedbackData.teacherEffectiveness[1] || 0],
+            ['Engagement', feedbackData.teacherEffectiveness[2] || 0],
+            ['Feedback', feedbackData.teacherEffectiveness[3] || 0]
+        ];
+
+        // Calculate percentages for pie/doughnut charts
+        const studentExpTotal = feedbackData.studentExperience.reduce((a, b) => a + b, 0);
+        const studentExpPercentages = studentExpTotal > 0 ? 
+            feedbackData.studentExperience.map(score => (score / studentExpTotal) * 100) : 
+            [25, 25, 25, 25];
+            
+        const studentExperienceData = [
+            ['Experience', 'Raw Score', 'Percentage (%)'],
+            ['Very Satisfied', feedbackData.studentExperience[0] || 0, studentExpPercentages[0].toFixed(1)],
+            ['Satisfied', feedbackData.studentExperience[1] || 0, studentExpPercentages[1].toFixed(1)],
+            ['Neutral', feedbackData.studentExperience[2] || 0, studentExpPercentages[2].toFixed(1)],
+            ['Dissatisfied', feedbackData.studentExperience[3] || 0, studentExpPercentages[3].toFixed(1)]
+        ];
+
+        const examsTotal = feedbackData.examsEvaluation.reduce((a, b) => a + b, 0);
+        const examsPercentages = examsTotal > 0 ? 
+            feedbackData.examsEvaluation.map(score => (score / examsTotal) * 100) : 
+            [25, 25, 25, 25];
+            
+        const examsEvaluationData = [
+            ['Aspect', 'Raw Score', 'Percentage (%)'],
+            ['Fair', feedbackData.examsEvaluation[0] || 0, examsPercentages[0].toFixed(1)],
+            ['Challenging', feedbackData.examsEvaluation[1] || 0, examsPercentages[1].toFixed(1)],
+            ['Well-structured', feedbackData.examsEvaluation[2] || 0, examsPercentages[2].toFixed(1)],
+            ['Needs Improvement', feedbackData.examsEvaluation[3] || 0, examsPercentages[3].toFixed(1)]
+        ];
+
+        const generalQuestionsData = [
+            ['Question', 'Response (out of 5)'],
+            ['Course Relevance to Career', feedbackData.generalQuestions[0] || 0],
+            ['Material Quality', feedbackData.generalQuestions[1] || 0],
+            ['Workload Manageability', feedbackData.generalQuestions[2] || 0],
+            ['Support Availability', feedbackData.generalQuestions[3] || 0],
+            ['Overall Satisfaction', feedbackData.generalQuestions[4] || 0]
+        ];
+
+        const tutorialLabData = [
+            ['Component', 'Tutorials Rating', 'Labs Rating'],
+            ['Clarity of Instructions', feedbackData.tutorialLabData[0][0] || 0, feedbackData.tutorialLabData[1][0] || 0],
+            ['Relevance to Course', feedbackData.tutorialLabData[0][1] || 0, feedbackData.tutorialLabData[1][1] || 0],
+            ['Equipment/Resources', feedbackData.tutorialLabData[0][2] || 0, feedbackData.tutorialLabData[1][2] || 0],
+            ['Staff Assistance', feedbackData.tutorialLabData[0][3] || 0, feedbackData.tutorialLabData[1][3] || 0],
+            ['Time Allocation', feedbackData.tutorialLabData[0][4] || 0, feedbackData.tutorialLabData[1][4] || 0]
+        ];
+
+        // Add metadata sheet with information about the feedback
+        const metadataData = [
+            ['Feedback Metadata'],
+            ['Form ID', feedbackData._id || 'Unknown'],
+            ['Section', feedbackData.section || 'Unknown'],
+            ['Number of Responses', '1'],
+            ['Generated Date', new Date().toISOString()]
+        ];
+
+        // Function to apply styling to a sheet
+        function styleSheet(sheet) {
+            const range = XLSX.utils.decode_range(sheet['!ref']);
+            const columnWidths = [];
+
+            // Style for headers
+            const headerStyle = {
+                font: { bold: true, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "4472C4" } },
+                alignment: { horizontal: "center", vertical: "center" }
+            };
+
+            // Style for data cells
+            const dataStyle = {
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                    top: { style: "thin" },
+                    bottom: { style: "thin" },
+                    left: { style: "thin" },
+                    right: { style: "thin" }
+                }
+            };
+
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                let maxColWidth = 10; // Minimum width
+                for (let R = range.s.r; R <= range.e.r; ++R) {
+                    const cell = sheet[XLSX.utils.encode_cell({ c: C, r: R })];
+                    if (!cell) continue;
+                    const cellValue = cell.v.toString();
+                    maxColWidth = Math.max(maxColWidth, cellValue.length);
+
+                    // Apply styles
+                    if (R === 0) {
+                        cell.s = headerStyle;
+                    } else {
+                        cell.s = dataStyle;
                     }
-                });
+                }
+                columnWidths[C] = maxColWidth;
+            }
 
-                // Teacher Effectiveness Chart
-                new Chart(document.getElementById('teacherEffectivenessChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: ['Communication', 'Knowledge', 'Engagement', 'Feedback'],
-                        datasets: [{
-                            label: 'Effectiveness',
-                            data: [85, 92, 78, 88],
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.8)',
-                                'rgba(54, 162, 235, 0.8)',
-                                'rgba(255, 206, 86, 0.8)',
-                                'rgba(75, 192, 192, 0.8)'
-                            ],
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Effectiveness Score'
-                                }
-                            }
-                        }
-                    }
-                });
+            sheet['!cols'] = columnWidths.map(w => ({ wch: w }));
+        }
 
-                // Student Learning Experience Chart
-                new Chart(document.getElementById('studentExperienceChart'), {
-                    type: 'pie',
-                    data: {
-                        labels: ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied'],
-                        datasets: [{
-                            data: [45, 35, 15, 5],
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.8)',
-                                'rgba(54, 162, 235, 0.8)',
-                                'rgba(255, 206, 86, 0.8)',
-                                'rgba(75, 192, 192, 0.8)'
-                            ],
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Overall Learning Experience'
-                            }
-                        }
-                    }
-                });
+        // Create a new workbook and add data
+        const workbook = XLSX.utils.book_new();
+        const sheets = [
+            { name: 'Metadata', data: metadataData },
+            { name: 'Faculty Information', data: facultyInfoData },
+            { name: 'Course Organization', data: courseOrganizationData },
+            { name: 'Teacher Effectiveness', data: teacherEffectivenessData },
+            { name: 'Student Experience', data: studentExperienceData },
+            { name: 'Exams Evaluation', data: examsEvaluationData },
+            { name: 'General Questions', data: generalQuestionsData },
+            { name: 'Tutorial & Lab', data: tutorialLabData }
+        ];
 
-                // Exams and Evaluation Chart
-                new Chart(document.getElementById('examsEvaluationChart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Fair', 'Challenging', 'Well-structured', 'Needs Improvement'],
-                        datasets: [{
-                            data: [50, 30, 15, 5],
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.8)',
-                                'rgba(54, 162, 235, 0.8)',
-                                'rgba(255, 206, 86, 0.8)',
-                                'rgba(75, 192, 192, 0.8)'
-                            ],
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Exam and Evaluation Quality'
-                            }
-                        }
-                    }
-                });
+        sheets.forEach(sheet => {
+            const ws = XLSX.utils.aoa_to_sheet(sheet.data);
+            styleSheet(ws);
+            XLSX.utils.book_append_sheet(workbook, ws, sheet.name);
+        });
 
-                // General Course Questions Chart
-                new Chart(document.getElementById('generalQuestionsChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: ['Course Relevance', 'Material Quality', 'Workload', 'Support Available', 'Overall Satisfaction'],
-                        datasets: [{
-                            label: 'Average Score',
-                            data: [4.2, 4.0, 3.8, 4.1, 4.3],
-                            backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        indexAxis: 'y',
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                max: 5,
-                                title: {
-                                    display: true,
-                                    text: 'Score (out of 5)'
-                                }
-                            }
-                        }
-                    }
-                });
+        // Export workbook with section name in the filename
+        const section = feedbackData.section || 'Unknown';
+        const fileName = `Faculty_Feedback_${section.replace(/\s+/g, '_')}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+    });
+}
 
-                // Tutorial & Lab Components Chart
-                new Chart(document.getElementById('tutorialLabChart'), {
-                    type: 'radar',
-                    data: {
-                        labels: ['Clarity', 'Relevance', 'Equipment', 'Assistance', 'Time Allocation'],
-                        datasets: [{
-                            label: 'Tutorials',
-                            data: [4.5, 4.2, 4.0, 4.3, 3.8],
-                            fill: true,
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            borderColor: 'rgb(255, 99, 132)',
-                            pointBackgroundColor: 'rgb(255, 99, 132)',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: 'rgb(255, 99, 132)'
-                        }, {
-                            label: 'Labs',
-                            data: [4.2, 4.5, 4.1, 4.4, 4.0],
-                            fill: true,
-                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                            borderColor: 'rgb(54, 162, 235)',
-                            pointBackgroundColor: 'rgb(54, 162, 235)',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: 'rgb(54, 162, 235)'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        elements: {
-                            line: {
-                                borderWidth: 3
-                            }
-                        },
-                        scales: {
-                            r: {
-                                angleLines: {
-                                    display: false
-                                },
-                                suggestedMin: 0,
-                                suggestedMax: 5
-                            }
-                        }
-                    }
-                });
+// Function to handle window resize for responsiveness
+function handleResize() {
+    const chartContainers = document.querySelectorAll('.chart-container');
+    chartContainers.forEach(container => {
+        const chartCanvas = container.querySelector('canvas');
+        if (chartCanvas) {
+            const containerWidth = container.clientWidth;
+            // Adjust height based on width, but with reasonable limits
+            const containerHeight = Math.max(200, Math.min(containerWidth * 0.75, 350));
+            container.style.height = `${containerHeight}px`;
+        }
+    });
+}
 
-                document.getElementById('downloadExcel').addEventListener('click', function () {
-                    // Define data for each chart
-                    const courseFeedbackData = [
-                        ['Aspect', 'Rating (out of 5)'],
-                        ['Course Content', 4.5],
-                        ['Teaching Methods', 4.2],
-                        ['Learning Resources', 4.0],
-                        ['Assignments', 3.8],
-                        ['Overall Satisfaction', 4.3]
-                    ];
-
-                    const teacherEffectivenessData = [
-                        ['Category', 'Effectiveness (out of 5)'],
-                        ['Communication', 4.5],
-                        ['Knowledge', 4.8],
-                        ['Engagement', 4.2],
-                        ['Feedback', 4.6]
-                    ];
-
-                    const studentExperienceData = [
-                        ['Experience', 'Rating'],
-                        ['Very Satisfied', 4],
-                        ['Satisfied', 3],
-                        ['Neutral', 2],
-                        ['Dissatisfied', 1]
-                    ];
-
-                    const examsEvaluationData = [
-                        ['Aspect', 'Rating (out of 5)'],
-                        ['Fairness', 4.2],
-                        ['Difficulty Level', 3.8],
-                        ['Clarity of Questions', 4.0],
-                        ['Time Allocation', 3.9]
-                    ];
-
-                    const generalQuestionsData = [
-                        ['Question', 'Response (out of 5)'],
-                        ['Course Relevance to Career', 4.5],
-                        ['Material Quality', 4.2],
-                        ['Workload Manageability', 3.8],
-                        ['Support Availability', 4.1],
-                        ['Would Recommend Course', 4.3]
-                    ];
-
-                    const tutorialLabData = [
-                        ['Component', 'Tutorials Rating', 'Labs Rating'],
-                        ['Clarity of Instructions', 4.5, 4.2],
-                        ['Relevance to Course', 4.2, 4.5],
-                        ['Equipment/Resources', 4.0, 4.1],
-                        ['Staff Assistance', 4.3, 4.4],
-                        ['Time Allocation', 3.8, 4.0]
-                    ];
-
-                    // Function to apply styling to a sheet
-                    function styleSheet(sheet) {
-                        const range = XLSX.utils.decode_range(sheet['!ref']);
-                        const columnWidths = [];
-
-                        // Style for headers
-                        const headerStyle = {
-                            font: { bold: true, color: { rgb: "FFFFFF" } },
-                            fill: { fgColor: { rgb: "4472C4" } },
-                            alignment: { horizontal: "center", vertical: "center" }
-                        };
-
-                        // Style for data cells
-                        const dataStyle = {
-                            alignment: { horizontal: "center", vertical: "center" },
-                            border: {
-                                top: { style: "thin" },
-                                bottom: { style: "thin" },
-                                left: { style: "thin" },
-                                right: { style: "thin" }
-                            }
-                        };
-
-                        for (let C = range.s.c; C <= range.e.c; ++C) {
-                            let maxColWidth = 10; // Minimum width
-                            for (let R = range.s.r; R <= range.e.r; ++R) {
-                                const cell = sheet[XLSX.utils.encode_cell({ c: C, r: R })];
-                                if (!cell) continue;
-                                const cellValue = cell.v.toString();
-                                maxColWidth = Math.max(maxColWidth, cellValue.length);
-
-                                // Apply styles
-                                if (R === 0) {
-                                    cell.s = headerStyle;
-                                } else {
-                                    cell.s = dataStyle;
-                                }
-                            }
-                            columnWidths[C] = maxColWidth;
-                        }
-
-                        sheet['!cols'] = columnWidths.map(w => ({ wch: w }));
-                    }
-
-                    // Create a new workbook and add data
-                    const workbook = XLSX.utils.book_new();
-                    const sheets = [
-                        { name: 'Course Feedback', data: courseFeedbackData },
-                        { name: 'Teacher Effectiveness', data: teacherEffectivenessData },
-                        { name: 'Student Experience', data: studentExperienceData },
-                        { name: 'Exams Evaluation', data: examsEvaluationData },
-                        { name: 'General Questions', data: generalQuestionsData },
-                        { name: 'Tutorial & Lab', data: tutorialLabData }
-                    ];
-
-                    sheets.forEach(sheet => {
-                        const ws = XLSX.utils.aoa_to_sheet(sheet.data);
-                        styleSheet(ws);
-                        XLSX.utils.book_append_sheet(workbook, ws, sheet.name);
-                    });
-
-                    // Export workbook
-                    XLSX.writeFile(workbook, 'individual_feedback_data.xlsx');
-                });
-
+// Initialize everything when the page loads
+document.addEventListener('DOMContentLoaded', async function() {
+    // Create chart containers for better responsiveness
+    const chartCanvases = document.querySelectorAll('canvas');
+    chartCanvases.forEach(canvas => {
+        const container = document.createElement('div');
+        container.className = 'chart-container';
+        container.style.position = 'relative';
+        container.style.height = '300px'; // Default height
+        canvas.parentNode.insertBefore(container, canvas);
+        container.appendChild(canvas);
+    });
+    
+    // Load feedback responses
+    const feedbackResponses = await loadFeedbackResponses();
+    
+    // Process the data
+    const processedData = processFeedbackData(feedbackResponses);
+    
+    // Create charts with the processed data
+    createResponsiveCharts(processedData);
+    
+    // Setup Excel download
+    setupExcelDownload(processedData);
+    
+    // Handle initial sizing and window resize
+    handleResize();
+    window.addEventListener('resize', handleResize);
+});
 </script>
 </body>
 </html>

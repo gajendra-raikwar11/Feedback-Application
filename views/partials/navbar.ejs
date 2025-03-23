@@ -1,11 +1,9 @@
 <!-- views/partials/navbar.ejs -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
   <div class="container-fluid px-4">
-    <!-- Brand logo -->
-    <a class="navbar-brand d-flex align-items-center" href="#">
-      <i class="fas fa-graduation-cap fs-4 text-primary me-2"></i>
-      <span class="fw-bold">Campus Connect</span>
-    </a>
+    <!-- Brand logo outside of a tag with blue color -->
+    <i class="fas fa-graduation-cap fs-3 text-primary me-2"></i>
+    <span class="fw-bold fs-4 text-primary">Campus Connect</span>
     
     <!-- Mobile toggle button -->
     <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
@@ -20,21 +18,21 @@
       <!-- Right-aligned user and logout options -->
       <ul class="navbar-nav ms-auto">
         <li class="nav-item mx-2">
-          <a class="nav-link px-3 <%= currentPage === 'dashboard' ? 'active text-primary fw-medium' : '' %>" href="/studentHomepage">
-            <i class="fas fa-th-large me-1"></i> Dashboard
+          <a class="nav-link px-3  fs-5  <%= activePage === 'dashboard' ? 'active text-primary fw-medium' : '' %>" href="/student/studentHomepage">
+            <i class="fas  fs-5 fa-th-large me-1"></i> Dashboard
           </a>
         </li>
         <li class="nav-item mx-2">
-          <a class="nav-link px-3 <%= currentPage === 'forms' ? 'active text-primary fw-medium' : '' %>" href="/studentFormspage">
-            <i class="fas fa-file-alt me-1"></i> Forms
+          <a class="nav-link   fs-5  px-3 <%= activePage === 'forms' ? 'active text-primary fw-medium' : '' %>" href="/student/studentFormspage">
+            <i class="fas  fs-5  fa-file-alt me-1"></i> Forms
           </a>
         </li>
         <!-- notifiaction here -->
-       <!-- calendar here -->
+        <!-- calendar here -->
 
         <li class="nav-item">
-          <a class="nav-link d-flex align-items-center px-3 py-2 text-danger" href="/logout">
-            <i class="fas fa-sign-out-alt me-2 text-danger"></i> 
+          <a class="nav-link  fs-5  d-flex align-items-center px-3 py-2 text-danger" href="/student/logout">
+            <i class="fas  fs-5  fa-sign-out-alt me-2 text-danger"></i> 
             <span>Logout</span>
           </a>
         </li>

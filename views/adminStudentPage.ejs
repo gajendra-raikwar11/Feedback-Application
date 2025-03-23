@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Students</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+  <!-- Responsive DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css">
+  <!-- DataTables Buttons CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --danger-color: #ef476f;
+      --success-color: #06d6a0;
+      --warning-color: #ffd166;
+      --dark-color: #1a1a2e;
+      --light-color: #f8f9fa;
+    }
+    
+    body {
+      background-color: #f5f7fb;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding-top: 56px; /* Add padding to account for fixed navbar */
+    }
+    
+    .main-content {
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    @media (max-width: 991.98px) {
+      .sidebar {
+        width: 100%;
+        position: static;
+        height: auto;
+        min-height: auto;
+      }
+      
+      .main-content {
+        margin-left: 0;
+        padding: 15px;
+      }
+    }
+    
+    @media (max-width: 767.98px) {
+      .main-content {
+        padding: 10px;
+      }
+      
+      .d-flex.justify-content-between.align-items-center {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px;
+      }
+      
+      .d-flex.justify-content-between.align-items-center .btn {
+        width: 100%;
+      }
+    }
+
+    /* Fix for stats cards on mobile */
+    @media (max-width: 575.98px) {
+      .stats-card {
+        margin-bottom: 15px;
+      }
+      
+      .card-body {
+        padding: 15px;
+      }
+      
+      .chart-container {
+        height: 250px;
+      }
+    }
+    
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s;
+      height: 100%;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .stats-card {
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      height: 100%;
+    }
+    
+    .stats-card .icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+    }
+    
+    .stats-card .number {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    
+    .stats-card .label {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .info-section {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-danger {
+      background-color: var(--danger-color);
+      border-color: var(--danger-color);
+    }
+
+    .table-container {
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      overflow-x: auto; /* Add horizontal scroll for smaller screens */
+    }
+    
+    table.dataTable thead th {
+      background-color: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+    }
+    
+    /* Improved responsive table */
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Responsive table adjustments */
+    @media (max-width: 767.98px) {
+      .table-container {
+        padding: 10px;
+      }
+      
+      .table>:not(caption)>*>* {
+        padding: 0.5rem;
+      }
+      
+      .student-info {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .student-avatar {
+        margin-bottom: 5px;
+      }
+    }
+    
+    /* Better mobile view for student info */
+    @media (max-width: 575.98px) {
+      .student-info {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }
+      
+      .student-details {
+        margin-left: 10px;
+      }
+    }
+    
+    .badge {
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-weight: 500;
+    }
+    
+    .badge-success {
+      background-color: rgba(6, 214, 160, 0.1);
+      color: var(--success-color);
+      border: 1px solid var(--success-color);
+    }
+    
+    .badge-warning {
+      background-color: rgba(255, 209, 102, 0.1);
+      color: #d18800;
+      border: 1px solid #d18800;
+    }
+    
+    .badge-danger {
+      background-color: rgba(239, 71, 111, 0.1);
+      color: var(--danger-color);
+      border: 1px solid var(--danger-color);
+    }
+    
+    .action-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      cursor: pointer;
+      margin: 0 2px;
+    }
+    
+    .action-btn:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+
+    .student-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    
+    .filter-section {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    
+    /* Improved filter section for mobile */
+    @media (max-width: 767.98px) {
+      .filter-section {
+        padding: 15px;
+      }
+      
+      .filter-section .btn {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      
+      .filter-section .btn:last-child {
+        margin-bottom: 0;
+      }
+      
+      .filter-section .mt-3 {
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .filter-section .btn + .btn {
+        margin-left: 0 !important;
+        margin-top: 10px;
+      }
+    }
+    
+    .chart-container {
+      height: 300px;
+      margin-bottom: 20px;
+    }
+    
+    /* Improved chart responsiveness */
+    @media (max-width: 991.98px) {
+      .chart-container {
+        height: 250px;
+      }
+    }
+    
+    @media (max-width: 575.98px) {
+      .chart-container {
+        height: 200px;
+      }
+    }
+    
+    .admin-profile-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 8px;
+      background-color: var(--primary-color);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Add spacing between rows in mobile view */
+    @media (max-width: 767.98px) {
+      .row > [class*="col-"] {
+        margin-bottom: 15px;
+      }
+    }
+    
+    /* Excel export button styling */
+    .excel-export-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .excel-btn {
+      display: flex;
+      align-items: center;
+    }
+    
+    .excel-btn i {
+      margin-right: 8px;
+    }
+    
+    @media (max-width: 767.98px) {
+      .excel-export-container {
+        flex-direction: column;
+      }
+      
+      .excel-btn {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 10px;
+      }
+    }
+    
+    /* Hide DataTables buttons container initially to prevent layout shifts */
+    .dt-buttons {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Toast Container for notifications -->
+  <div class="toast-container"></div>
+
+  <!-- Topbar -->
+  <%- include('partials/adminTopNavbar', { admin: adminData }) %>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <%- include('./partials/adminSideNavbar', { path: currentPath ,admin: adminData  }) %>
+
+      <!-- Main Content -->
+      <div class="col-lg-10 col-md-12 ms-auto">
+        <div class="main-content">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-3 mb-md-0"><i class="fas fa-user-graduate me-2"></i>Student Management</h2>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="row mb-4 g-3">
+            <div class="col-xl-3 col-sm-6">
+              <div class="card stats-card h-100">
+                <div class="icon text-primary">
+                  <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="number"><%= totalStudents %></div>
+                <div class="label">Total Students</div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-sm-6">
+              <div class="card stats-card h-100">
+                <div class="icon text-success">
+                  <i class="fas fa-user-check"></i>
+                </div>
+                <div class="number"><%= loggedInStudents %></div>
+                <div class="label">Currently Active</div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-sm-6">
+              <div class="card stats-card h-100">
+                <div class="icon text-warning">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="number"><%= uniqueSections.length %></div>
+                <div class="label">Total Sections</div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-sm-6">
+              <div class="card stats-card h-100">
+                <div class="icon text-info">
+                  <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="number"><%= uniqueBranches.length %></div>
+                <div class="label">Total Branches</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Distribution Charts -->
+          <div class="row mb-4 g-3">
+            <div class="col-lg-6">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h5 class="card-title">Semester Distribution</h5>
+                  <div class="chart-container">
+                    <canvas id="semesterChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h5 class="card-title">Branch Distribution</h5>
+                  <div class="chart-container">
+                    <canvas id="branchChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter Section with Excel Export -->
+          <div class="filter-section mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Students</h4>
+              <div class="excel-export-container">
+                <button id="exportAllExcel" class="btn btn-success excel-btn">
+                  <i class="fas fa-file-excel"></i> Export All
+                </button>
+                <button id="exportFilteredExcel" class="btn btn-info excel-btn">
+                  <i class="fas fa-filter"></i> Export Filtered
+                </button>
+              </div>
+            </div>
+            <div class="row g-3">
+              <div class="col-xl-3 col-md-6">
+                <label for="branchFilter" class="form-label">Branch</label>
+                <select class="form-select" id="branchFilter">
+                  <option value="">All Branches</option>
+                  <% uniqueBranches.forEach(branch => { %>
+                  <option value="<%= branch %>"><%= branch %></option>
+                  <% }); %>
+                </select>
+              </div>
+              <div class="col-xl-3 col-md-6">
+                <label for="sectionFilter" class="form-label">Section</label>
+                <select class="form-select" id="sectionFilter">
+                  <option value="">All Sections</option>
+                  <% uniqueSections.forEach(section => { %>
+                  <option value="<%= section %>"><%= section %></option>
+                  <% }); %>
+                </select>
+              </div>
+              <div class="col-xl-3 col-md-6">
+                <label for="semesterFilter" class="form-label">Semester</label>
+                <select class="form-select" id="semesterFilter">
+                  <option value="">All Semesters</option>
+                  <% Object.keys(semesterDistribution).sort((a, b) => a - b).forEach(semester => { %>
+                  <option value="<%= semester %>"><%= semester %></option>
+                  <% }); %>
+                </select>
+              </div>
+              <div class="col-xl-3 col-md-6">
+                <label for="statusFilter" class="form-label">Status</label>
+                <select class="form-select" id="statusFilter">
+                  <option value="">All</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+            <div class="mt-3 d-flex flex-column flex-md-row">
+              <button class="btn btn-primary me-md-2 mb-2 mb-md-0" id="applyFilters">Apply Filters</button>
+              <button class="btn btn-outline-secondary" id="resetFilters">Reset</button>
+            </div>
+          </div>
+
+          <!-- Students Table -->
+          <div class="table-container">
+            <div class="table-responsive">
+              <table class="table table-hover dt-responsive nowrap w-100" id="studentsTable">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Enrollment No.</th>
+                    <th>Branch</th>
+                    <th>Section</th>
+                    <th>Semester</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% students.forEach(student => { %>
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center student-info">
+                        <div class="student-avatar" style="background-color: #<%= student.color %>">
+                          <%= student.name.charAt(0) %>
+                        </div>
+                        <div class="student-details">
+                          <div class="fw-bold text-break"><%= student.name %></div>
+                          <div class="small text-muted text-break"><%= student.email %></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><%= student.enrollmentNumber %></td>
+                    <td><%= student.branch %></td>
+                    <td><%= student.section %></td>
+                    <td><%= student.semester %></td>
+                    <td>
+                      <span class="badge <%= student.isLoggedIn ? 'badge-success' : 'badge-danger' %>">
+                        <i class="fas <%= student.isLoggedIn ? 'fa-check-circle' : 'fa-times-circle' %> me-1"></i>
+                        <%= student.isLoggedIn ? 'Active' : 'Inactive' %>
+                      </span>
+                    </td>
+                    <td>
+                      <div class="d-flex">
+                        <!-- Delete Button -->
+                        <button class="action-btn text-danger delete-student" data-id="<%= student._id %>" title="Delete">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Student Modal -->
+  <div class="modal fade" id="deleteStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirm Delete</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this student? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- jQuery -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <!-- DataTables -->
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+  <!-- DataTables Responsive -->
+  <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.4.1/js/responsive.bootstrap5.min.js"></script>
+  <!-- DataTables Buttons -->
+  <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    $(document).ready(function() {
+  // Initialize DataTable with responsive features and Excel export
+  const studentsTable = $('#studentsTable').DataTable({
+    responsive: true,
+    pageLength: 10,
+    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+    columnDefs: [
+      // Set column priorities for responsive display
+      { responsivePriority: 1, targets: 0 }, // Student info
+      { responsivePriority: 2, targets: 6 }, // Actions
+      { responsivePriority: 3, targets: 5 }, // Status
+      { responsivePriority: 4, targets: 1 }, // Enrollment No.
+      { responsivePriority: 5, targets: 4 }, // Semester
+      { responsivePriority: 6, targets: 2 }, // Branch
+      { responsivePriority: 7, targets: 3 }  // Section
+    ]
+  });
+  
+  // Function to show toast notifications
+  function showToast(title, message, type) {
+    const toast = `
+      <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            <strong>${title}:</strong> ${message}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+    `;
+    
+    $('.toast-container').append(toast);
+    const toastElement = $('.toast').last();
+    const bsToast = new bootstrap.Toast(toastElement, {
+      autohide: true,
+      delay: 3000
+    });
+    bsToast.show();
+    
+    // Remove toast after it's hidden
+    toastElement.on('hidden.bs.toast', function() {
+      $(this).remove();
+    });
+  }
+  
+  // Function to export table data to Excel using SheetJS
+  function exportTableToExcel(filename = 'students_data') {
+    // Create an array to hold all the data
+    const exportData = [];
+    
+    // Add header row
+    const headers = ['Student Name', 'Email', 'Enrollment No.', 'Branch', 'Section', 'Semester', 'Status'];
+    exportData.push(headers);
+    
+    // Get visible data from DataTables
+    const tableData = studentsTable.rows({ search: 'applied' }).data();
+    
+    // Process each row
+    tableData.each(function(rowData) {
+      const row = [];
+      
+      // Extract student name and email from HTML
+      const div = document.createElement('div');
+      div.innerHTML = rowData[0];
+      const name = div.querySelector('.fw-bold').textContent.trim();
+      const email = div.querySelector('.small.text-muted').textContent.trim();
+      
+      // Add to row array
+      row.push(name);
+      row.push(email);
+      
+      // Add other columns
+      row.push(rowData[1]); // Enrollment No.
+      row.push(rowData[2]); // Branch
+      row.push(rowData[3]); // Section
+      row.push(rowData[4]); // Semester
+      
+      // Extract status from HTML
+      const statusDiv = document.createElement('div');
+      statusDiv.innerHTML = rowData[5];
+      const status = statusDiv.textContent.trim();
+      row.push(status);
+      
+      // Add row to export data
+      exportData.push(row);
+    });
+    
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(exportData);
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Students');
+    
+    // Set column widths
+    const wscols = [
+      { wch: 20 }, // Student Name
+      { wch: 25 }, // Email
+      { wch: 15 }, // Enrollment No.
+      { wch: 15 }, // Branch
+      { wch: 10 }, // Section
+      { wch: 10 }, // Semester
+      { wch: 10 }  // Status
+    ];
+    ws['!cols'] = wscols;
+    
+    // Generate Excel file and trigger download
+    XLSX.writeFile(wb, `${filename}.xlsx`);
+  }
+  
+  // Export All button functionality
+  $('#exportAllExcel').on('click', function() {
+    // First reset any filters to ensure all data is included
+    studentsTable.search('').columns().search('').draw();
+    
+    // Show loading indicator
+    $('#loadingOverlay').css('display', 'flex');
+    
+    // Slight delay to allow UI to update
+    setTimeout(function() {
+      try {
+        // Export all data
+        exportTableToExcel('Students_Data_Full');
+        
+        // Hide loading indicator
+        $('#loadingOverlay').css('display', 'none');
+        
+        // Show success message
+        showToast('Export Complete', 'All student data has been exported to Excel.', 'success');
+      } catch (error) {
+        console.error('Excel export error:', error);
+        $('#loadingOverlay').css('display', 'none');
+        showToast('Export Failed', 'Unable to export data. Please try again.', 'danger');
+      }
+    }, 500);
+  });
+  
+  // Export Filtered Excel button functionality
+  $('#exportFilteredExcel').on('click', function() {
+    // Check if any filters are applied
+    const isFiltered = studentsTable.columns().search().join('').length > 0 || 
+                      studentsTable.search().length > 0;
+    
+    if (!isFiltered) {
+      showToast('No Filters Applied', 'Please apply filters before exporting filtered data.', 'warning');
+      return;
+    }
+    
+    // Show loading indicator
+    $('#loadingOverlay').css('display', 'flex');
+    
+    // Create a custom filename based on current filters
+    let filterLabels = [];
+    
+    if ($('#branchFilter').val()) filterLabels.push('Branch_' + $('#branchFilter').val());
+    if ($('#sectionFilter').val()) filterLabels.push('Section_' + $('#sectionFilter').val());
+    if ($('#semesterFilter').val()) filterLabels.push('Sem_' + $('#semesterFilter').val());
+    if ($('#statusFilter').val()) filterLabels.push('Status_' + $('#statusFilter').val());
+    
+    const filename = filterLabels.length > 0 ? 
+                    'Students_' + filterLabels.join('_') : 
+                    'Students_Filtered';
+    
+    // Slight delay to allow UI to update
+    setTimeout(function() {
+      try {
+        // Export filtered data
+        exportTableToExcel(filename);
+        
+        // Hide loading indicator
+        $('#loadingOverlay').css('display', 'none');
+        
+        // Show success message
+        showToast('Export Complete', 'Filtered student data has been exported to Excel.', 'success');
+      } catch (error) {
+        console.error('Excel export error:', error);
+        $('#loadingOverlay').css('display', 'none');
+        showToast('Export Failed', 'Unable to export data. Please try again.', 'danger');
+      }
+    }, 500);
+  });
+  
+  // Check for window resize and adjust table layout if needed
+  $(window).on('resize', function() {
+    if ($(window).width() < 768) {
+      // Adjust any mobile-specific issues
+      $('.student-info').addClass('flex-row');
+    } else {
+      $('.student-info').removeClass('flex-row');
+    }
+  });
+  
+  // Trigger resize event once to set initial state
+  $(window).trigger('resize');
+  
+  // Check if canvas elements exist before creating charts
+  if (document.getElementById('semesterChart') && document.getElementById('branchChart')) {
+    // Create Semester Distribution Chart
+    try {
+      const semesterCtx = document.getElementById('semesterChart').getContext('2d');
+      
+      // Access the data directly from the EJS template variables
+      const semesterDistribution = <%- JSON.stringify(semesterDistribution) %>;
+      const semesterLabels = Object.keys(semesterDistribution).sort((a, b) => parseInt(a) - parseInt(b));
+      const semesterData = semesterLabels.map(label => semesterDistribution[label]);
+      
+      new Chart(semesterCtx, {
+        type: 'bar',
+        data: {
+          labels: semesterLabels.map(label => `Sem ${label}`),
+          datasets: [{
+            label: 'Number of Students',
+            data: semesterData,
+            backgroundColor: 'rgba(67, 97, 238, 0.7)',
+            borderColor: 'rgba(67, 97, 238, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: $(window).width() > 768
+            },
+            tooltip: {
+              enabled: true
+            }
+          }
+        }
+      });
+      
+      // Create Branch Distribution Chart
+      const branchCtx = document.getElementById('branchChart').getContext('2d');
+      
+      // Access the data directly
+      const branchCounts = {};
+      <% uniqueBranches.forEach(branch => { %>
+        branchCounts['<%= branch %>'] = <%= students.filter(student => student.branch === branch).length %>;
+      <% }); %>
+      
+      // Generate colors for the branch chart
+      const generateBranchColors = (count) => {
+        const colors = [];
+        const backgroundColors = [];
+        const borderColors = [];
+        
+        // Generate an array of distinct colors
+        for (let i = 0; i < count; i++) {
+          const hue = (i * 137.5) % 360; // Golden angle approximation for good distribution
+          const saturation = 70;
+          const lightness = 60;
+          
+          // Convert HSL to hexadecimal
+          const h = hue / 360;
+          const s = saturation / 100;
+          const l = lightness / 100;
+          
+          let r, g, b;
+          if (s === 0) {
+            r = g = b = l;
+          } else {
+            const hue2rgb = (p, q, t) => {
+              if (t < 0) t += 1;
+              if (t > 1) t -= 1;
+              if (t < 1/6) return p + (q - p) * 6 * t;
+              if (t < 1/2) return q;
+              if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+              return p;
+            };
+            
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            
+            r = hue2rgb(p, q, h + 1/3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1/3);
+          }
+          
+          const toHex = (x) => {
+            const hex = Math.round(x * 255).toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+          };
+          
+          const color = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+          colors.push(color);
+          backgroundColors.push(`${color}CC`); // Add 80% opacity
+          borderColors.push(color);
+        }
+        
+        return { backgroundColors, borderColors };
+      };
+      
+      // Branch chart colors
+      const branchColors = generateBranchColors(Object.keys(branchCounts).length);
+      
+      new Chart(branchCtx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(branchCounts),
+          datasets: [{
+            data: Object.values(branchCounts),
+            backgroundColor: branchColors.backgroundColors,
+            borderColor: branchColors.borderColors,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              display: $(window).width() > 768,
+              labels: {
+                boxWidth: 15,
+                padding: 10
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error creating charts:', error);
+      // Create a placeholder message if charts fail to load
+      $('#semesterChart, #branchChart').parent().html('<div class="alert alert-warning">Unable to load chart data. Please refresh the page.</div>');
+    }
+  }
+  
+  // Apply filter functionality
+  $('#applyFilters').on('click', function() {
+    const branch = $('#branchFilter').val();
+    const section = $('#sectionFilter').val();
+    const semester = $('#semesterFilter').val();
+    const status = $('#statusFilter').val();
+    
+    // Clear previous search
+    studentsTable.search('').columns().search('').draw();
+    
+    // Apply each filter if it has a value
+    if (branch) {
+      studentsTable.column(2).search(branch).draw();
+    }
+    
+    if (section) {
+      studentsTable.column(3).search(section).draw();
+    }
+    
+    if (semester) {
+      studentsTable.column(4).search(`^${semester}$`, true, false).draw();
+    }
+    
+    if (status) {
+      const statusText = status === 'active' ? 'Active' : 'Inactive';
+      studentsTable.column(5).search(statusText).draw();
+    }
+    
+    // Show confirmation of filters applied
+    const filtersApplied = [];
+    if (branch) filtersApplied.push(`Branch: ${branch}`);
+    if (section) filtersApplied.push(`Section: ${section}`);
+    if (semester) filtersApplied.push(`Semester: ${semester}`);
+    if (status) filtersApplied.push(`Status: ${status}`);
+    
+    if (filtersApplied.length > 0) {
+      showToast('Filters Applied', filtersApplied.join(', '), 'info');
+    } else {
+      showToast('No Filters', 'Showing all students', 'info');
+    }
+  });
+  
+  // Reset filters
+  $('#resetFilters').on('click', function() {
+    // Reset all select inputs
+    $('#branchFilter, #sectionFilter, #semesterFilter, #statusFilter').val('');
+    
+    // Clear DataTable search
+    studentsTable.search('').columns().search('').draw();
+    
+    // Show confirmation
+    showToast('Filters Reset', 'All filters have been cleared', 'info');
+  });
+  
+  // Handle delete student functionality
+  let studentIdToDelete = null;
+  
+  // Show delete confirmation modal when delete button is clicked
+  $(document).on('click', '.delete-student', function() {
+    studentIdToDelete = $(this).data('id');
+    $('#deleteStudentModal').modal('show');
+  });
+  
+  // Handle confirm delete button click
+  $('#confirmDelete').on('click', function() {
+    if (!studentIdToDelete) {
+      showToast('Error', 'No student selected for deletion', 'danger');
+      $('#deleteStudentModal').modal('hide');
+      return;
+    }
+    
+    // Show loading indicator
+    $('#loadingOverlay').css('display', 'flex');
+    
+    // Send delete request to the server
+    $.ajax({
+      url: `/admin/students/delete/${studentIdToDelete}`,
+      method: 'DELETE',
+      success: function(response) {
+        // Hide modal
+        $('#deleteStudentModal').modal('hide');
+        
+        // Remove the row from the table
+        studentsTable.row($(`button[data-id="${studentIdToDelete}"]`).closest('tr')).remove().draw();
+        
+        // Show success message
+        showToast('Success', 'Student deleted successfully', 'success');
+        
+        // Hide loading indicator
+        $('#loadingOverlay').css('display', 'none');
+        
+        // Update stats
+        // Note: In a production environment, you would ideally update the stats dynamically
+        // or refresh the page to get updated stats from the server
+        const totalStudentsElement = $('.stats-card .number').first();
+        let totalStudents = parseInt(totalStudentsElement.text()) - 1;
+        totalStudentsElement.text(totalStudents);
+      },
+      error: function(error) {
+        // Hide modal
+        $('#deleteStudentModal').modal('hide');
+        
+        // Show error message
+        let errorMessage = 'Failed to delete student';
+        if (error.responseJSON && error.responseJSON.message) {
+          errorMessage = error.responseJSON.message;
+        }
+        showToast('Error', errorMessage, 'danger');
+        
+        // Hide loading indicator
+        $('#loadingOverlay').css('display', 'none');
+      }
+    });
+  });
+  
+  // Close loading overlay when page is fully loaded
+  $(window).on('load', function() {
+    $('#loadingOverlay').css('display', 'none');
+  });
+});
+  </script>
+</body>
+</html>

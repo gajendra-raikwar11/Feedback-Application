@@ -1,30 +1,112 @@
 [
-    {
-      "empId": "CSE100",
-      "name": "Dr. John Smith",
-      "department": "Computer Science",
-      "email": "john.smith@example.com",
-      "phone": "+1234567890",
-      "subjects": ["Data Structures", "Algorithms"],
-      "password": "aaaaaa"
-    },
-    {
-      "empId": "CSE101",
-      "name": "Prof. Emily Johnson",
-      "department": "Mathematics",
-      "email": "emily.johnson@example.com",
-      "phone": "+0987654321",
-      "subjects": ["Linear Algebra", "Calculus"],
-      "password": "aaaaaa"
-    },
-    {
-      "empId": "CSE102",
-      "name": "Dr. Mark Williams",
-      "department": "Physics",
-      "email": "mark.williams@example.com",
-      "phone": "+1122334455",
-      "subjects": ["Quantum Mechanics", "Thermodynamics"],
-      "password": "aaaaaa"
-    }
-  ]
-  
+  {
+    "name": "Dr. Rajesh Sharma",
+    "idNumber": "FAC1001",
+    "email": "rajesh.sharma@example.com",
+    "branch": "CSE",
+    "subjects": ["DBMS", "OS"],
+    "sections": ["CSE-A", "CSE-B"],
+    "feedbackForms": [],
+    "role": "faculty",
+    "password": "111111"
+  },
+  {
+    "name": "Prof. Anjali Mehta",
+    "idNumber": "FAC1002",
+    "email": "anjali.mehta@example.com",
+    "branch": "IT",
+    "subjects": ["Web Development", "Cyber Security"],
+    "sections": ["IT-A"],
+    "feedbackForms": [],
+    "role": "faculty",
+    "password": "hashed_password_2"
+  },
+  {
+    "name": "Dr. Vikram Patel",
+    "idNumber": "FAC1003",
+    "email": "vikram.patel@example.com",
+    "branch": "ECE",
+    "subjects": ["Embedded Systems", "Digital Electronics"],
+    "sections": ["ECE-B"],
+    "feedbackForms": [],
+    "role": "faculty",
+    "password": "hashed_password_3"
+  },
+  {
+    "name": "Prof. Neha Gupta",
+    "idNumber": "FAC1004",
+    "email": "neha.gupta@example.com",
+    "branch": "CSE",
+    "subjects": ["AI", "Machine Learning"],
+    "sections": ["CSE-C"],
+    "feedbackForms": [],
+    "role": "faculty",
+    "password": "hashed_password_4"
+  },
+  {
+    "name": "Dr. Pankaj Verma",
+    "idNumber": "FAC1005",
+    "email": "pankaj.verma@example.com",
+    "branch": "ME",
+    "subjects": ["Thermodynamics", "Fluid Mechanics"],
+    "sections": ["ME-A"],
+    "feedbackForms": [],
+    "role": "faculty",
+    "password": "hashed_password_5"
+  },
+  {
+    "name": "Prof. Swati Mishra",
+    "idNumber": "FAC1006",
+    "email": "swati.mishra@example.com",
+    "branch": "CSE",
+    "subjects": ["Data Structures", "Algorithms"],
+    "sections": ["CSE-A"],
+    "feedbackForms": [],
+    "role": "faculty",
+    "password": "hashed_password_6"
+  },
+  {
+    "name": "Dr. Ramesh Kumar",
+    "idNumber": "FAC1007",
+    "email": "ramesh.kumar@example.com",
+    "branch": "EEE",
+    "subjects": ["Power Systems", "Control Systems"],
+    "sections": ["EEE-A", "EEE-B"],
+    "feedbackForms": [],
+    "role": "faculty",
+    "password": "hashed_password_7"
+  },
+  {
+    "name": "Prof. Sneha Das",
+    "idNumber": "FAC1008",
+    "email": "sneha.das@example.com",
+    "branch": "IT",
+    "subjects": ["Networking", "Cloud Computing"],
+    "sections": ["IT-B"],
+    "feedbackForms": [],
+    "role": "faculty",
+    "password": "hashed_password_8"
+  },
+  {
+    "name": "Dr. Manoj Singh",
+    "idNumber": "FAC1009",
+    "email": "manoj.singh@example.com",
+    "branch": "CIVIL",
+    "subjects": ["Structural Analysis", "Surveying"],
+    "sections": ["CIVIL-A"],
+    "feedbackForms": [],
+    "role": "faculty",
+    "password": "hashed_password_9"
+  },
+  {
+    "name": "Prof. Kavita Reddy",
+    "idNumber": "FAC1010",
+    "email": "kavita.reddy@example.com",
+    "branch": "CSE",
+    "subjects": ["Software Engineering", "Operating Systems"],
+    "sections": ["CSE-D"],
+    "feedbackForms": [],
+    "role": "faculty",
+    "password": "hashed_password_10"
+  }
+]

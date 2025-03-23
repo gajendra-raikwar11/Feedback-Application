@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Toastify CSS for notifications -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-gray: #f4f6f9;
+            --dark-gray: #343a40;
+        }
+        
+        body {
+            background-color: var(--light-gray);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .form-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-header {
+            border-bottom: 2px solid var(--primary-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+        }
+        
+        .form-title {
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+        
+        .form-metadata {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .metadata-item {
+            display: flex;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metadata-label {
+            font-weight: 600;
+            min-width: 120px;
+        }
+        
+        .question-card {
+            border-left: 4px solid var(--primary-color);
+            background-color: #fff;
+            border-radius: 0 8px 8px 0;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .required-star {
+            color: var(--accent-color);
+            margin-left: 5px;
+        }
+        
+        .btn-submit {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-submit:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-cancel {
+            background-color: #e0e0e0;
+            color: var(--dark-gray);
+            border: none;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #c0c0c0;
+        }
+        
+        .radio-option, .checkbox-option {
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control:focus, .form-check-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .grid-question-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .grid-question-table th, .grid-question-table td {
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+        }
+        
+        .grid-question-table th {
+            background-color: var(--light-gray);
+        }
+        
+        @media (max-width: 768px) {
+            .metadata-item {
+                flex-direction: column;
+            }
+            
+            .metadata-label {
+                margin-bottom: 0.25rem;
+            }
+            
+            .grid-question-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar partial will be included here -->
+    <!-- <%# include('../partials/navbar') %> -->
+    
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Toast container for notifications -->
+                <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
+                
+                <div class="form-container shadow-sm p-4 mb-5 bg-white rounded">
+                    <div class="form-header mb-4 pb-3 border-bottom">
+                        <h2 class="form-title fw-bold"><%= form.title %></h2>
+                        <p class="text-muted mb-0"><%= form.formType %> Feedback Form</p>
+                    </div>
+                    
+                    <div class="form-metadata p-3 mb-4 bg-light rounded">
+                        <div class="row">
+                            <div class="col-md-4 mb-2 mb-md-0">
+                                <div class="metadata-item">
+                                    <span class="metadata-label fw-semibold"><i class="fas fa-user-tie me-2"></i>Faculty:</span>
+                                    <span><%= form.facultyForCurrentStudent %></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2 mb-md-0">
+                                <div class="metadata-item">
+                                    <span class="metadata-label fw-semibold"><i class="fas fa-calendar-alt me-2"></i>Deadline:</span>
+                                    <span><%= new Date(form.deadline).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metadata-item">
+                                    <span class="metadata-label fw-semibold"><i class="fas fa-book me-2"></i>Semester:</span>
+                                    <span><%= form.semester %></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form id="feedbackForm" action="/student/submitFormResponse/<%= form._id %>" method="POST">
+                        <input type="hidden" name="facultyId" value="<%= facultyId %>">
+                        
+                        <% form.questions.forEach((question, qIndex) => { %>
+                            <div class="question-container p-3 mb-4 <%= qIndex % 2 === 0 ? 'bg-light' : 'bg-white' %> rounded border">
+                                <h3 class="mb-3 fw-bold fs-5">
+                                    <%= question.text %> 
+                                    <% if (question.required) { %><span class="required text-danger">*</span><% } %>
+                                </h3>
+                                
+                                <% if (question.description) { %>
+                                    <p class="question-description text-muted mb-3"><%= question.description %></p>
+                                <% } %>
+                                
+                                <div class="question-input mt-3">
+                                    <% if(question.type === 'text') { %>
+                                        <input type="text" name="responses[<%= question._id %>]" class="form-control" 
+                                               <% if(question.required) { %>required<% } %>>
+                                               
+                                    <% } else if(question.type === 'paragraph') { %>
+                                        <textarea name="responses[<%= question._id %>]" class="form-control" rows="4"
+                                                  <% if(question.required) { %>required<% } %>></textarea>
+                                                  
+                                    <% } else if(question.type === 'rating') { %>
+                                        <div class="rating-container d-flex align-items-center justify-content-start gap-3 my-2">
+                                            <% for(let i = 1; i <= 5; i++) { %>
+                                                <div class="rating-option form-check">
+                                                    <input type="radio" class="form-check-input" id="rating-<%= question._id %>-<%= i %>" 
+                                                        name="responses[<%= question._id %>]" value="<%= i %>"
+                                                        <% if(question.required) { %>required<% } %>>
+                                                    <label class="form-check-label" for="rating-<%= question._id %>-<%= i %>"><%= i %></label>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                        
+                                    <% } else if(question.type === 'yes_no') { %>
+                                        <div class="yes-no-container d-flex gap-4 my-2">
+                                            <div class="option form-check">
+                                                <input type="radio" class="form-check-input" id="yes-<%= question._id %>" 
+                                                    name="responses[<%= question._id %>]" value="yes"
+                                                    <% if(question.required) { %>required<% } %>>
+                                                <label class="form-check-label" for="yes-<%= question._id %>">
+                                                    <%= question.yesNoLabels && question.yesNoLabels.yes ? question.yesNoLabels.yes : 'Yes' %>
+                                                </label>
+                                            </div>
+                                            <div class="option form-check">
+                                                <input type="radio" class="form-check-input" id="no-<%= question._id %>" 
+                                                    name="responses[<%= question._id %>]" value="no"
+                                                    <% if(question.required) { %>required<% } %>>
+                                                <label class="form-check-label" for="no-<%= question._id %>">
+                                                    <%= question.yesNoLabels && question.yesNoLabels.no ? question.yesNoLabels.no : 'No' %>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                    <% } else if(question.type === 'mcq') { %>
+                                        <div class="mcq-container my-2">
+                                            <% if(question.options && Array.isArray(question.options)) { %>
+                                                <div class="row">
+                                                    <% question.options.forEach((option, index) => { %>
+                                                        <div class="col-md-6 mb-2">
+                                                            <div class="option form-check">
+                                                                <input type="radio" class="form-check-input" id="mcq-<%= question._id %>-<%= index %>" 
+                                                                    name="responses[<%= question._id %>]" value="<%= option %>"
+                                                                    <% if(question.required) { %>required<% } %>>
+                                                                <label class="form-check-label" for="mcq-<%= question._id %>-<%= index %>"><%= option %></label>
+                                                            </div>
+                                                        </div>
+                                                    <% }) %>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                        
+                                    <% } else if(question.type === 'checkbox') { %>
+                                        <div class="checkbox-container my-2">
+                                            <% if(question.options && Array.isArray(question.options)) { %>
+                                                <div class="row">
+                                                    <% question.options.forEach((option, index) => { %>
+                                                        <div class="col-md-6 mb-2">
+                                                            <div class="option form-check">
+                                                                <input type="checkbox" class="form-check-input" id="checkbox-<%= question._id %>-<%= index %>" 
+                                                                    name="responses[<%= question._id %>][]" value="<%= option %>">
+                                                                <label class="form-check-label" for="checkbox-<%= question._id %>-<%= index %>"><%= option %></label>
+                                                            </div>
+                                                        </div>
+                                                    <% }) %>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                        
+                                    <% } else if(question.type === 'dropdown') { %>
+                                        <select name="responses[<%= question._id %>]" class="form-select"
+                                                <% if(question.required) { %>required<% } %>>
+                                            <option value="">Select an option</option>
+                                            <% if(question.options && Array.isArray(question.options)) { %>
+                                                <% question.options.forEach(option => { %>
+                                                    <option value="<%= option %>"><%= option %></option>
+                                                <% }) %>
+                                            <% } %>
+                                        </select>
+                                        
+                                    <% } else if(question.type === 'date') { %>
+                                        <input type="date" name="responses[<%= question._id %>]" class="form-control"
+                                                <% if(question.required) { %>required<% } %>>
+                                                
+                                    <% } else if(question.type === 'grid') { %>
+                                        <div class="table-responsive">
+                                            <table class="grid-container table table-bordered">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th></th>
+                                                        <% if(question.gridOptions && Array.isArray(question.gridOptions.columns)) { %>
+                                                            <% question.gridOptions.columns.forEach(column => { %>
+                                                                <th class="text-center"><%= column %></th>
+                                                            <% }) %>
+                                                        <% } %>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% if(question.gridOptions && Array.isArray(question.gridOptions.rows)) { %>
+                                                        <% question.gridOptions.rows.forEach(row => { %>
+                                                            <tr>
+                                                                <td class="fw-semibold"><%= row %></td>
+                                                                <% if(question.gridOptions && Array.isArray(question.gridOptions.columns)) { %>
+                                                                    <% question.gridOptions.columns.forEach((column, colIndex) => { %>
+                                                                        <td class="text-center">
+                                                                            <input type="radio" class="form-check-input" 
+                                                                                name="responses[<%= question._id %>][<%= row %>]" 
+                                                                                value="<%= column %>"
+                                                                                <% if(question.required) { %>required<% } %>>
+                                                                        </td>
+                                                                    <% }) %>
+                                                                <% } %>
+                                                            </tr>
+                                                        <% }) %>
+                                                    <% } %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        
+                                    <% } else { %>
+                                        <!-- Default to text input if type is not recognized -->
+                                        <input type="text" name="responses[<%= question._id %>]" class="form-control"
+                                                <% if(question.required) { %>required<% } %>>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% }) %>
+                        
+                        <div class="d-flex justify-content-end mt-4 mb-2">
+                            <a href="/student/studentFormsPage" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i> Submit Response
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Toastify JS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for flash messages from the server
+            const showToast = (message, type) => {
+                const backgroundColor = type === 'error' ? '#e74c3c' : 
+                                        type === 'success' ? '#2ecc71' : 
+                                        type === 'warning' ? '#f39c12' : '#3498db';
+                
+                Toastify({
+                    text: message,
+                    duration: 5000,
+                    close: true,
+                    gravity: "top",
+                    position: "right", 
+                    backgroundColor: backgroundColor,
+                    stopOnFocus: true
+                }).showToast();
+            };
+            
+            // Example of how to display flash messages
+            <% if (typeof messages !== 'undefined' && messages.error) { %>
+                <% messages.error.forEach(function(message) { %>
+                    showToast(`<%= message %>`, 'error');
+                <% }); %>
+            <% } %>
+            
+            <% if (typeof messages !== 'undefined' && messages.success) { %>
+                <% messages.success.forEach(function(message) { %>
+                    showToast(`<%= message %>`, 'success');
+                <% }); %>
+            <% } %>
+            
+            // Form validation
+            const form = document.getElementById('feedbackForm');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    let isValid = true;
+                    const requiredElements = form.querySelectorAll('[required]');
+                    
+                    requiredElements.forEach(element => {
+                        if (!element.value) {
+                            isValid = false;
+                            // Find the parent question card
+                            const questionCard = element.closest('.question-card');
+                            if (questionCard) {
+                                questionCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                questionCard.style.borderLeft = '4px solid #e74c3c';
+                                
+                                // Highlight the input
+                                if (element.classList.contains('form-control') || element.classList.contains('form-select')) {
+                                    element.classList.add('is-invalid');
+                                }
+                            }
+                            
+                            showToast('Please fill in all required fields', 'error');
+                        }
+                    });
+                    
+                    if (!isValid) {
+                        event.preventDefault();
+                    }
+                });
+                
+                // Remove error highlighting when field is edited
+                form.addEventListener('input', function(event) {
+                    const element = event.target;
+                    
+                    if (element.classList.contains('is-invalid')) {
+                        element.classList.remove('is-invalid');
+                    }
+                    
+                    // Find the parent question card and reset its style
+                    const questionCard = element.closest('.question-card');
+                    if (questionCard && questionCard.style.borderLeft.includes('#e74c3c')) {
+                        questionCard.style.borderLeft = '4px solid var(--primary-color)';
+                    }
+                });
+            }
+            
+            // Deadline countdown
+            const deadlineElement = document.querySelector('.metadata-item:nth-child(2) span:last-child');
+            if (deadlineElement) {
+                const deadlineDate = new Date('<%= form.deadline %>');
+                const now = new Date();
+                
+                // If deadline is within 24 hours, show countdown
+                if (deadlineDate - now < 24 * 60 * 60 * 1000 && deadlineDate > now) {
+                    const updateCountdown = () => {
+                        const currentTime = new Date();
+                        const timeLeft = deadlineDate - currentTime;
+                        
+                        if (timeLeft <= 0) {
+                            deadlineElement.innerHTML += ' <span class="badge bg-danger">Expired</span>';
+                            return;
+                        }
+                        
+                        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                        
+                        deadlineElement.innerHTML = `${new Date(deadlineDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} <span class="badge bg-warning text-dark">${hours}h ${minutes}m ${seconds}s left</span>`;
+                    };
+                    
+                    updateCountdown();
+                    setInterval(updateCountdown, 1000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -9,24 +9,32 @@
         <h4>Admin Portal</h4>
     </div>
     
+    
     <!-- Navigation items -->
     <div class="nav-item active">
-        <a href="/dashboard" style="text-decoration: none; color: white;"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a>
+        <a href="/admin/adminHome" style="text-decoration: none; color: white;"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a>
     </div>
     <div class="nav-item">
-        <a href="/students" style="text-decoration: none; color: white;"><i class="fas fa-user-graduate me-2"></i> Students</a>
+        <a href="/admin/adminStudentPage" style="text-decoration: none; color: white;"><i class="fas fa-user-graduate me-2"></i> Students</a>
     </div>
     <div class="nav-item">
-        <a href="/forms" style="text-decoration: none; color: white;"><i class="fas fa-clipboard-list me-2"></i> Forms</a>
-    </div>
-    <div class="nav-item">
-        <a href="/analytics" style="text-decoration: none; color: white;"><i class="fas fa-chart-bar me-2"></i> Analytics</a>
+        <a href="/admin/Total-Forms" style="text-decoration: none; color: white;"><i class="fas fa-clipboard-list me-2"></i> Forms</a>
     </div>
     <div class="nav-item">
         <a href="/settings" style="text-decoration: none; color: white;"><i class="fas fa-cog me-2"></i> Settings</a>
     </div>
     <div class="nav-item">
-        <a href="/logout" style="text-decoration: none; color: white;"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+        <a href="/admin/logout" style="text-decoration: none; color: white;"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+    </div>
+    <!-- Admin Profile Section - Using EJS Template Data -->
+    <div class="admin-profile">
+        <div class="admin-avatar">
+            <span><%= admin && admin.name ? admin.name.charAt(0).toUpperCase() : 'A' %></span>
+        </div>
+        <div class="admin-info">
+            <div class="admin-name"><%= admin && admin.name ? admin.name : 'Admin User' %></div>
+            <div class="admin-email"><%= admin && admin.email ? admin.email : 'admin@example.com' %></div>
+        </div>
     </div>
 </div>
 
@@ -52,6 +60,8 @@
         padding: 20px 0;
         z-index: 1000;
         transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
     }
 
     .logo {
@@ -66,6 +76,7 @@
         font-weight: 600;
         letter-spacing: 0.5px;
         margin: 0;
+        font-size: 16px;
     }
 
     .nav-item {
@@ -95,6 +106,54 @@
         background-color: rgba(242, 244, 245, 0.1);
         font-weight: bold;
         color:white;
+    }
+
+    /* Admin Profile Styles */
+    .admin-profile {
+        margin-top: auto;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        margin-top: 20px;
+    }
+
+    .admin-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+    }
+
+    .admin-avatar span {
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .admin-info {
+        overflow: hidden;
+    }
+
+    .admin-name {
+        color: white;
+        font-weight: 500;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .admin-email {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     /* Close button styles */
@@ -132,8 +191,6 @@
         color: white;
         font-size: 1.25rem;
     }
-
-    
 
     /* White close toggle button that appears on nav when open */
     .white-close-toggle {
@@ -204,43 +261,67 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const navItems = document.querySelectorAll('.nav-item');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    // Get current path
+    const currentPath = window.location.pathname;
+    
+    // Create white close toggle button
+    const whiteCloseToggle = document.createElement('button');
+    whiteCloseToggle.className = 'white-close-toggle';
+    whiteCloseToggle.innerHTML = '<i class="fas fa-times"></i>';
+    sidebar.appendChild(whiteCloseToggle);
+    
+    // Set active class based on current path
+navItems.forEach(item => {
+    const link = item.querySelector('a');
+    if (link) {
+        const href = link.getAttribute('href');
         
-        // Create white close toggle button
-        const whiteCloseToggle = document.createElement('button');
-        whiteCloseToggle.className = 'white-close-toggle';
-        whiteCloseToggle.innerHTML = '<i class="fas fa-times"></i>';
-        sidebar.appendChild(whiteCloseToggle);
+        // Check if current path is related to forms
+        const isFormsPage = currentPath.includes('/forms') || 
+                           currentPath.startsWith('/admin/forms') || 
+                           currentPath === '/admin/Total-Forms';
         
-        // Function to toggle sidebar
-        function toggleSidebar() {
-            sidebar.classList.toggle('active');
-            sidebarOverlay.classList.toggle('active');
+        // If this is the Forms nav item and we're on a forms-related page
+        if ((href === '/admin/Total-Forms' && isFormsPage) || 
+            (href === currentPath)) {
+            // Remove active class from all items first
+            navItems.forEach(navItem => navItem.classList.remove('active'));
+            // Add active class to current item
+            item.classList.add('active');
         }
-        
-        // Open sidebar
-        sidebarToggle.addEventListener('click', toggleSidebar);
-        
-        // Close sidebar when clicking close button
-        sidebarCloseBtn.addEventListener('click', toggleSidebar);
-        
-        // Close sidebar when clicking white close toggle
-        whiteCloseToggle.addEventListener('click', toggleSidebar);
-        
-        // Close sidebar when clicking overlay
-        sidebarOverlay.addEventListener('click', toggleSidebar);
-        
-        // Close sidebar when clicking a nav item (on mobile)
-        navItems.forEach(item => {
-            item.addEventListener('click', function() {
-                if (window.innerWidth <= 768) {
-                    toggleSidebar();
-                }
-            });
+    }
+});
+    // Function to toggle sidebar
+    function toggleSidebar() {
+        sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active');
+    }
+    
+    // Open sidebar
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    
+    // Close sidebar when clicking close button
+    sidebarCloseBtn.addEventListener('click', toggleSidebar);
+    
+    // Close sidebar when clicking white close toggle
+    whiteCloseToggle.addEventListener('click', toggleSidebar);
+    
+    // Close sidebar when clicking overlay
+    sidebarOverlay.addEventListener('click', toggleSidebar);
+    
+    // Close sidebar when clicking a nav item (on mobile)
+    navItems.forEach(item => {
+        item.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
         });
     });
+});
 </script>

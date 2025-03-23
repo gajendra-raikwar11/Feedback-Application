@@ -10,6 +10,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts - Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Add these in the head section of your main layout -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <style>
         :root {
             --primary: #4361ee;
@@ -169,6 +173,56 @@
             font-size: 0.95rem;
             word-break: break-word;
         }
+        .profile-card {
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        background-color: #fff;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .profile-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #007bff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: bold;
+    }
+    
+    .profile-header {
+        display: flex;
+        align-items: center;
+    }
+    
+    .profile-info {
+        margin-left: 15px;
+    }
+    
+    .profile-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    
+    .profile-detail-item p {
+        color: #6c757d;
+        margin-bottom: 5px;
+        font-size: 0.85rem;
+    }
+    
+    .profile-detail-item h6 {
+        margin-bottom: 0;
+        font-weight: 500;
+    }
+    
+    .edit-field {
+        margin-bottom: 10px;
+    }
         
         .feedback-form textarea {
             resize: none;
@@ -311,11 +365,8 @@
     </style>
 </head>
 <body>
-    
-    
     <!-- Navbar -->
-    <%- include('partials/navbar', { activePage: 'dashboard', student: student }) %>
-
+    <%- include('partials/navbar', { activePage:currentPage , student: student }) %>
     <!-- Dashboard Content -->
     <div class="container-fluid dashboard-container">
         <div class="row">
@@ -330,7 +381,7 @@
                         else if (hour < 18) greeting = "Good Afternoon";
                         else greeting = "Good Evening";
                         %>
-                        <%= greeting %>, <%= student.StudentName %>!
+                        <%= greeting %>, <%= student.name %>!
                     </h2>
                     <p><i class="far fa-calendar-alt me-2"></i> <%= new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></p>
                 </div>
@@ -339,112 +390,126 @@
 
         <!-- Stats Section -->
         <div class="row g-3 mb-4">
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="stats-card">
-                    <div class="stats-icon" style="background-color: var(--primary);">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <h3>12</h3>
-                    <p>Available Forms</p>
-                    <a href="/studentFormsPage" class="btn btn-sm btn-outline-primary mt-3">View All <i class="fas fa-arrow-right ms-1"></i></a>
-                </div>
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="stats-card">
+            <div class="stats-icon" style="background-color: var(--primary);">
+                <i class="fas fa-file-alt"></i>
             </div>
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="stats-card">
-                    <div class="stats-icon" style="background-color: var(--warning);">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <h3>3</h3>
-                    <p>Pending Forms</p>
-                    <a href="#" class="btn btn-sm btn-outline-warning mt-3">Check Status <i class="fas fa-arrow-right ms-1"></i></a>
-                </div>
+            <h3><%= formStats.availableForms %></h3>
+            <p>Available Forms</p>
+            <a href="/student/studentFormsPage" class="btn btn-sm btn-outline-primary mt-3">View All <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="stats-card">
+            <div class="stats-icon" style="background-color: var(--warning);">
+                <i class="fas fa-clock"></i>
             </div>
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="stats-card">
-                    <div class="stats-icon" style="background-color: var(--success);">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <h3>8</h3>
-                    <p>Completed Forms</p>
-                    <a href="#" class="btn btn-sm btn-outline-success mt-3">View History <i class="fas fa-arrow-right ms-1"></i></a>
-                </div>
+            <h3><%= formStats.pendingForms %></h3>
+            <p>Pending Forms</p>
+            <a href="/student/studentFormsPage" class="btn btn-sm btn-outline-warning mt-3">Check Status <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="stats-card">
+            <div class="stats-icon" style="background-color: var(--success);">
+                <i class="fas fa-check-circle"></i>
             </div>
+            <h3><%= formStats.completedForms %></h3>
+            <p>Completed Forms</p>
+            <a href="/student/studentFormsPage?filter=completed" class="btn btn-sm btn-outline-success mt-3">View History <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+    </div>
         </div>
 
         <!-- Profile & Feedback Section -->
         <div class="row g-3">
-            <!-- Profile Section -->
+           <!-- Profile Card in Dashboard -->
             <div class="col-12 col-lg-8">
-                <div class="profile-card">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i> My Profile</h4>
-                        <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit me-1"></i> Edit</a>
-                    </div>
-                    
-                    <div class="profile-header">
-                        <div class="profile-avatar">
-                            <%= student.StudentName ? student.StudentName.charAt(0).toUpperCase() : 'S' %>
-                        </div>
-                        <div class="profile-info">
-                            <h4><%= student.StudentName %></h4>
-                            <p class="text-muted mb-1"><%= student.Email %></p>
-                            <span class="badge bg-primary">
-                                <% let branch = student.Enroll.includes("CS") ? "Computer Science" : "Unknown Branch"; %>
-                                <%= branch %>
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <hr>
-                    
-                    <div class="profile-details">
-                        <div class="profile-detail-item">
-                            <p>Student ID</p>
-                            <h6><%= student.Enroll %></h6>
-                        </div>
-                        <div class="profile-detail-item">
-                            <p>Department</p>
-                            <h6>
-                            <%= branch %>
-                            </h6>
-                        </div>
-                        <div class="profile-detail-item">
-                            <p>Semester</p>
-                            <h6>
-                            <% let num = parseInt(student.Enroll.substring(6, 8));
-                            let subtractedValue = new Date().getFullYear() - (2000 + num) ;
-                            let currentMonth = new Date().getMonth() + 1
-                            let finalValue = (currentMonth >= 2 && currentMonth <= 6) ? subtractedValue *2  : subtractedValue *2  + 1; %> 
-                            <%= finalValue%>
-                            <% if (finalValue == 1) { %>
-                                <%= "st" %>
-                            <% } else if (finalValue == 2) { %>
-                                <%= "nd" %>
-                            <% } else if (finalValue == 3) { %>
-                                <%= "rd" %>
-                            <% } else if (finalValue >= 4) { %>
-                                <%= "th" %>
-                            <% } %>
-
-                            </h6>
-                        </div>
-                        <div class="profile-detail-item">
-                            <p>Batch</p>
-                            <h6>
-                                <% let batch = parseInt(student.Enroll.substring(6, 8)); %>
-                                <%= 2000+batch %> - <%= 2000+batch+4 %>
-                            </h6>
-                        </div>
-                        <div class="profile-detail-item">
-                            <p>Contact</p>
-                            <h6><%= student.ContactNumber || '+91 9876543210' %></h6>
-                        </div>
-                        <div class="profile-detail-item">
-                            <p>Address</p>
-                            <h6><%= student.Address || 'University Campus, Building 4, Room 101' %></h6>
-                        </div>
-                    </div>
+    <div class="profile-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i> My Profile</h4>
+            <button id="editProfileBtn" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit me-1"></i> Edit</button>
+            <div id="editActions" class="d-none">
+                <button id="saveProfileBtn" class="btn btn-sm btn-success me-2"><i class="fas fa-check me-1"></i> Save</button>
+                <button id="cancelEditBtn" class="btn btn-sm btn-outline-secondary"><i class="fas fa-times me-1"></i> Cancel</button>
+            </div>
+        </div>
+        
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <%= student.name ? student.name.charAt(0).toUpperCase() : 'S' %>
+            </div>
+            <div class="profile-info">
+                <h4 id="displayName"><%= student.name %></h4>
+                <div id="editNameField" class="edit-field d-none">
+                    <input type="text" class="form-control form-control-sm" id="nameInput" value="<%= student.name %>">
                 </div>
+                
+                <p class="text-muted mb-1" id="displayEmail"><%= student.email %></p>
+                <div id="editEmailField" class="edit-field d-none">
+                    <input type="email" class="form-control form-control-sm" id="emailInput" value="<%= student.email %>">
+                </div>
+                
+                <span class="badge bg-primary">
+                    <p class="pt-2">kuch bhi</p>
+                </span>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <div class="profile-details">
+            <div class="profile-detail-item">
+                <p>Student ID</p>
+                <h6><%= student.enrollmentNumber %></h6>
+            </div>
+            <div class="profile-detail-item">
+                <p>Department</p>
+                <h6><%= student.branch %></h6>
+            </div>
+            <div class="profile-detail-item">
+                <p>Semester</p>
+                <h6>
+                <% let num = parseInt(student.enrollmentNumber.substring(6, 8));
+                let subtractedValue = new Date().getFullYear() - (2000 + num) ;
+                let currentMonth = new Date().getMonth() + 1
+                let finalValue = (currentMonth >= 2 && currentMonth <= 6) ? subtractedValue *2  : subtractedValue *2  + 1; %> 
+                <%= finalValue%>
+                <% if (finalValue == 1) { %>
+                    <%= "st" %>
+                <% } else if (finalValue == 2) { %>
+                    <%= "nd" %>
+                <% } else if (finalValue == 3) { %>
+                    <%= "rd" %>
+                <% } else if (finalValue >= 4) { %>
+                    <%= "th" %>
+                <% } %>
+                </h6>
+            </div>
+            <div class="profile-detail-item">
+                <p>Batch</p>
+                <h6>
+                    <% let batch = parseInt(student.enrollmentNumber.substring(6, 8)); %>
+                    <%= 2000+batch %> - <%= 2000+batch+4 %>
+                </h6>
+            </div>
+            <div class="profile-detail-item">
+                <p>Contact</p>
+                <h6 id="displayContact"><%= student.ContactNumber || 'N/A' %></h6>
+                <div id="editContactField" class="edit-field d-none">
+                    <input type="tel" class="form-control form-control-sm" id="contactInput" value="<%= student.ContactNumber || '' %>">
+                </div>
+            </div>
+            <div class="profile-detail-item">
+                <p>Address</p>
+                <h6 id="displayAddress"><%= student.Address || 'Sagar institute Of science and technology SISTec, Gandhi Nagar Bhopal(M.P)' %></h6>
+                <div id="editAddressField" class="edit-field d-none">
+                    <textarea class="form-control form-control-sm" id="addressInput" rows="2"><%= student.Address || 'Sagar institute Of science and technology SISTec, Gandhi Nagar Bhopal(M.P)' %></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
             </div>
             
             <!-- Feedback Section -->
@@ -477,7 +542,7 @@
         </div>
         
         <!-- Recent Activity Section -->
-        <div class="row mt-3">
+            <div class="row mt-3">
             <div class="col-12">
                 <div class="stats-card">
                     <h4 class="mb-4"><i class="fas fa-history me-2"></i> Recent Activity</h4>
@@ -522,25 +587,8 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-white py-4 mt-4 border-top">
-        <div class="container-fluid px-4">
-            <div class="row g-2">
-                <div class="col-md-6">
-                    <p class="mb-0">© 2025 Campus Connect. All rights reserved.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <a href="#" class="text-decoration-none text-muted me-3">Privacy Policy</a>
-                    <a href="#" class="text-decoration-none text-muted me-3">Terms of Service</a>
-                    <a href="#" class="text-decoration-none text-muted">Contact Us</a>
-                </div>
             </div>
-        </div>
-    </footer>
-
+    </div>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -571,6 +619,126 @@
                 });
             });
         });
+
+         // Configure toastr (toast notification)
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-top-right",
+        timeOut: 3000
+    };
+
+    $(document).ready(function() {
+        // Initialize variables to store original values
+        let originalName = '<%= student.name %>';
+        let originalEmail = '<%= student.email %>';
+        let originalContact = '<%= student.ContactNumber || "" %>';
+        let originalAddress = '<%= student.Address || "Sagar institute Of science and technology SISTec, Gandhi Nagar Bhopal(M.P)" %>';
+        
+        // Toggle edit mode
+        $('#editProfileBtn').click(function() {
+            // Set current values in inputs
+            $('#nameInput').val(originalName);
+            $('#emailInput').val(originalEmail);
+            $('#contactInput').val(originalContact);
+            $('#addressInput').val(originalAddress);
+            
+            // Hide display elements, show edit fields
+            $('#displayName, #displayEmail, #displayContact, #displayAddress').addClass('d-none');
+            $('#editNameField, #editEmailField, #editContactField, #editAddressField').removeClass('d-none');
+            
+            // Hide edit button, show save/cancel buttons
+            $(this).addClass('d-none');
+            $('#editActions').removeClass('d-none');
+        });
+        
+        // Cancel editing
+        $('#cancelEditBtn').click(function() {
+            // Show display elements, hide edit fields
+            $('#displayName, #displayEmail, #displayContact, #displayAddress').removeClass('d-none');
+            $('#editNameField, #editEmailField, #editContactField, #editAddressField').addClass('d-none');
+            
+            // Show edit button, hide save/cancel buttons
+            $('#editProfileBtn').removeClass('d-none');
+            $('#editActions').addClass('d-none');
+        });
+        
+        // Save profile changes
+        $('#saveProfileBtn').click(function() {
+            // Disable save button while processing
+            $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Saving...');
+            
+            // Get updated values
+            const updatedData = {
+                name: $('#nameInput').val(),
+                email: $('#emailInput').val(),
+                ContactNumber: $('#contactInput').val(),
+                Address: $('#addressInput').val()
+            };
+            
+            // Send AJAX request to update profile
+            $.ajax({
+                url: '/student/update-profile',
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(updatedData),
+                success: function(response) {
+                    if (response.success) {
+                        // Update display elements with new values
+                        $('#displayName').text(updatedData.name);
+                        $('#displayEmail').text(updatedData.email);
+                        $('#displayContact').text(updatedData.ContactNumber || 'N/A');
+                        $('#displayAddress').text(updatedData.Address);
+                        
+                        // Update the profile avatar with first letter of name
+                        $('.profile-avatar').text(updatedData.name.charAt(0).toUpperCase());
+                        
+                        // Update original values
+                        originalName = updatedData.name;
+                        originalEmail = updatedData.email;
+                        originalContact = updatedData.ContactNumber;
+                        originalAddress = updatedData.Address;
+                        
+                        // Show success notification
+                        toastr.success('Profile updated successfully');
+                    } else {
+                        toastr.error(response.message || 'Failed to update profile');
+                    }
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : 'Something went wrong';
+                    toastr.error(errorMsg);
+                },
+                complete: function() {
+                    // Reset button state
+                    $('#saveProfileBtn').prop('disabled', false).html('<i class="fas fa-check me-1"></i> Save');
+                    
+                    // Show display elements, hide edit fields
+                    $('#displayName, #displayEmail, #displayContact, #displayAddress').removeClass('d-none');
+                    $('#editNameField, #editEmailField, #editContactField, #editAddressField').addClass('d-none');
+                    
+                    // Show edit button, hide save/cancel buttons
+                    $('#editProfileBtn').removeClass('d-none');
+                    $('#editActions').addClass('d-none');
+                }
+            });
+        });
+    });
     </script>
+    <!-- Footer -->
+    <footer class="bg-white py-4 mt-4 border-top">
+        <div class="container-fluid px-4">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <p class="mb-0">© 2025 Campus Connect. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-decoration-none text-muted me-3">Privacy Policy</a>
+                    <a href="#" class="text-decoration-none text-muted me-3">Terms of Service</a>
+                    <a href="#" class="text-decoration-none text-muted">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

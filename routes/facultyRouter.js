@@ -5,6 +5,8 @@ const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const path = require("path");
 const { Faculty, validateFacultyLogin } = require("../models/facultySchema");
+const { FeedbackForm, validateFeedbackForm } = require('../models/feedbackForm');
+const { Student, validateStudent } = require("../models/studentSchema");
 
 // Path to the JSON file with initial faculty data
 const FACULTY_JSON_PATH = path.join(__dirname, "../data/facultyDataFile.json");
@@ -74,7 +76,7 @@ router.post("/login", async (req, res) => {
   try {
     // First, try to find the faculty in MongoDB
     let faculty = await Faculty.findOne({
-      $or: [{ email: loginIdentifier }, { empId: loginIdentifier }],
+      $or: [{ email: loginIdentifier }, { idNumber: loginIdentifier }],
     });
 
     // If faculty not found in MongoDB, check the JSON file
@@ -92,7 +94,7 @@ router.post("/login", async (req, res) => {
       }
 
       const jsonFaculty = facultyData.find(
-        (f) => f.email === loginIdentifier || f.empId === loginIdentifier
+        (f) => f.email === loginIdentifier || f.idNumber === loginIdentifier
       );
 
       // If found in JSON, create a new entry in MongoDB
@@ -105,12 +107,14 @@ router.post("/login", async (req, res) => {
 
         // Create new faculty in MongoDB
         faculty = new Faculty({
-          empId: jsonFaculty.empId,
+          idNumber: jsonFaculty.idNumber,
           name: jsonFaculty.name,
-          department: jsonFaculty.department,
+          branch: jsonFaculty.branch,
           email: jsonFaculty.email,
-          phone: jsonFaculty.phone,
           subjects: jsonFaculty.subjects,
+          sections: jsonFaculty.sections,
+          feedbackForms: jsonFaculty.feedbackForms || [],
+          role: jsonFaculty.role,
           password: password, // This will be hashed by the pre-save hook
         });
 
@@ -120,10 +124,10 @@ router.post("/login", async (req, res) => {
         if (req.session) {
           req.session.faculty = {
             id: faculty._id,
-            empId: faculty.empId,
+            idNumber: faculty.idNumber,
             name: faculty.name,
             email: faculty.email,
-            department: faculty.department
+            branch: faculty.branch,
           };
           
           if (rememberMe && req.session.cookie) {
@@ -134,7 +138,7 @@ router.post("/login", async (req, res) => {
 
         // Log device info if provided
         if (deviceInfo) {
-          console.log(`Login successful for ${faculty.name} (${faculty.empId}) from device: ${deviceInfo}`);
+          console.log(`Login successful for ${faculty.name} (${faculty.idNumber}) from device: ${deviceInfo}`);
         }
 
         // Redirect to faculty dashboard
@@ -155,10 +159,10 @@ router.post("/login", async (req, res) => {
       if (req.session) {
         req.session.faculty = {
           id: faculty._id,
-          empId: faculty.empId,
+          idNumber: faculty.idNumber,
           name: faculty.name,
           email: faculty.email,
-          department: faculty.department
+          branch: faculty.branch,
         };
         
         if (rememberMe && req.session.cookie) {
@@ -169,7 +173,7 @@ router.post("/login", async (req, res) => {
 
       // Log device info if provided
       if (deviceInfo) {
-        console.log(`Login successful for ${faculty.name} (${faculty.empId}) from device: ${deviceInfo}`);
+        console.log(`Login successful for ${faculty.name} (${faculty.idNumber}) from device: ${deviceInfo}`);
       }
 
       // Redirect to faculty dashboard
@@ -182,21 +186,208 @@ router.post("/login", async (req, res) => {
   }
 });
 
+
 // Other routes remain the same...
 
 // Dummy dashboard route
-router.get("/dashboard", (req, res) => {
-  // Check if faculty is logged in
-  if (!req.session || !req.session.faculty) {
-    return res.redirect("/faculty/login");
-  }
+// router.get("/dashboard", (req, res) => {
+//   // Check if faculty is logged in
+//   if (!req.session || !req.session.faculty) {
+//     return res.redirect("/faculty/login");
+//   }
   
-  // Render dashboard with faculty info
-  res.render("facultyDashboard", {
-    faculty: req.session.faculty
-  });
-});
+//   // Render dashboard with faculty info
+//   res.render("facultyDashboard", {
+//     faculty: req.session.faculty
+//   });
+// });
 
+router.get("/dashboard", async (req, res) => {
+  try {
+    // Check if faculty is logged in
+    if (!req.session || !req.session.faculty) {
+      return res.redirect("/faculty/login");
+    }
+    
+    const facultyId = req.session.faculty._id;
+    const faculty = req.session.faculty;
+    
+    // Find all forms where this faculty is assigned
+    const assignedForms = await FeedbackForm.find({
+      facultyAssigned: facultyId
+    }).select('title formType sectionsAssigned deadline semester status');
+    
+    // Get unique sections from all forms assigned to this faculty
+    const facultySections = [...new Set(
+      assignedForms.flatMap(form => form.sectionsAssigned)
+    )];
+    
+    // Find all students in these sections
+    const sectionStudents = await Student.find({
+      section: { $in: facultySections }
+    }).select('name enrollmentNumber email branch section semester feedbackGiven');
+    
+    // For each student, check if they have submitted feedback for forms assigned to this faculty
+    const studentsWithFeedbackStatus = await Promise.all(
+      sectionStudents.map(async (student) => {
+        // Check each form if student has given feedback
+        const studentFeedbackStatus = await Promise.all(
+          assignedForms.map(async (form) => {
+            // Check if student's section is in this form's assigned sections
+            if (!form.sectionsAssigned.includes(student.section)) {
+              return { formId: form._id, submitted: false };
+            }
+            
+            const hasSubmitted = student.feedbackGiven.some(
+              feedbackId => feedbackId.toString() === form._id.toString()
+            );
+            
+            return { formId: form._id, submitted: hasSubmitted };
+          })
+        );
+        
+        // Calculate attendance percentage (mock data - in a real app, fetch from attendance database)
+        // For demo purposes, generate a random attendance between 55% and 95%
+        const attendance = Math.floor(Math.random() * (95 - 55 + 1) + 55);
+        
+        return {
+          id: student._id,
+          name: student.name,
+          rollNumber: student.enrollmentNumber,
+          section: student.section,
+          semester: student.semester,
+          email: student.email,
+          branch: student.branch,
+          feedbackStatus: studentFeedbackStatus,
+          // Check if student has submitted feedback for at least one form
+          submitted: studentFeedbackStatus.some(status => status.submitted),
+          attendance: attendance
+        };
+      })
+    );
+    
+    // Get feedback analytics (mock data - in a real app, fetch from database)
+    // This should come from actual feedback responses in a production app
+    const feedbackAnalytics = {
+      all: {
+        ratings: {
+          'Course Content': 4.2,
+          'Teaching Method': 3.9,
+          'Faculty Engagement': 4.5,
+          'Learning Resources': 3.7,
+          'Assessment Methods': 4.0
+        },
+        categories: {
+          'Excellent': 30,
+          'Good': 40,
+          'Average': 20,
+          'Poor': 10
+        }
+      },
+      // In a real app, this would be populated from the database
+      students: {},
+      attendance: {
+        excellent: {
+          ratings: {
+            'Course Content': 4.6,
+            'Teaching Method': 4.3,
+            'Faculty Engagement': 4.7,
+            'Learning Resources': 4.0,
+            'Assessment Methods': 4.2
+          },
+          categories: {
+            'Excellent': 45,
+            'Good': 40,
+            'Average': 10,
+            'Poor': 5
+          }
+        },
+        good: {
+          ratings: {
+            'Course Content': 4.3,
+            'Teaching Method': 4.0,
+            'Faculty Engagement': 4.5,
+            'Learning Resources': 3.8,
+            'Assessment Methods': 4.0
+          },
+          categories: {
+            'Excellent': 35,
+            'Good': 45,
+            'Average': 15,
+            'Poor': 5
+          }
+        },
+        average: {
+          ratings: {
+            'Course Content': 4.0,
+            'Teaching Method': 3.7,
+            'Faculty Engagement': 4.2,
+            'Learning Resources': 3.5,
+            'Assessment Methods': 3.7
+          },
+          categories: {
+            'Excellent': 25,
+            'Good': 40,
+            'Average': 25,
+            'Poor': 10
+          }
+        },
+        poor: {
+          ratings: {
+            'Course Content': 3.5,
+            'Teaching Method': 3.3,
+            'Faculty Engagement': 3.8,
+            'Learning Resources': 3.0,
+            'Assessment Methods': 3.2
+          },
+          categories: {
+            'Excellent': 15,
+            'Good': 35,
+            'Average': 35,
+            'Poor': 15
+          }
+        }
+      }
+    };
+    
+    // In a real application, fetch actual feedback data for each student
+    // For now, mock data for students who have submitted feedback
+    studentsWithFeedbackStatus.forEach(student => {
+      if (student.submitted) {
+        feedbackAnalytics.students[student.id] = {
+          ratings: {
+            'Course Content': (Math.random() * (4.8 - 3.5) + 3.5).toFixed(1),
+            'Teaching Method': (Math.random() * (4.5 - 3.3) + 3.3).toFixed(1),
+            'Faculty Engagement': (Math.random() * (4.9 - 3.7) + 3.7).toFixed(1),
+            'Learning Resources': (Math.random() * (4.2 - 3.0) + 3.0).toFixed(1),
+            'Assessment Methods': (Math.random() * (4.3 - 3.2) + 3.2).toFixed(1)
+          },
+          categories: {
+            'Excellent': Math.floor(Math.random() * (50 - 15) + 15),
+            'Good': Math.floor(Math.random() * (50 - 15) + 15),
+            'Average': Math.floor(Math.random() * (30 - 5) + 5),
+            'Poor': Math.floor(Math.random() * (20 - 0) + 0)
+          }
+        };
+      }
+    });
+    
+    // Render dashboard with all data
+    res.render("facultyDashboard", {
+      faculty: faculty,
+      students: studentsWithFeedbackStatus,
+      forms: assignedForms,
+      feedbackData: JSON.stringify(feedbackAnalytics)
+    });
+    
+  } catch (error) {
+    console.error("Error in faculty dashboard:", error);
+    res.status(500).render("error", { 
+      message: "Error loading dashboard", 
+      error: error 
+    });
+  }
+});
 // Logout route
 router.get("/logout", (req, res) => {
   if (req.session) {
