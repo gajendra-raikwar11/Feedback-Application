@@ -1,59 +1,3 @@
-// const mongoose = require("mongoose");
-// const Joi = require("joi");
-
-// // Schema for Feedback Response
-// const feedbackResponseSchema = new mongoose.Schema({
-//   formID: {
-//      type: mongoose.Schema.Types.ObjectId,
-//      ref: "FeedbackForm", required: true
-//      },
-//   studentID:
-//     {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: "Student", required: true 
-//     },
-//   facultyID:{
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: "Faculty", required: true
-//     },
-//   section:{
-//     type: String,
-//     required: true
-//     },
-//   answers: [
-//     {
-//       questionID: { type: mongoose.Schema.Types.ObjectId, required: true },
-//       responseText: { type: String }, // For text-based answers
-//       responseOptions: [{ type: String }], // For multiple-choice / grid answers
-//       responseRating: { type: Number, min: 1, max: 5 } // For rating questions
-//     }
-//   ],
-//   timestamp: { type: Date, default: Date.now }
-// });
-
-// // In your validation file (e.g., validation.js)
-// function validateFeedbackResponse(response) {
-//   const schema = Joi.object({
-//     formID: Joi.string().required(),
-//     studentID: Joi.string().required(),
-//     facultyID: Joi.string().required(),
-//     section: Joi.string().required(),
-//     answers: Joi.array().items(
-//       Joi.object({
-//         questionID: Joi.string().required(),
-//         responseText: Joi.string().allow('', null),
-//         responseOptions: Joi.array().items(Joi.string()).allow(null),
-//         responseRating: Joi.number().min(0).max(5).allow(null)
-//       }).unknown(true) // Allow other properties that may be added
-//     )
-//   });
-  
-//   return schema.validate(response);
-// }
-
-// const FeedbackResponse = mongoose.model("FeedbackResponse", feedbackResponseSchema);
-// module.exports = { FeedbackResponse, validateFeedbackResponse };
-
 const mongoose = require("mongoose");
 const Joi = require("joi");
 
@@ -64,6 +8,16 @@ const feedbackResponseSchema = new mongoose.Schema({
     ref: "FeedbackForm",
     required: true
   },
+  formTitle: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  formType: {
+    type: String,
+    required: true,
+    enum: ["Academic", "Institutional", "Training"]
+  },
   studentID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Student",
@@ -72,7 +26,7 @@ const feedbackResponseSchema = new mongoose.Schema({
   facultyID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Faculty",
-    required: true
+    default: null
   },
   section: {
     type: String,
@@ -84,36 +38,64 @@ const feedbackResponseSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  commonSemester: {
+    type: String,
+    trim: true,
+    default: null
+  },
   answers: [
     {
-      questionID: { 
-        type: mongoose.Schema.Types.ObjectId, 
+      questionID: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Question",
-        required: true 
+        required: true
       },
-      responseText: { type: String, trim: true, default: null }, // For text-based answers
-      responseOptions: [{ type: String }], // For multiple-choice, dropdown, grid
-      responseRating: { type: Number, min: 1, max: 5, default: null } // For rating questions
+      questionText: {
+        type: String,
+        required: true,
+        trim: true
+      },
+      sectionTitle: {
+        type: String,
+        required: true,
+        trim: true
+      }, // सेक्शन टाइटल जोड़ा गया
+      questionType: {
+        type: String,
+        enum: ["rating", "yes_no", "mcq", "text", "grid", "dropdown", "date","radio"],
+        required: true
+      }, // प्रश्न का प्रकार
+      responseText: { type: String, trim: true, default: null },
+      responseOptions: [{ type: String }],
+      responseRating: { type: Number, min: 1, max: 5, default: null },
+      responseDate: { type: Date, default: null } // यदि तारीख का प्रश्न हो तो
     }
   ],
-  submittedAt: { type: Date, default: Date.now },
-  status: { type: String, default: "submitted", enum: ["submitted", "pending"] }
+  status: { type: String, default: "submitted", enum: ["submitted", "pending"] },
+  submittedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
 // Joi Validation for Feedback Response
 const validateFeedbackResponse = (data) => {
   const schema = Joi.object({
     formID: Joi.string().hex().length(24).required(),
+    formTitle: Joi.string().required().trim(),
+    formType: Joi.string().valid("Academic", "Institutional", "Training").required(),
     studentID: Joi.string().hex().length(24).required(),
-    facultyID: Joi.string().hex().length(24).required(),
+    facultyID: Joi.string().hex().length(24).allow(null),
     section: Joi.string().required().trim(),
     semester: Joi.string().required().trim(),
+    commonSemester: Joi.string().allow(null),
     answers: Joi.array().items(
       Joi.object({
         questionID: Joi.string().hex().length(24).required(),
+        questionText: Joi.string().required().trim(),
+        sectionTitle: Joi.string().required().trim(),
+        questionType: Joi.string().valid("rating", "yes_no", "mcq", "text", "grid", "dropdown", "date","radio").required(),
         responseText: Joi.string().allow('', null),
         responseOptions: Joi.array().items(Joi.string()).allow(null),
-        responseRating: Joi.number().min(1).max(5).allow(null)
+        responseRating: Joi.number().min(1).max(5).allow(null),
+        responseDate: Joi.date().allow(null)
       })
     ).required(),
     status: Joi.string().valid("submitted", "pending").default("submitted")

@@ -7,6 +7,7 @@
     "section": "CSE-A",
     "semester": 6,
     "feedbackGiven": [],
+    "contact":"8319573364",
     "role": "student",
     "password": "123456"
   },
@@ -19,7 +20,9 @@
     "semester": 4,
     "feedbackGiven": [],
     "role": "student",
+    "contact":"8319573364",
     "password": "123456"
+  
   },
   {
     "name": "Rajat Mehta",
@@ -27,10 +30,11 @@
     "email": "rajat.mehta@example.com",
     "branch": "CSE",
     "section": "CSE-B",
-    "semester": 2,
+    "semester": 4,
     "feedbackGiven": [],
+    "contact":"8319573364",
     "role": "student",
-    "password": "Rajat@789"
+    "password": "111111"
   },
   {
     "name": "Priya Singh",
@@ -39,6 +43,7 @@
     "branch": "ECE",
     "section": "ECE-A",
     "semester": 8,
+    "contact":"8319573364",
     "feedbackGiven": [],
     "role": "student",
     "password": "Priya@987"
@@ -50,6 +55,7 @@
     "branch": "ME",
     "section": "ME-C",
     "semester": 7,
+    "contact":"8319573364",
     "feedbackGiven": [],
     "role": "student",
     "password": "Vikas@654"
@@ -61,6 +67,7 @@
     "branch": "CSE",
     "section": "CSE-A",
     "semester": 1,
+    "contact":"8319573364",
     "feedbackGiven": [],
     "role": "student",
     "password": "Anjali@321"
@@ -72,6 +79,7 @@
     "branch": "IT",
     "section": "IT-D",
     "semester": 5,
+    "contact":"8319573364",
     "feedbackGiven": [],
     "role": "student",
     "password": "Rohit@111"
@@ -83,6 +91,7 @@
     "branch": "EEE",
     "section": "EEE-B",
     "semester": 7,
+    "contact":"8319573364",
     "feedbackGiven": [],
     "role": "student",
     "password": "Kriti@222"
@@ -94,6 +103,7 @@
     "branch": "CSE",
     "section": "CSE-C",
     "semester": 3,
+    "contact":"8319573364",
     "feedbackGiven": [],
     "role": "student",
     "password": "Saurabh@333"
@@ -105,6 +115,7 @@
     "branch": "ME",
     "section": "ME-A",
     "semester": 6,
+    "contact":"8319573364",
     "feedbackGiven": [],
     "role": "student",
     "password": "Pooja@444"

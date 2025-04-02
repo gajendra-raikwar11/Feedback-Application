@@ -370,7 +370,7 @@
             <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
 
                 <table class="table table-hover">
-                    <thead  style="position: sticky; top: 0; background: white; z-index: 10;">
+                    <thead style="position: sticky; top: 0; background: white; z-index: 10;">
                         <tr>
                             <th>Form Title</th>
                             <th>Type</th>
@@ -385,21 +385,31 @@
                                     <td><%= form.title %></td>
                                     <td><%= form.formType %></td>
                                     <td>
-                                        <% if(form.isActive) { %>
+                                        <% if(form.status === 'active') { %>
                                             <span class="badge bg-success">Active</span>
-                                        <% } else { %>
+                                        <% } else if(form.status === 'closed') { %>
                                             <span class="badge bg-danger">Inactive</span>
                                         <% } %>
                                     </td>
                                     <td>
                                         <div class="btn-group">
-                                            <button class="btn btn-sm btn-primary" onclick="editForm('<%= form._id %>')"><i class="fas fa-edit"></i></button>
-                                            <% if(form.isActive) { %>
-                                                <button class="btn btn-sm btn-danger" onclick="toggleFormStatus('<%= form._id %>', false)"><i class="fas fa-power-off"></i></button>
+                                            <button class="btn btn-sm btn-primary" onclick="editForm('<%= form._id %>')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            
+                                            <% if(form.status === 'active') { %>
+                                                <button class="btn btn-sm btn-danger" onclick="toggleFormStatus('<%= form._id %>', 'closed')">
+                                                    <i class="fas fa-power-off"></i>
+                                                </button>
                                             <% } else { %>
-                                                <button class="btn btn-sm btn-success" onclick="toggleFormStatus('<%= form._id %>', true)"><i class="fas fa-power-off"></i></button>
+                                                <button class="btn btn-sm btn-success" onclick="toggleFormStatus('<%= form._id %>', 'active')">
+                                                    <i class="fas fa-power-off"></i>
+                                                </button>
                                             <% } %>
-                                            <button class="btn btn-sm btn-info" onclick="viewForm('<%= form._id %>')"><i class="fas fa-eye"></i></button>
+                
+                                            <button class="btn btn-sm btn-info" onclick="viewForm('<%= form._id %>')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -411,10 +421,11 @@
                         <% } %>
                     </tbody>
                 </table>
+                
             </div>
             <div class="d-flex justify-content-between mt-3">
                 <a href="/admin/assign-forms" class="btn btn-outline-primary">Assign Forms</a>
-                <a href="/admin/all-forms" class="btn btn-outline-secondary">View All Forms</a>
+                <a href="/admin/Total-Forms" class="btn btn-outline-secondary">View All Forms</a>
             </div>
         </div>
     </div>
@@ -615,15 +626,12 @@
         <!-- End of Footer -->
     </div>
 </div>
-
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <!-- Bootstrap core JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Custom scripts -->
 <script>
-
      // Form status filter functionality
      document.getElementById('formStatusFilter').addEventListener('change', function() {
         const status = this.value;
@@ -642,37 +650,30 @@
             }
         });
     });
-
     // Function to edit form
     function editForm(formId) {
         window.location.href = `/admin/forms/${formId}/edit`;
     }
-    
     // Function to toggle form status
-    function toggleFormStatus(formId, isActive) {
-        // You can use fetch API to send AJAX request to update form status
-        fetch(`/admin/toggle-form-status/${formId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ isActive: isActive })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Refresh the page or update the UI
-                window.location.reload();
+    async function toggleFormStatus(formId, newStatus) {
+        try {
+            const response = await fetch(`/admin/forms/updateStatus/${formId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert(`Form status updated to ${newStatus}`);
+                location.reload(); // Refresh to show updated status
             } else {
-                alert('Failed to update form status');
+                alert("Failed to update form status");
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred');
-        });
+        } catch (error) {
+            console.error("Error updating form status:", error);
+        }
     }
-    
     // Function to view form
     function viewForm(formId) {
         window.location.href = `/admin/forms/view/${formId}`;

@@ -117,7 +117,7 @@ router.post('/login', async (req, res) => {
             await validAdmin.save();
 
             // Generate JWT token
-            let token = jwt.sign({ email: email, id: validAdmin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+            let token = jwt.sign({ email: email, id: validAdmin._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
             res.cookie("adminToken", token, { httpOnly: true });
 
             // Store admin data in session
@@ -164,14 +164,6 @@ router.get('/logout', validateAdmin, (req, res) => {
     // Redirect to login page
     res.redirect('/adminLogin');
 });
-
-
-
-
-
-
-
-
 
 // Route to fetch feedback data for charts
 // router.get("/getFeedbackData", validateAdmin, async (req, res) => {
@@ -353,6 +345,7 @@ router.get("/adminFaculty", validateAdmin, (req, res) => {
     res.render("facultyManagement", { currentPath, adminData });
 });
 
+// GET/POST route for form creation page
 router.get('/adminHome/forms/create/:formType', async (req, res) => {
     try {
         let { formType } = req.params;
@@ -368,12 +361,21 @@ router.get('/adminHome/forms/create/:formType', async (req, res) => {
 
         // Fetch faculty list
         const faculties = await Faculty.find({}, 'name _id department');
+        
+        // Get sections, semesters and subjects
         const sectionCategories = ["CSE-A", "CSE-B", "IT-A", "IT-B", "ECE-A", "ECE-B"];
+        const semesterCategories = [1,2,3,4,5,6,7,8];
+        
+        // For academic forms, fetch subjects (you can replace this with actual subject fetching)
+        const subjects = ["Data Structures", "Database Management", "Computer Networks", 
+                         "Operating Systems", "Machine Learning", "Web Development"];
 
         res.render('CreateFeedbackForms', {
             formType,
             faculties,
             sectionCategories,
+            semesterCategories,
+            subjects,
             currentPath: req.path,
             adminData: req.session.admin || {} 
         });
@@ -383,109 +385,162 @@ router.get('/adminHome/forms/create/:formType', async (req, res) => {
         res.status(500).send("Server error");
     }
 });
-
-// POST route for form creation - Fix for JSON handling
 router.post('/adminHome/forms/create/:formType', async (req, res) => {
     try {
         let { formType } = req.params;
+        console.log(`\n🔹 Route hit: /adminHome/forms/create/${formType}`);
 
         // Convert formType to Title Case
         formType = formType.charAt(0).toUpperCase() + formType.slice(1).toLowerCase();
+        console.log(`✅ Converted formType: ${formType}`);
 
         // Validate form type
         const validFormTypes = ["Academic", "Institutional", "Training"];
         if (!validFormTypes.includes(formType)) {
+            console.error("❌ Invalid form type received");
             return res.status(400).json({ success: false, message: "Invalid form type" });
         }
 
-        // Check content type and parse correctly
         let formData = req.body;
-        
-        // Log request content type and body for debugging
-        console.log("Content-Type:", req.headers['content-type']);
-        console.log("Request body type:", typeof req.body);
-        
-        // Handle JSON parsing from string if needed (add body-parser middleware properly)
-        if (typeof req.body === 'string') {
-            try {
-                formData = JSON.parse(req.body);
-            } catch (e) {
-                console.error("JSON Parsing Error:", e);
-                return res.status(400).json({ success: false, message: "Invalid JSON format" });
-            }
+        console.log("📥 Raw formData received:", formData);
+
+        // Process facultyAssigned array
+        if (Array.isArray(formData.facultyAssigned)) {
+            formData.facultyAssigned = formData.facultyAssigned.map(String);
+        } else {
+            formData.facultyAssigned = [];
         }
+        console.log("✅ Processed facultyAssigned:", formData.facultyAssigned);
 
-        // Ensure formType is properly set in the form data
-        formData.formType = formType;
+        // Process sectionsAssigned array
+        if (Array.isArray(formData.sectionsAssigned)) {
+            formData.sectionsAssigned = formData.sectionsAssigned.map(String);
+        } else {
+            formData.sectionsAssigned = [];
+        }
+        console.log("✅ Processed sectionsAssigned:", formData.sectionsAssigned);
 
-        // Create a new feedback form
+        // Process semesters
+        if (!Array.isArray(formData.semesters) || formData.semesters.length === 0) {
+            return res.status(400).json({ success: false, message: "Semesters are required" });
+        }
+        formData.semesters = formData.semesters.map(String);
+        console.log("✅ Processed semesters:", formData.semesters);
+
+        // Ensure createdBy exists
+        if (!formData.createdBy && req.session.admin) {
+            formData.createdBy = req.session.admin.id;
+        }
+        if (!formData.createdBy) {
+            return res.status(400).json({ success: false, message: "createdBy is required" });
+        }
+        formData.createdBy = String(formData.createdBy);
+        console.log("✅ Processed createdBy:", formData.createdBy);
+
+        // Process sections from flattened form data
+        const processedSections = [];
+        
+        // First, find all section indexes
+        const sectionIndexes = new Set();
+        Object.keys(formData).forEach(key => {
+            const match = key.match(/^sections\[(\d+)\]/);
+            if (match) {
+                sectionIndexes.add(parseInt(match[1]));
+            }
+        });
+        
+        // Process each section
+        Array.from(sectionIndexes).sort((a, b) => a - b).forEach(sectionIndex => {
+            const section = {
+                title: formData[`sections[${sectionIndex}][title]`] || '',
+                description: formData[`sections[${sectionIndex}][description]`] || '',
+                questions: []
+            };
+            
+            // Find all question indexes for this section
+            const questionIndexes = new Set();
+            Object.keys(formData).forEach(key => {
+                const match = key.match(new RegExp(`^sections\\[${sectionIndex}\\]\\[questions\\]\\[(\\d+)\\]`));
+                if (match) {
+                    questionIndexes.add(parseInt(match[1]));
+                }
+            });
+            
+            // Process each question
+            Array.from(questionIndexes).sort((a, b) => a - b).forEach(questionIndex => {
+                const questionPrefix = `sections[${sectionIndex}][questions][${questionIndex}]`;
+                const question = {
+                    questionText: formData[`${questionPrefix}[questionText]`] || '',
+                    questionType: formData[`${questionPrefix}[questionType]`] || '',
+                    required: formData[`${questionPrefix}[required]`] === 'true'
+                };
+                
+                // Handle different question types and their options
+                if (question.questionType === 'mcq' || question.questionType === 'dropdown' || 
+                    question.questionType === 'rating' || question.questionType === 'yes_no') {
+                    // Get options array
+                    const optionsKey = `${questionPrefix}[options]`;
+                    question.options = Array.isArray(formData[optionsKey]) ? 
+                        formData[optionsKey] : 
+                        (formData[optionsKey] ? [formData[optionsKey]] : []);
+                } else if (question.questionType === 'grid') {
+                    // Handle grid questions with rows and columns
+                    question.gridOptions = {
+                        rows: [],
+                        columns: []
+                    };
+                    
+                    // Get rows
+                    const rowsKey = `${questionPrefix}[gridOptions][rows]`;
+                    if (formData[rowsKey]) {
+                        question.gridOptions.rows = Array.isArray(formData[rowsKey]) ? 
+                            formData[rowsKey] : [formData[rowsKey]];
+                    }
+                    
+                    // Get columns
+                    const columnsKey = `${questionPrefix}[gridOptions][columns]`;
+                    if (formData[columnsKey]) {
+                        question.gridOptions.columns = Array.isArray(formData[columnsKey]) ? 
+                            formData[columnsKey] : [formData[columnsKey]];
+                    }
+                }
+                
+                section.questions.push(question);
+            });
+            
+            processedSections.push(section);
+        });
+        
+        console.log("✅ Processed sections:", processedSections);
+
+        // Create and save feedback form
         const newForm = new FeedbackForm({
             title: formData.title,
             formType,
-            facultyAssigned: formData.facultyAssigned || [],
-            sectionsAssigned: formData.sectionsAssigned || [],
-            questions: formData.questions || [],
+            facultyAssigned: formData.facultyAssigned,
+            subjects: formData.subjects || [],
+            sectionsAssigned: formData.sectionsAssigned,
+            semesters: formData.semesters,
             deadline: formData.deadline,
-            semester: formData.semester,
-            createdBy: req.session.admin ? req.session.admin.id : null,
+            createdBy: formData.createdBy,
+            sections: processedSections,  // Use our processed sections
             status: formData.status || 'active'
         });
-
-        // Save to database
+        
+        console.log("📋 Form data ready to save:", newForm);
         await newForm.save();
+        console.log("✅ Feedback form saved successfully");
 
-        // Return JSON response with correct status
         return res.status(201).json({ 
             success: true, 
             message: `${formType} feedback form created successfully`,
-            redirect: '/admin/Total-Forms' // Provide correct redirect URL
+            redirect: '/admin/Total-Forms'
         });
-
     } catch (error) {
-        console.error('Error creating feedback form:', error);
+        console.error('❌ Error creating feedback form:', error);
         return res.status(500).json({ success: false, message: "Server error: " + error.message });
     }
 });
-
-// Form listing route - shows all forms as cards
-// router.get('/Total-Forms', validateAdmin, async (req, res) => {
-//     try {
-//         // Fetch forms from database
-//         const forms = await FeedbackForm.find({}).lean();
-        
-//         // Format the forms for display
-//         const formattedForms = forms.map(form => {
-//           return {
-//             _id: form._id,
-//             title: form.title,
-//             formType: form.formType,
-//             startDate: form.deadline, // Using deadline as startDate
-//             endDate: form.deadline,   // Using deadline as endDate
-//             isActive: form.status === 'active',
-//             department: 'Information Technology', // Default department
-//             sections: [{ title: 'Section 1' }], // Assuming one section for each form
-//             facultyAssignments: form.facultyAssigned.map(id => ({ 
-//               facultyId: id, 
-//               facultyName: `Faculty #${id.substring(0, 8)}` 
-//             })),
-//             classAssignments: [{
-//               classes: form.sectionsAssigned || []
-//             }],
-//             submissionCount: Math.floor(Math.random() * 100) // Random submission count for demo
-//           };
-//         });
-        
-//         res.render('TotalForms', { 
-//           forms: formattedForms,
-//           adminData: req.session.admin,
-//           currentPath:req.path
-//         });
-//       } catch (error) {
-//         console.error('Error fetching forms:', error);
-//         res.status(500).send('Error fetching forms');
-//         res.redirect('/admin/adminHome');
-//       }
-// });
 
 router.get('/Total-Forms', validateAdmin, async (req, res) => {
     try {
@@ -527,7 +582,6 @@ router.get('/Total-Forms', validateAdmin, async (req, res) => {
     }
 });
 
-
 // DELETE - Delete a form
 router.delete('/forms/:id', async (req, res) => {
     try {
@@ -551,7 +605,7 @@ router.delete('/forms/:id', async (req, res) => {
       console.error('Error deleting form:', error);
       return res.status(500).json({ success: false, message: 'Error deleting form' });
     }
-  });
+});
 
 // POST - Process bulk actions on forms
 router.post('/forms/bulk-action', async (req, res) => {
@@ -630,117 +684,256 @@ router.get('/forms/view/:formId', validateAdmin, async (req, res) => {
     }
 });
 
-router.get('/forms/:id/edit', async (req, res) => {
-    try {
-        const formId = req.params.id;
-        
-        // Fetch the form data
-        const form = await FeedbackForm.findById(formId);
-        
-        if (!form) {
-            return res.status(404).render('error', {
-                message: 'Form not found',
-                error: { status: 404 }
-            });
-        }
-        
-        // Fetch faculty list for assignment
-        const faculties = await Faculty.find({}).sort('name');
-        
-        // Get available section categories
-        const sectionCategories = ["CSE-A", "CSE-B", "IT-A", "IT-B", "ECE-A", "ECE-B"];
-        
-        // Render the edit form view
-        res.render('EditForm', {
-            title: 'Edit Feedback Form',
-            form,
-            faculties,
-            sectionCategories,
-            adminData: req.session.admin,
-            currentPath: req.path
-        });
-    } catch (error) {
-        console.error('Error fetching form details:', error);
-        res.status(500).render('error', {
-            message: 'Internal Server Error',
-            error: { status: 500 }
-        });
-    }
-});
-
-/**
- * Route for updating the form
- */
 router.post('/forms/:id/update', async (req, res) => {
     try {
         const formId = req.params.id;
-        const formData = req.body;
+        // Fetch the existing form to verify it exists
+        const existingForm = await FeedbackForm.findById(formId);
+        if (!existingForm) {
+            req.session.errorMessage = 'Feedback form not found';
+            return res.redirect('/admin');
+        }
+
+        let formData = req.body;
+        // Process facultyAssigned array
+        if (Array.isArray(formData.facultyAssigned)) {
+            formData.facultyAssigned = formData.facultyAssigned.map(String);
+        } else if (formData.facultyAssigned) {
+            formData.facultyAssigned = [String(formData.facultyAssigned)];
+        } else {
+            formData.facultyAssigned = [];
+        }
+        // Process sectionsAssigned array
+        if (Array.isArray(formData.sectionsAssigned)) {
+            formData.sectionsAssigned = formData.sectionsAssigned.map(String);
+        } else if (formData.sectionsAssigned) {
+            formData.sectionsAssigned = [String(formData.sectionsAssigned)];
+        } else {
+            formData.sectionsAssigned = [];
+        }
+        // Process semesters
+        if (Array.isArray(formData.semesters)) {
+            formData.semesters = formData.semesters.map(String);
+        } else if (formData.semesters) {
+            formData.semesters = [String(formData.semesters)];
+        } else {
+            formData.semesters = existingForm.semesters; // Keep existing if not provided
+        }
+        // Process sections - handle directly if they're already structured
+        let processedSections = [];
         
-        // Process questions data
-        const questions = [];
-        
-        if (formData.questions) {
-            for (const key in formData.questions) {
-                const question = formData.questions[key];
+        // Check if sections are already in structured format (not flattened)
+        if (Array.isArray(formData.sections)) {
+            processedSections = formData.sections.map(section => {
+                // Process questions within each section
+                const questions = Array.isArray(section.questions) 
+                    ? section.questions.map(question => {
+                        // Ensure required is boolean
+                        const required = question.required === true || question.required === 'true';
+                        
+                        // Create base question object
+                        const processedQuestion = {
+                            questionText: question.questionText || '',
+                            questionType: question.questionType || 'text',
+                            required: required
+                        };
+                        
+                        // Add options based on question type
+                        if (['mcq', 'dropdown', 'rating', 'yes_no'].includes(question.questionType)) {
+                            processedQuestion.options = Array.isArray(question.options) 
+                                ? question.options 
+                                : (question.options ? [question.options] : []);
+                        } else if (question.questionType === 'grid') {
+                            processedQuestion.gridOptions = {
+                                rows: Array.isArray(question.gridOptions?.rows) 
+                                    ? question.gridOptions.rows 
+                                    : (question.gridOptions?.rows ? [question.gridOptions.rows] : []),
+                                columns: Array.isArray(question.gridOptions?.columns) 
+                                    ? question.gridOptions.columns 
+                                    : (question.gridOptions?.columns ? [question.gridOptions.columns] : [])
+                            };
+                        }
+                        
+                        return processedQuestion;
+                    }) 
+                    : [];
                 
-                // Create question object
-                const questionObj = {
-                    questionText: question.questionText,
-                    questionType: question.questionType,
-                    required: question.required === 'true'
+                return {
+                    title: section.title || '',
+                    description: section.description || '',
+                    questions: questions
+                };
+            });
+        } else {
+            // Fallback to the original flattened processing logic
+            // First, find all section indexes
+            const sectionIndexes = new Set();
+            Object.keys(formData).forEach(key => {
+                const match = key.match(/^sections\[(\d+)\]/);
+                if (match) {
+                    sectionIndexes.add(parseInt(match[1]));
+                }
+            });
+            
+            // Process each section
+            Array.from(sectionIndexes).sort((a, b) => a - b).forEach(sectionIndex => {
+                const section = {
+                    title: formData[`sections[${sectionIndex}][title]`] || '',
+                    description: formData[`sections[${sectionIndex}][description]`] || '',
+                    questions: []
                 };
                 
-                // Process options for mcq, dropdown, rating
-                if (['mcq', 'dropdown', 'rating'].includes(question.questionType) && question.optionsText) {
-                    questionObj.options = question.optionsText.split(',').map(option => option.trim());
-                }
+                // Find all question indexes for this section
+                const questionIndexes = new Set();
+                Object.keys(formData).forEach(key => {
+                    const match = key.match(new RegExp(`^sections\\[${sectionIndex}\\]\\[questions\\]\\[(\\d+)\\]`));
+                    if (match) {
+                        questionIndexes.add(parseInt(match[1]));
+                    }
+                });
                 
-                // Process grid options
-                if (question.questionType === 'grid') {
-                    questionObj.gridOptions = {
-                        rows: question.gridRows ? question.gridRows.split(',').map(row => row.trim()) : [],
-                        columns: question.gridColumns ? question.gridColumns.split(',').map(column => column.trim()) : []
+                // Process each question
+                Array.from(questionIndexes).sort((a, b) => a - b).forEach(questionIndex => {
+                    const questionPrefix = `sections[${sectionIndex}][questions][${questionIndex}]`;
+                    const question = {
+                        questionText: formData[`${questionPrefix}[questionText]`] || '',
+                        questionType: formData[`${questionPrefix}[questionType]`] || '',
+                        required: formData[`${questionPrefix}[required]`] === 'true'
                     };
-                }
+                    
+                    // Handle different question types and their options
+                    if (question.questionType === 'mcq' || question.questionType === 'dropdown' || 
+                        question.questionType === 'rating' || question.questionType === 'yes_no') {
+                        // Get options array
+                        const optionsKey = `${questionPrefix}[options]`;
+                        question.options = Array.isArray(formData[optionsKey]) ? 
+                            formData[optionsKey] : 
+                            (formData[optionsKey] ? [formData[optionsKey]] : []);
+                    } else if (question.questionType === 'grid') {
+                        // Handle grid questions with rows and columns
+                        question.gridOptions = {
+                            rows: [],
+                            columns: []
+                        };
+                        
+                        // Get rows
+                        const rowsKey = `${questionPrefix}[gridOptions][rows]`;
+                        if (formData[rowsKey]) {
+                            question.gridOptions.rows = Array.isArray(formData[rowsKey]) ? 
+                                formData[rowsKey] : [formData[rowsKey]];
+                        }
+                        
+                        // Get columns
+                        const columnsKey = `${questionPrefix}[gridOptions][columns]`;
+                        if (formData[columnsKey]) {
+                            question.gridOptions.columns = Array.isArray(formData[columnsKey]) ? 
+                                formData[columnsKey] : [formData[columnsKey]];
+                        }
+                    }
+                    
+                    section.questions.push(question);
+                });
                 
-                questions.push(questionObj);
-            }
-        }
-        
-        // Update form data
-        const updatedForm = await FeedbackForm.findByIdAndUpdate(
-            formId,
-            {
-                title: formData.title,
-                deadline: formData.deadline || null,
-                semester: formData.semester,
-                status: formData.status || 'closed',
-                facultyAssigned: formData.facultyAssigned || [],
-                sectionsAssigned: formData.sectionsAssigned || [],
-                questions,
-                updatedAt: new Date()
-            },
-            { new: true }
-        );
-        
-        if (!updatedForm) {
-            return res.status(404).json({
-                success: false,
-                message: 'Form not found'
+                processedSections.push(section);
             });
         }
         
-        res.json({
-            success: true,
-            message: 'Form updated successfully',
-            form: updatedForm
-        });
+        // Update form data
+        const updateData = {
+            title: formData.title || existingForm.title,
+            facultyAssigned: formData.facultyAssigned,
+            subjects: formData.subjects || existingForm.subjects || [],
+            sectionsAssigned: formData.sectionsAssigned,
+            semesters: formData.semesters,
+            deadline: formData.deadline || existingForm.deadline,
+            formType: existingForm.formType, // Preserve the form type
+            sections: processedSections.length > 0 ? processedSections : existingForm.sections,
+            status: formData.status || existingForm.status,
+            updatedAt: new Date()
+        };
+        
+        // Update the form
+        const updatedForm = await FeedbackForm.findByIdAndUpdate(
+            formId,
+            updateData,
+            { new: true }
+        );
+        
+        console.log("✅ Feedback form updated successfully");
+
+        req.session.successMessage = `${existingForm.formType} feedback form updated successfully`;
+        return res.redirect('/admin/Total-Forms');
     } catch (error) {
-        console.error('Error updating form:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal Server Error'
+        console.error('❌ Error updating feedback form:', error);
+        return res.redirect(`/forms/${req.params.id}/edit`);
+    }
+});
+
+// GET route for editing a form
+router.get('/forms/:id/edit', async (req, res) => {
+    try {
+        const formId = req.params.id;
+        console.log(`\n🔹 Route hit: /forms/${formId}/edit`);
+
+        // Fetch the form data
+        const formData = await FeedbackForm.findById(formId);
+        
+        if (!formData) {
+            console.error("❌ Form not found");
+            // Instead of rendering an error page, redirect with a flash message
+            req.session.errorMessage = 'Feedback form not found';
+            return res.redirect('/admin'); // Redirect to admin dashboard or another existing page
+        }
+        
+        // Rest of the code remains the same...
+        const faculties = await Faculty.find({}, 'name _id department');
+        const sectionCategories = ["CSE-A", "CSE-B", "IT-A", "IT-B", "ECE-A", "ECE-B"];
+        const semesterCategories = [1,2,3,4,5,6,7,8];
+        const subjects = ["Data Structures", "Database Management", "Computer Networks", 
+                         "Operating Systems", "Machine Learning", "Web Development"];
+
+        console.log("✅ Form data fetched successfully");
+        
+        res.render('EditForm', {
+            title: 'Edit Feedback Form',
+            formData,
+            formType: formData.formType,
+            faculties,
+            sectionCategories,
+            semesterCategories,
+            subjects,
+            currentPath: req.path,
+            adminData: req.session.admin || {}
         });
+
+    } catch (error) {
+        console.error('❌ Error loading form edit page:', error);
+        // Instead of rendering error page, redirect with a flash message
+        req.session.errorMessage = 'Internal Server Error';
+        return res.redirect('/admin'); // Redirect to admin dashboard or another existing page
+    }
+});
+//home page form status toggle button route
+router.patch('/forms/updateStatus/:formId', async (req, res) => {
+    try {
+        const { formId } = req.params;
+        const { status } = req.body;
+
+        const updatedForm = await FeedbackForm.findByIdAndUpdate(
+            formId,
+            { status: status },
+            { new: true }
+        );
+
+        if (!updatedForm) {
+            return res.status(404).json({ success: false, message: "Form not found" });
+        }
+
+        res.json({ success: true, message: "Status updated", form: updatedForm });
+
+    } catch (error) {
+        console.error("Error updating form status:", error);
+        res.status(500).json({ success: false, message: "Server error" });
     }
 });
 

@@ -435,113 +435,102 @@ footer {
                     </div>
                 </div>
             </div>
+           <!-- Forms List -->
+<div class="row g-4">
+    <% if (forms && forms.length > 0) { %>
+        <% forms.forEach(form => { %>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card form-card position-relative">
+                    <!-- Status badge -->
+                    <% if (form.hasSubmitted) { %>
+                        <span class="form-status-badge badge-submitted">Submitted</span>
+                    <% } else if (!form.canSubmit) { %>
+                        <span class="form-status-badge badge-rejected">Expired</span>
+                    <% } else { %>
+                        <span class="form-status-badge badge-pending">Active</span>
+                    <% } %>
 
-            <!-- Forms List -->
-            <div class="row g-4">
-                <% if (forms && forms.length> 0) { %>
-                    <% forms.forEach(form=> { %>
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="card form-card position-relative">
-                                <!-- Status badge -->
-                                <% if (form.hasSubmitted) { %>
-                                    <span class="form-status-badge badge-submitted">Submitted</span>
-                                    <% } else if (!form.canSubmit) { %>
-                                        <span class="form-status-badge badge-rejected">Expired</span>
-                                        <% } else { %>
-                                            <span class="form-status-badge badge-pending">Active</span>
-                                            <% } %>
-
-                                                <div class="card-body">
-                                                    <div class="form-header mb-3">
-                                                        <h5 class="card-title">
-                                                            <%= form.title %>
-                                                        </h5>
-                                                        <span class="badge bg-info">
-                                                            <%= form.formType %>
-                                                        </span>
-                                                    </div>
-
-                                                    <!-- Faculty display -->
-
-                                                    <% if (form.assignedFacultyForStudent) { %>
-                                                        <p class="card-text"><strong>Faculty:</strong>
-                                                            <%= form.assignedFacultyForStudent.name %>
-                                                        </p>
-                                                        <% } else { %>
-                                                            <p class="card-text">No faculty assigned for your section
-                                                            </p>
-                                                            <% } %>
-
-                                                                <p class="card-text"><strong>Section:</strong>
-                                                                    <%= form.commonSection %>
-                                                                </p>
-
-                                                                <p class="card-text"><strong>Semester:</strong>
-                                                                    <%= form.semester %>
-                                                                </p>
-
-                                                                <% const deadlineDate=new Date(form.deadline); const
-                                                                    today=new Date(); const
-                                                                    daysLeft=Math.ceil((deadlineDate - today) / (1000 *
-                                                                    60 * 60 * 24)); let deadlineClass='' ; if (daysLeft
-                                                                    <=3 && daysLeft> 0) {
-                                                                    deadlineClass = 'deadline-near';
-                                                                    } else if (daysLeft <= 7 && daysLeft> 0) {
-                                                                        deadlineClass = 'deadline-upcoming';
-                                                                        }
-                                                                        %>
-
-                                                                        <p class="card-text">
-                                                                            <strong>Deadline:</strong>
-                                                                            <span
-                                                                                class="deadline-indicator <%= deadlineClass %>">
-                                                                                <%= deadlineDate.toLocaleDateString() %>
-                                                                                    <% if (daysLeft> 0) { %>
-                                                                                        (<%= daysLeft %> days left)
-                                                                                            <% } else if (daysLeft===0)
-                                                                                                { %>
-                                                                                                (Today)
-                                                                                                <% } else { %>
-                                                                                                    (Expired)
-                                                                                                    <% } %>
-                                                                            </span>
-                                                                        </p>
-
-                                                                        <p class="card-text">
-                                                                            <strong>Questions:</strong>
-                                                                            <%= form.questions.length %>
-                                                                        </p>
-
-                                                                        <div
-                                                                            class="d-flex justify-content-between mt-4">
-                                                                            <% if (form.hasSubmitted) { %>
-                                                                                <a href="/viewSubmission/<%= form._id %>"
-                                                                                    class="btn btn-outline-primary">View
-                                                                                    Response</a>
-                                                                                <% } else if (form.canSubmit) { %>
-                                                                                    <a href="/student/submitForm/<%= form._id %>"
-                                                                                        class="btn btn-primary">Submit
-                                                                                        Feedback</a>
-                                                                                    <% } else { %>
-                                                    <button class="btn btn-secondary"disabled>Expired</button>
-                                             <% } %>
-                                        <a href="/student/previewForm/<%= form._id %>?preview=true" class="btn btn-outline-secondary">Preview</a>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="card-body">
+                        <div class="form-header mb-3">
+                            <h5 class="card-title">
+                                <%= form.title %>
+                            </h5>
+                            <span class="badge bg-info">
+                                <%= form.formType %>
+                            </span>
                         </div>
-                        <% }); %>
-                            <% } else { %>
-                                <div class="col-12">
-                                    <div class="no-forms-container">
-                                        <div class="alert alert-info p-4">
-                                            <h4>No forms available!</h4>
-                                            <p>There are currently no feedback forms assigned to your section.</p>
-                                        </div>
-                                    </div>
-                                </div>
+
+                        <!-- Faculty display -->
+                        <% if (form.assignedFacultyForStudent) { %>
+                            <p class="card-text"><strong>Faculty:</strong>
+                                <%= form.assignedFacultyForStudent.name %>
+                            </p>
+                        <% } else { %>
+                            <p class="card-text"><strong>Faculty:</strong> Not Assigned</p>
+                        <% } %>
+
+                        <p class="card-text"><strong>Section:</strong>
+                            <%= form.commonSection %>
+                        </p>
+
+                        <p class="card-text"><strong>Semester:</strong>
+                            <%= form.commonSemester %>
+                        </p>
+
+                        <% const deadlineDate = new Date(form.deadline);
+                           const today = new Date();
+                           const daysLeft = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+                           let deadlineClass = '';
+                           if (daysLeft <= 3 && daysLeft > 0) {
+                               deadlineClass = 'deadline-near';
+                           } else if (daysLeft <= 7 && daysLeft > 0) {
+                               deadlineClass = 'deadline-upcoming';
+                           } %>
+
+                        <p class="card-text">
+                            <strong>Deadline:</strong>
+                            <span class="deadline-indicator <%= deadlineClass %>">
+                                <%= deadlineDate.toLocaleDateString() %>
+                                <% if (daysLeft > 0) { %>
+                                    (<%= daysLeft %> days left)
+                                <% } else if (daysLeft === 0) { %>
+                                    (Today)
+                                <% } else { %>
+                                    (Expired)
                                 <% } %>
+                            </span>
+                        </p>
+
+                        <p class="card-text">
+                            <strong>Questions:</strong>
+                          
+                        </p>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <% if (form.hasSubmitted) { %>
+                                <a href="/viewSubmission/<%= form._id %>" class="btn btn-outline-primary">View Response</a>
+                            <% } else if (form.canSubmit) { %>
+                                <a href="/student/submitForm/<%= form._id %>" class="btn btn-primary">Submit Feedback</a>
+                            <% } else { %>
+                                <button class="btn btn-secondary" disabled>Expired</button>
+                            <% } %>
+                            <a href="/student/previewForm/<%= form._id %>?preview=true" class="btn btn-outline-secondary">Preview</a>
+                        </div>
+                    </div>
+                </div>
             </div>
+        <% }); %>
+    <% } else { %>
+        <div class="col-12">
+            <div class="no-forms-container">
+                <div class="alert alert-info p-4">
+                    <h4>No forms available!</h4>
+                    <p>There are currently no feedback forms assigned to your section.</p>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>
             <!-- Pagination -->
             <div class="pagination-container">
                 <nav aria-label="Forms pagination">

@@ -1,0 +1,598 @@
+<!-- views/admin/feedback-charts.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .chart-container {
+      position: relative;
+      height: 400px;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+    .card {
+      margin-bottom: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .card-header {
+      background-color: #f8f9fa;
+      font-weight: bold;
+    }
+    .filters {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/admin-navbar', {activeLink}) %>
+  
+  <div class="container mt-4">
+    <h1 class="mb-4">Feedback Analytics</h1>
+    
+    <div class="filters">
+      <div class="row">
+        <div class="col-md-3">
+          <label for="semester">Semester:</label>
+          <select id="semester" class="form-control">
+            <option value="Fall 2023">Fall 2023</option>
+            <option value="Spring 2024">Spring 2024</option>
+            <option value="Summer 2024">Summer 2024</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="faculty">Faculty:</label>
+          <select id="faculty" class="form-control">
+            <option value="">All</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Engineering">Engineering</option>
+            <option value="Mathematics">Mathematics</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="subject">Subject:</label>
+          <select id="subject" class="form-control">
+            <option value="">All</option>
+            <option value="Programming">Programming</option>
+            <option value="Database">Database</option>
+            <option value="Algorithms">Algorithms</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label>&nbsp;</label>
+          <button id="applyFilters" class="btn btn-primary form-control">Apply Filters</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row">
+      <!-- Teacher Effectiveness Chart -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            Teacher Effectiveness
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="teacherEffectivenessChart"></canvas>
+            </div>
+          </div>
+          <div class="card-footer text-muted">
+            Based on Course Organization, Delivery, and Learning Ratings
+          </div>
+        </div>
+      </div>
+      
+      <!-- Student Learning Experience Chart -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            Student Learning Experience
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="learningExperienceChart"></canvas>
+            </div>
+          </div>
+          <div class="card-footer text-muted">
+            Learning (Theory) and Lab Organization Ratings Over Time
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row">
+      <!-- Course Organization & Exams Chart -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            Course Organization & Exams Evaluation
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="chart-container">
+                  <canvas id="examsChart"></canvas>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="chart-container">
+                  <canvas id="generalQuestionsChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer text-muted">
+            Exams & Evaluation Ratings and General Yes/No Questions
+          </div>
+        </div>
+      </div>
+      
+      <!-- Labs & Tutorials Effectiveness Chart -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            Labs & Tutorials Effectiveness
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="labsTutorialsChart"></canvas>
+            </div>
+          </div>
+          <div class="card-footer text-muted">
+            Comparison of Tutorial and Lab Components
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row">
+      <!-- General Course Questions Chart -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            General Course Questions
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="pieChart"></canvas>
+            </div>
+          </div>
+          <div class="card-footer text-muted">
+            Distribution of Yes/No Responses for General Questions
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tutorial & Lab Components Chart -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            Tutorial & Lab Components Over Time
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="trendChart"></canvas>
+            </div>
+          </div>
+          <div class="card-footer text-muted">
+            Tracking Progress Over Semesters
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Charts configuration and data fetching
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get filter values
+      function getFilters() {
+        return {
+          semester: document.getElementById('semester').value,
+          faculty: document.getElementById('faculty').value,
+          subject: document.getElementById('subject').value
+        };
+      }
+      
+      // Apply filters button click
+      document.getElementById('applyFilters').addEventListener('click', function() {
+        loadAllCharts();
+      });
+      
+      // Initialize charts
+      let teacherChart, learningChart, examsChart, generalChart;
+      let labsTutorialsChart, pieChart, trendChart;
+      
+      function loadAllCharts() {
+        loadTeacherEffectivenessChart();
+        loadLearningExperienceChart();
+        loadCourseExamsCharts();
+        loadLabsTutorialsChart();
+        loadGeneralQuestionsChart();
+        loadTrendChart();
+      }
+      
+      // 1. Teacher Effectiveness Chart (Bar Chart)
+      async function loadTeacherEffectivenessChart() {
+        const filters = getFilters();
+        const queryParams = new URLSearchParams(filters).toString();
+        
+        try {
+          const response = await fetch(`/admin/api/teacher-effectiveness?${queryParams}`);
+          if (!response.ok) throw new Error('Network response was not ok');
+          
+          const data = await response.json();
+          
+          const ctx = document.getElementById('teacherEffectivenessChart').getContext('2d');
+          
+          // Destroy previous chart instance if it exists
+          if (teacherChart) teacherChart.destroy();
+          
+          teacherChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: data.labels,
+              datasets: [{
+                label: 'Average Rating (1-5)',
+                data: data.averages,
+                backgroundColor: [
+                  'rgba(75, 192, 192, 0.7)',
+                  'rgba(54, 162, 235, 0.7)',
+                  'rgba(153, 102, 255, 0.7)'
+                ],
+                borderColor: [
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(54, 162, 235, 1)', 
+                  'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  max: 5,
+                  title: {
+                    display: true,
+                    text: 'Average Rating'
+                  }
+                }
+              }
+            }
+          });
+        } catch (error) {
+          console.error('Error loading teacher effectiveness chart:', error);
+        }
+      }
+      
+      // 2. Student Learning Experience Chart (Line Chart)
+      async function loadLearningExperienceChart() {
+        try {
+          const response = await fetch('/admin/api/learning-experience');
+          if (!response.ok) throw new Error('Network response was not ok');
+          
+          const data = await response.json();
+          
+          const ctx = document.getElementById('learningExperienceChart').getContext('2d');
+          
+          // Destroy previous chart instance if it exists
+          if (learningChart) learningChart.destroy();
+          
+          learningChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: data.labels,
+              datasets: [
+                {
+                  label: 'Learning (Theory)',
+                  data: data.learning,
+                  borderColor: 'rgba(54, 162, 235, 1)',
+                  backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                  tension: 0.3,
+                  fill: true
+                },
+                {
+                  label: 'Lab Organization',
+                  data: data.labOrganization,
+                  borderColor: 'rgba(255, 99, 132, 1)',
+                  backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                  tension: 0.3,
+                  fill: true
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  max: 5,
+                  title: {
+                    display: true,
+                    text: 'Average Rating'
+                  }
+                }
+              }
+            }
+          });
+        } catch (error) {
+          console.error('Error loading learning experience chart:', error);
+        }
+      }
+      
+      // 3. Course Organization & Exams Charts (Stacked Bar & Pie)
+      async function loadCourseExamsCharts() {
+        const filters = getFilters();
+        const queryParams = new URLSearchParams({
+          semester: filters.semester
+        }).toString();
+        
+        try {
+          const response = await fetch(`/admin/api/course-exams?${queryParams}`);
+          if (!response.ok) throw new Error('Network response was not ok');
+          
+          const data = await response.json();
+          
+          // Exams Chart (Stacked Bar)
+          const examsCtx = document.getElementById('examsChart').getContext('2d');
+          if (examsChart) examsChart.destroy();
+          
+          examsChart = new Chart(examsCtx, {
+            type: 'bar',
+            data: {
+              labels: ['Exam Evaluation'],
+              datasets: [
+                {
+                  label: 'Poor',
+                  data: [data.ratingDistribution.Poor],
+                  backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                },
+                {
+                  label: 'Fair',
+                  data: [data.ratingDistribution.Fair],
+                  backgroundColor: 'rgba(255, 159, 64, 0.7)'
+                },
+                {
+                  label: 'Good',
+                  data: [data.ratingDistribution.Good],
+                  backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                },
+                {
+                  label: 'Excellent',
+                  data: [data.ratingDistribution.Excellent],
+                  backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  stacked: true,
+                  title: {
+                    display: true,
+                    text: 'Number of Responses'
+                  }
+                },
+                x: {
+                  stacked: true
+                }
+              }
+            }
+          });
+          
+          // General Questions Chart (Pie)
+          const generalCtx = document.getElementById('generalQuestionsChart').getContext('2d');
+          if (generalChart) generalChart.destroy();
+          
+          generalChart = new Chart(generalCtx, {
+            type: 'pie',
+            data: {
+              labels: ['Yes', 'No'],
+              datasets: [{
+                data: [data.yesNoDistribution.Yes, data.yesNoDistribution.No],
+                backgroundColor: [
+                  'rgba(75, 192, 192, 0.7)',
+                  'rgba(255, 99, 132, 0.7)'
+                ],
+                borderColor: [
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false
+            }
+          });
+        } catch (error) {
+          console.error('Error loading course and exams charts:', error);
+        }
+      }
+      
+      // 4. Labs & Tutorials Effectiveness Chart (Grouped Bar)
+      async function loadLabsTutorialsChart() {
+        const filters = getFilters();
+        const queryParams = new URLSearchParams({
+          semester: filters.semester
+        }).toString();
+        
+        try {
+          const response = await fetch(`/admin/api/labs-tutorials?${queryParams}`);
+          if (!response.ok) throw new Error('Network response was not ok');
+          
+          const data = await response.json();
+          
+          const ctx = document.getElementById('labsTutorialsChart').getContext('2d');
+          if (labsTutorialsChart) labsTutorialsChart.destroy();
+          
+          labsTutorialsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: data.labels,
+              datasets: [
+                {
+                  label: 'Tutorials',
+                  data: data.tutorialRatings,
+                  backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                  borderColor: 'rgba(54, 162, 235, 1)',
+                  borderWidth: 1
+                },
+                {
+                  label: 'Labs',
+                  data: data.labRatings,
+                  backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                  borderColor: 'rgba(255, 99, 132, 1)',
+                  borderWidth: 1
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  max: 5,
+                  title: {
+                    display: true,
+                    text: 'Average Rating'
+                  }
+                }
+              }
+            }
+          });
+        } catch (error) {
+          console.error('Error loading labs and tutorials chart:', error);
+        }
+      }
+      
+      // 5. General Course Questions Chart (Donut)
+      async function loadGeneralQuestionsChart() {
+        const filters = getFilters();
+        const queryParams = new URLSearchParams({
+          semester: filters.semester
+        }).toString();
+        
+        try {
+          const response = await fetch(`/admin/api/general-questions?${queryParams}`);
+          if (!response.ok) throw new Error('Network response was not ok');
+          
+          const data = await response.json();
+          
+          // Use first question for pie chart example
+          const firstQuestion = data[0];
+          
+          const ctx = document.getElementById('pieChart').getContext('2d');
+          if (pieChart) pieChart.destroy();
+          
+          pieChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: ['Yes', 'No'],
+              datasets: [{
+                data: [firstQuestion.yesPercentage, firstQuestion.noPercentage],
+                backgroundColor: [
+                  'rgba(75, 192, 192, 0.7)',
+                  'rgba(255, 99, 132, 0.7)'
+                ],
+                borderColor: [
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                title: {
+                  display: true,
+                  text: firstQuestion.question
+                }
+              }
+            }
+          });
+        } catch (error) {
+          console.error('Error loading general questions chart:', error);
+        }
+      }
+      
+      // 6. Tutorial & Lab Components Trend Chart (Stacked Line)
+      async function loadTrendChart() {
+        try {
+          const response = await fetch('/admin/api/tutorial-lab-trends');
+          if (!response.ok) throw new Error('Network response was not ok');
+          
+          const data = await response.json();
+          
+          const ctx = document.getElementById('trendChart').getContext('2d');
+          if (trendChart) trendChart.destroy();
+          
+          // Add colors to datasets
+          const colors = [
+            { border: 'rgba(54, 162, 235, 1)', background: 'rgba(54, 162, 235, 0.1)' },
+            { border: 'rgba(255, 99, 132, 1)', background: 'rgba(255, 99, 132, 0.1)' },
+            { border: 'rgba(75, 192, 192, 1)', background: 'rgba(75, 192, 192, 0.1)' },
+            { border: 'rgba(255, 159, 64, 1)', background: 'rgba(255, 159, 64, 0.1)' },
+            { border: 'rgba(153, 102, 255, 1)', background: 'rgba(153, 102, 255, 0.1)' },
+            { border: 'rgba(255, 205, 86, 1)', background: 'rgba(255, 205, 86, 0.1)' }
+          ];
+          
+          data.datasets.forEach((dataset, i) => {
+            dataset.borderColor = colors[i % colors.length].border;
+            dataset.backgroundColor = colors[i % colors.length].background;
+dataset.tension = 0.3;
+dataset.fill = true;
+});
+
+trendChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: data.labels,
+    datasets: data.datasets
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 5,
+        title: {
+          display: true,
+          text: 'Average Rating'
+        }
+      }
+    }
+  }
+});
+} catch (error) {
+  console.error('Error loading trend chart:', error);
+}
+}
+
+// Initial load of all charts
+loadAllCharts();
+});
+</script>
+</body>
+</html>

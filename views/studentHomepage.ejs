@@ -470,22 +470,7 @@
             </div>
             <div class="profile-detail-item">
                 <p>Semester</p>
-                <h6>
-                <% let num = parseInt(student.enrollmentNumber.substring(6, 8));
-                let subtractedValue = new Date().getFullYear() - (2000 + num) ;
-                let currentMonth = new Date().getMonth() + 1
-                let finalValue = (currentMonth >= 2 && currentMonth <= 6) ? subtractedValue *2  : subtractedValue *2  + 1; %> 
-                <%= finalValue%>
-                <% if (finalValue == 1) { %>
-                    <%= "st" %>
-                <% } else if (finalValue == 2) { %>
-                    <%= "nd" %>
-                <% } else if (finalValue == 3) { %>
-                    <%= "rd" %>
-                <% } else if (finalValue >= 4) { %>
-                    <%= "th" %>
-                <% } %>
-                </h6>
+                <h6><%= student.semester %> </h6>
             </div>
             <div class="profile-detail-item">
                 <p>Batch</p>
@@ -496,17 +481,14 @@
             </div>
             <div class="profile-detail-item">
                 <p>Contact</p>
-                <h6 id="displayContact"><%= student.ContactNumber || 'N/A' %></h6>
+                <h6 id="displayContact"><%= student.contact || 'N' %></h6>
                 <div id="editContactField" class="edit-field d-none">
-                    <input type="tel" class="form-control form-control-sm" id="contactInput" value="<%= student.ContactNumber || '' %>">
+                    <input type="tel" class="form-control form-control-sm" id="contactInput" value="<%= student.contact || '' %>">
                 </div>
             </div>
             <div class="profile-detail-item">
                 <p>Address</p>
-                <h6 id="displayAddress"><%= student.Address || 'Sagar institute Of science and technology SISTec, Gandhi Nagar Bhopal(M.P)' %></h6>
-                <div id="editAddressField" class="edit-field d-none">
-                    <textarea class="form-control form-control-sm" id="addressInput" rows="2"><%= student.Address || 'Sagar institute Of science and technology SISTec, Gandhi Nagar Bhopal(M.P)' %></textarea>
-                </div>
+                <h6 id="displayAddress">Sagar institute Of science and technology SISTec, Gandhi Nagar Bhopal(M.P)</h6>
             </div>
         </div>
     </div>
@@ -621,7 +603,7 @@
         });
 
          // Configure toastr (toast notification)
-    toastr.options = {
+        toastr.options = {
         closeButton: true,
         progressBar: true,
         positionClass: "toast-top-right",
@@ -632,7 +614,7 @@
         // Initialize variables to store original values
         let originalName = '<%= student.name %>';
         let originalEmail = '<%= student.email %>';
-        let originalContact = '<%= student.ContactNumber || "" %>';
+        let originalContact = '<%= student.contact || "" %>';
         let originalAddress = '<%= student.Address || "Sagar institute Of science and technology SISTec, Gandhi Nagar Bhopal(M.P)" %>';
         
         // Toggle edit mode
@@ -672,7 +654,7 @@
             const updatedData = {
                 name: $('#nameInput').val(),
                 email: $('#emailInput').val(),
-                ContactNumber: $('#contactInput').val(),
+                contact: $('#contactInput').val(),
                 Address: $('#addressInput').val()
             };
             
@@ -687,8 +669,8 @@
                         // Update display elements with new values
                         $('#displayName').text(updatedData.name);
                         $('#displayEmail').text(updatedData.email);
-                        $('#displayContact').text(updatedData.ContactNumber || 'N/A');
-                        $('#displayAddress').text(updatedData.Address);
+                        $('#displayContact').text(updatedData.contact || 'N/A');
+                        // $('#displayAddress').text(updatedData.Address);
                         
                         // Update the profile avatar with first letter of name
                         $('.profile-avatar').text(updatedData.name.charAt(0).toUpperCase());
@@ -696,8 +678,8 @@
                         // Update original values
                         originalName = updatedData.name;
                         originalEmail = updatedData.email;
-                        originalContact = updatedData.ContactNumber;
-                        originalAddress = updatedData.Address;
+                        originalContact = updatedData.contact;
+                        // originalAddress = updatedData.Address;
                         
                         // Show success notification
                         toastr.success('Profile updated successfully');

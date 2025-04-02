@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Details - Admin Panel</title>
+    <title><%= title %> - Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -47,13 +47,27 @@
         .response-card {
             border-left: 4px solid #198754;
         }
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            .card-body {
+                padding: 15px;
+            }
+            .form-metadata span {
+                display: block;
+                margin-bottom: 5px;
+            }
+        }
     </style>
 </head>
 <body>
      <!-- Topbar -->
      <%- include('partials/adminTopNavbar', { admin: adminData }) %>
      <!-- Sidebar -->
-     <%- include('./partials/adminSideNavbar', { path: currentPath ,admin: adminData  }) %>
+     <%- include('./partials/adminSideNavbar', { path: currentPath, admin: adminData }) %>
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="mb-0">Form Details</h1>
@@ -68,8 +82,12 @@
                     <h3 class="mb-1"><%= form.title %></h3>
                     <div class="form-metadata">
                         <span class="me-3"><i class="far fa-calendar-alt me-1"></i>Created: <%= new Date(form.createdAt).toLocaleDateString() %></span>
-                        <span class="me-3"><i class="fas fa-hourglass-end me-1"></i>Deadline: <%= new Date(form.deadline).toLocaleDateString() %></span>
-                        <span><i class="fas fa-graduation-cap me-1"></i><%= form.semester %></span>
+                        <% if (form.deadline) { %>
+                            <span class="me-3"><i class="fas fa-hourglass-end me-1"></i>Deadline: <%= new Date(form.deadline).toLocaleDateString() %></span>
+                        <% } %>
+                        <% if (form.semester) { %>
+                            <span><i class="fas fa-graduation-cap me-1"></i><%= form.semester %></span>
+                        <% } %>
                     </div>
                 </div>
                 <span class="form-status <%= form.status === 'open' ? 'status-open' : 'status-closed' %>">
@@ -83,17 +101,19 @@
                         <h5 class="mb-3">Form Details</h5>
                         <table class="table table-borderless">
                             <tbody>
+                                <% if (form.formType) { %>
                                 <tr>
                                     <th class="ps-0" style="width: 150px;">Form Type:</th>
                                     <td><%= form.formType %></td>
                                 </tr>
+                                <% } %>
                                 <tr>
                                     <th class="ps-0">Faculty Assigned:</th>
                                     <td>
                                         <% if (facultyData && facultyData.length > 0) { %>
                                             <ul class="list-unstyled mb-0">
                                                 <% facultyData.forEach(faculty => { %>
-                                                    <li><%= faculty.name %></li>
+                                                    <li><%= faculty.name %> (<%= faculty.department %>)</li>
                                                 <% }) %>
                                             </ul>
                                         <% } else { %>
@@ -138,33 +158,56 @@
                     </div>
                 </div>
 
-                <h5 class="mb-3">Questions</h5>
-                <% if (form.questions && form.questions.length > 0) { %>
-                    <% form.questions.forEach((question, index) => { %>
-                        <div class="card question-card mb-3">
+                <!-- Show sections and questions as per route handler structure -->
+                <h5 class="mb-3">Form Sections</h5>
+                <% if (form.sections && form.sections.length > 0) { %>
+                    <% form.sections.forEach((section, sectionIndex) => { %>
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-1"><%= section.title %></h5>
+                                <% if (section.description) { %>
+                                    <p class="mb-0 text-muted"><%= section.description %></p>
+                                <% } %>
+                            </div>
                             <div class="card-body">
-                                <h6 class="mb-2">Question <%= index + 1 %> <%= question.required ? '<span class="text-danger">*</span>' : '' %></h6>
-                                <p class="mb-2"><%= question.questionText %></p>
-                                <div class="form-metadata">
-                                    <span class="badge bg-secondary me-2"><%= question.questionType %></span>
-                                    <% if (question.questionType === 'multiple_choice' && question.options && question.options.length > 0) { %>
-                                        <div class="mt-2">
-                                            <strong>Options:</strong>
-                                            <ul class="mt-1 mb-0">
-                                                <% question.options.forEach(option => { %>
-                                                    <li><%= option %></li>
-                                                <% }) %>
-                                            </ul>
+                                <% if (section.questions && section.questions.length > 0) { %>
+                                    <% section.questions.forEach((question, questionIndex) => { %>
+                                        <div class="card question-card mb-3">
+                                            <div class="card-body">
+                                                <h6 class="mb-2">
+                                                    Question <%= questionIndex + 1 %>
+                                                    <% if (question.required) { %>
+                                                        <span class="text-danger">*</span>
+                                                    <% } %>
+                                                </h6>
+                                                <p class="mb-2"><%= question.questionText %></p>
+                                                <div class="form-metadata">
+                                                    <span class="badge bg-secondary me-2"><%= question.questionType %></span>
+                                                    <% if (question.questionType === 'multiple_choice' && question.options && question.options.length > 0) { %>
+                                                        <div class="mt-2">
+                                                            <strong>Options:</strong>
+                                                            <ul class="mt-1 mb-0">
+                                                                <% question.options.forEach(option => { %>
+                                                                    <li><%= option %></li>
+                                                                <% }) %>
+                                                            </ul>
+                                                        </div>
+                                                    <% } %>
+                                                </div>
+                                            </div>
                                         </div>
-                                    <% } %>
-                                </div>
+                                    <% }) %>
+                                <% } else { %>
+                                    <div class="alert alert-info">No questions in this section.</div>
+                                <% } %>
                             </div>
                         </div>
                     <% }) %>
                 <% } else { %>
-                    <div class="alert alert-info">No questions added to this form.</div>
+                    <div class="alert alert-info">No sections added to this form.</div>
                 <% } %>
 
+                <!-- Keep responses section with adjustments -->
                 <h5 class="mb-3 mt-4">Responses</h5>
                 <% if (form.responses && form.responses.length > 0) { %>
                     <div class="accordion" id="responseAccordion">
@@ -183,7 +226,14 @@
                                                 <div class="card response-card mb-3">
                                                     <div class="card-body">
                                                         <h6 class="mb-2">Question <%= ansIndex + 1 %></h6>
-                                                        <p class="mb-1"><strong>Question:</strong> <%= form.questions[ansIndex] ? form.questions[ansIndex].questionText : 'Unknown Question' %></p>
+                                                        <!-- Use section structure to find question text -->
+                                                        <% let questionText = "Unknown Question"; %>
+                                                        <% form.sections.forEach(section => { %>
+                                                            <% section.questions.forEach((q, idx) => { %>
+                                                                <% if (idx === ansIndex) questionText = q.questionText; %>
+                                                            <% }); %>
+                                                        <% }); %>
+                                                        <p class="mb-1"><strong>Question:</strong> <%= questionText %></p>
                                                         <p class="mb-0"><strong>Answer:</strong> <%= answer %></p>
                                                     </div>
                                                 </div>
@@ -238,40 +288,40 @@
         const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
         
         function confirmDeleteForm(formId) {
-    document.getElementById('confirmModalTitle').textContent = 'Delete Form';
-    document.getElementById('confirmModalBody').textContent = 'Are you sure you want to delete this form? This action cannot be undone.';
-    
-    const confirmButton = document.getElementById('confirmModalButton');
-    confirmButton.className = 'btn btn-danger';
-    confirmButton.textContent = 'Delete';
-    confirmButton.onclick = () => {
-        // Use fetch API to call the DELETE endpoint
-        fetch(`/admin/forms/${formId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // If successful, redirect to forms list
-                window.location.href = '/admin/Total-Forms';
-            } else {
-                // If there's an error, show an alert
-                alert('Error: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while deleting the form');
-        });
-        
-        confirmModal.hide();
-    };
-    
-    confirmModal.show();
-}
+            document.getElementById('confirmModalTitle').textContent = 'Delete Form';
+            document.getElementById('confirmModalBody').textContent = 'Are you sure you want to delete this form? This action cannot be undone.';
+            
+            const confirmButton = document.getElementById('confirmModalButton');
+            confirmButton.className = 'btn btn-danger';
+            confirmButton.textContent = 'Delete';
+            confirmButton.onclick = () => {
+                // Use fetch API to call the DELETE endpoint
+                fetch(`/admin/forms/${formId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // If successful, redirect to forms list
+                        window.location.href = '/admin/forms';
+                    } else {
+                        // If there's an error, show an alert
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the form');
+                });
+                
+                confirmModal.hide();
+            };
+            
+            confirmModal.show();
+        }
 
         function confirmCloseForm(formId) {
             document.getElementById('confirmModalTitle').textContent = 'Close Form';

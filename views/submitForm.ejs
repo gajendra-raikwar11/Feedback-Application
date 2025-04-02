@@ -30,6 +30,7 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             padding: 2rem;
             margin-bottom: 2rem;
+            width: 100%;
         }
         
         .form-header {
@@ -50,23 +51,32 @@
             margin-bottom: 1.5rem;
         }
         
-        .metadata-item {
-            display: flex;
-            margin-bottom: 0.5rem;
-        }
-        
-        .metadata-label {
-            font-weight: 600;
-            min-width: 120px;
-        }
-        
-        .question-card {
+        .section-card {
             border-left: 4px solid var(--primary-color);
             background-color: #fff;
             border-radius: 0 8px 8px 0;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            color: var(--secondary-color);
+            font-weight: 600;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .question-container {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .question-container:hover {
+            background-color: var(--light-gray);
         }
         
         .required-star {
@@ -126,8 +136,18 @@
         }
         
         @media (max-width: 768px) {
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            .form-container {
+                padding: 1rem;
+            }
+            
             .metadata-item {
                 flex-direction: column;
+                margin-bottom: 0.5rem;
             }
             
             .metadata-label {
@@ -137,17 +157,39 @@
             .grid-question-table {
                 display: block;
                 overflow-x: auto;
+                width: 100%;
+            }
+            
+            .section-card {
+                padding: 1rem;
+            }
+            
+            .question-container {
+                padding: 0.75rem;
+            }
+            
+            .btn-submit, .btn-cancel {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            .d-flex.justify-content-end {
+                flex-direction: column;
+            }
+            
+            .btn {
+                margin-right: 0 !important;
+                margin-bottom: 0.5rem;
             }
         }
     </style>
 </head>
 <body>
     <!-- Navbar partial will be included here -->
-    <!-- <%# include('../partials/navbar') %> -->
     
-    <div class="container py-4">
+    <div class="container-fluid py-4">
         <div class="row justify-content-center">
-            <div class="col-lg-10">
+            <div class="col-lg-10 col-md-12 col-sm-12">
                 <!-- Toast container for notifications -->
                 <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
                 
@@ -159,181 +201,240 @@
                     
                     <div class="form-metadata p-3 mb-4 bg-light rounded">
                         <div class="row">
-                            <div class="col-md-4 mb-2 mb-md-0">
-                                <div class="metadata-item">
-                                    <span class="metadata-label fw-semibold"><i class="fas fa-user-tie me-2"></i>Faculty:</span>
-                                    <span><%= form.facultyForCurrentStudent %></span>
+                            <div class="col-md-4 col-sm-12 mb-2 mb-md-0">
+                                <div class="metadata-item d-flex">
+                                    <span class="metadata-label fw-semibold me-2"><i class="fas fa-user-tie me-2"></i>Faculty:</span>
+                                    <span><%= facultyName || 'Assigned Faculty' %></span>
                                 </div>
                             </div>
-                            <div class="col-md-4 mb-2 mb-md-0">
-                                <div class="metadata-item">
-                                    <span class="metadata-label fw-semibold"><i class="fas fa-calendar-alt me-2"></i>Deadline:</span>
+                            <div class="col-md-4 col-sm-12 mb-2 mb-md-0">
+                                <div class="metadata-item d-flex">
+                                    <span class="metadata-label fw-semibold me-2"><i class="fas fa-calendar-alt me-2"></i>Deadline:</span>
                                     <span><%= new Date(form.deadline).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></span>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="metadata-item">
-                                    <span class="metadata-label fw-semibold"><i class="fas fa-book me-2"></i>Semester:</span>
-                                    <span><%= form.semester %></span>
+                            <div class="col-md-4 col-sm-12">
+                                <div class="metadata-item d-flex">
+                                    <span class="metadata-label fw-semibold me-2"><i class="fas fa-book me-2"></i>Semester:</span>
+                                    <span><%= form.commonSemester %></span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <form id="feedbackForm" action="/student/submitFormResponse/<%= form._id %>" method="POST">
-                        <input type="hidden" name="facultyId" value="<%= facultyId %>">
+                        <input type="hidden" name="formId" value="<%= form._id %>">
+                        <input type="hidden" name="formTitle" value="<%= form.title %>">
+                        <input type="hidden" name="formType" value="<%= form.formType %>">
+                        <input type="hidden" name="commonSemester" value="<%= form.commonSemester %>">
                         
-                        <% form.questions.forEach((question, qIndex) => { %>
-                            <div class="question-container p-3 mb-4 <%= qIndex % 2 === 0 ? 'bg-light' : 'bg-white' %> rounded border">
-                                <h3 class="mb-3 fw-bold fs-5">
-                                    <%= question.text %> 
-                                    <% if (question.required) { %><span class="required text-danger">*</span><% } %>
-                                </h3>
-                                
-                                <% if (question.description) { %>
-                                    <p class="question-description text-muted mb-3"><%= question.description %></p>
-                                <% } %>
-                                
-                                <div class="question-input mt-3">
-                                    <% if(question.type === 'text') { %>
-                                        <input type="text" name="responses[<%= question._id %>]" class="form-control" 
-                                               <% if(question.required) { %>required<% } %>>
-                                               
-                                    <% } else if(question.type === 'paragraph') { %>
-                                        <textarea name="responses[<%= question._id %>]" class="form-control" rows="4"
-                                                  <% if(question.required) { %>required<% } %>></textarea>
-                                                  
-                                    <% } else if(question.type === 'rating') { %>
-                                        <div class="rating-container d-flex align-items-center justify-content-start gap-3 my-2">
-                                            <% for(let i = 1; i <= 5; i++) { %>
-                                                <div class="rating-option form-check">
-                                                    <input type="radio" class="form-check-input" id="rating-<%= question._id %>-<%= i %>" 
-                                                        name="responses[<%= question._id %>]" value="<%= i %>"
-                                                        <% if(question.required) { %>required<% } %>>
-                                                    <label class="form-check-label" for="rating-<%= question._id %>-<%= i %>"><%= i %></label>
-                                                </div>
-                                            <% } %>
-                                        </div>
-                                        
-                                    <% } else if(question.type === 'yes_no') { %>
-                                        <div class="yes-no-container d-flex gap-4 my-2">
-                                            <div class="option form-check">
-                                                <input type="radio" class="form-check-input" id="yes-<%= question._id %>" 
-                                                    name="responses[<%= question._id %>]" value="yes"
-                                                    <% if(question.required) { %>required<% } %>>
-                                                <label class="form-check-label" for="yes-<%= question._id %>">
-                                                    <%= question.yesNoLabels && question.yesNoLabels.yes ? question.yesNoLabels.yes : 'Yes' %>
-                                                </label>
-                                            </div>
-                                            <div class="option form-check">
-                                                <input type="radio" class="form-check-input" id="no-<%= question._id %>" 
-                                                    name="responses[<%= question._id %>]" value="no"
-                                                    <% if(question.required) { %>required<% } %>>
-                                                <label class="form-check-label" for="no-<%= question._id %>">
-                                                    <%= question.yesNoLabels && question.yesNoLabels.no ? question.yesNoLabels.no : 'No' %>
-                                                </label>
-                                            </div>
-                                        </div>
-                                        
-                                    <% } else if(question.type === 'mcq') { %>
-                                        <div class="mcq-container my-2">
-                                            <% if(question.options && Array.isArray(question.options)) { %>
-                                                <div class="row">
-                                                    <% question.options.forEach((option, index) => { %>
-                                                        <div class="col-md-6 mb-2">
-                                                            <div class="option form-check">
-                                                                <input type="radio" class="form-check-input" id="mcq-<%= question._id %>-<%= index %>" 
-                                                                    name="responses[<%= question._id %>]" value="<%= option %>"
-                                                                    <% if(question.required) { %>required<% } %>>
-                                                                <label class="form-check-label" for="mcq-<%= question._id %>-<%= index %>"><%= option %></label>
-                                                            </div>
-                                                        </div>
-                                                    <% }) %>
-                                                </div>
-                                            <% } %>
-                                        </div>
-                                        
-                                    <% } else if(question.type === 'checkbox') { %>
-                                        <div class="checkbox-container my-2">
-                                            <% if(question.options && Array.isArray(question.options)) { %>
-                                                <div class="row">
-                                                    <% question.options.forEach((option, index) => { %>
-                                                        <div class="col-md-6 mb-2">
-                                                            <div class="option form-check">
-                                                                <input type="checkbox" class="form-check-input" id="checkbox-<%= question._id %>-<%= index %>" 
-                                                                    name="responses[<%= question._id %>][]" value="<%= option %>">
-                                                                <label class="form-check-label" for="checkbox-<%= question._id %>-<%= index %>"><%= option %></label>
-                                                            </div>
-                                                        </div>
-                                                    <% }) %>
-                                                </div>
-                                            <% } %>
-                                        </div>
-                                        
-                                    <% } else if(question.type === 'dropdown') { %>
-                                        <select name="responses[<%= question._id %>]" class="form-select"
-                                                <% if(question.required) { %>required<% } %>>
-                                            <option value="">Select an option</option>
-                                            <% if(question.options && Array.isArray(question.options)) { %>
-                                                <% question.options.forEach(option => { %>
-                                                    <option value="<%= option %>"><%= option %></option>
-                                                <% }) %>
-                                            <% } %>
-                                        </select>
-                                        
-                                    <% } else if(question.type === 'date') { %>
-                                        <input type="date" name="responses[<%= question._id %>]" class="form-control"
-                                                <% if(question.required) { %>required<% } %>>
-                                                
-                                    <% } else if(question.type === 'grid') { %>
-                                        <div class="table-responsive">
-                                            <table class="grid-container table table-bordered">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th></th>
-                                                        <% if(question.gridOptions && Array.isArray(question.gridOptions.columns)) { %>
-                                                            <% question.gridOptions.columns.forEach(column => { %>
-                                                                <th class="text-center"><%= column %></th>
-                                                            <% }) %>
-                                                        <% } %>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <% if(question.gridOptions && Array.isArray(question.gridOptions.rows)) { %>
-                                                        <% question.gridOptions.rows.forEach(row => { %>
-                                                            <tr>
-                                                                <td class="fw-semibold"><%= row %></td>
-                                                                <% if(question.gridOptions && Array.isArray(question.gridOptions.columns)) { %>
-                                                                    <% question.gridOptions.columns.forEach((column, colIndex) => { %>
-                                                                        <td class="text-center">
-                                                                            <input type="radio" class="form-check-input" 
-                                                                                name="responses[<%= question._id %>][<%= row %>]" 
-                                                                                value="<%= column %>"
-                                                                                <% if(question.required) { %>required<% } %>>
-                                                                        </td>
-                                                                    <% }) %>
-                                                                <% } %>
-                                                            </tr>
-                                                        <% }) %>
+                        <% if (form.sections && form.sections.length > 0) { %>
+                            <% form.sections.forEach((section, sIndex) => { %>
+                                <div class="section-card mb-4">
+                                    <h3 class="section-title mb-3"><%= section.title %></h3>
+                                    <input type="hidden" name="sectionTitles[<%= section._id %>]" value="<%= section.title %>">
+                                    
+                                    <% if (section.description) { %>
+                                        <p class="section-description text-muted mb-4"><%= section.description %></p>
+                                    <% } %>
+                                    
+                                    <% if (section.questions && section.questions.length > 0) { %>
+                                        <% section.questions.forEach((question, qIndex) => { %>
+                                            <div class="question-container <%= qIndex % 2 === 0 ? 'bg-light' : 'bg-white' %> rounded border p-3 mb-3">
+                                                <h4 class="mb-3 fw-semibold fs-5">
+                                                    <%= question.text %> 
+                                                    <% if (question.required) { %>
+                                                        <span class="required-star text-danger">*</span>
                                                     <% } %>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        
-                                    <% } else { %>
-                                        <!-- Default to text input if type is not recognized -->
-                                        <input type="text" name="responses[<%= question._id %>]" class="form-control"
-                                                <% if(question.required) { %>required<% } %>>
+                                                </h4>
+                                                
+                                                <!-- Store question text for schema compatibility -->
+                                                <input type="hidden" name="questionTexts[<%= question._id %>]" value="<%= question.text %>">
+                                                
+                                                <div class="question-input mt-3">
+                                                    <% if (question.type === 'text') { %>
+                                                        <input type="text" name="responses[<%= question._id %>]" class="form-control" 
+                                                               data-section-title="<%= section.title %>"
+                                                               <% if (question.required) { %>required<% } %>>
+                                                               
+                                                    <% } else if (question.type === 'textarea') { %>
+                                                        <textarea name="responses[<%= question._id %>]" class="form-control" rows="4"
+                                                                data-section-title="<%= section.title %>"
+                                                                <% if (question.required) { %>required<% } %>></textarea>
+                                                               
+                                                    <% } else if (question.type === 'rating') { %>
+                                                        <div class="rating-container d-flex flex-wrap align-items-center justify-content-start gap-3 my-2">
+                                                            <% if (question.options && question.options.length > 0) { %>
+                                                                <% question.options.forEach((option, i) => { %>
+                                                                    <div class="rating-option form-check">
+                                                                        <input type="radio" class="form-check-input" 
+                                                                               id="rating-<%= question._id %>-<%= i %>" 
+                                                                               name="responses[<%= question._id %>]" 
+                                                                               value="<%= option %>"
+                                                                               data-section-title="<%= section.title %>"
+                                                                               <% if (question.required) { %>required<% } %>>
+                                                                        <label class="form-check-label" 
+                                                                               for="rating-<%= question._id %>-<%= i %>"><%= option %></label>
+                                                                    </div>
+                                                                <% }); %>
+                                                            <% } else { %>
+                                                                <!-- Default 1-5 rating if no options provided -->
+                                                                <% for (let i = 1; i <= 5; i++) { %>
+                                                                    <div class="rating-option form-check">
+                                                                        <input type="radio" class="form-check-input" 
+                                                                               id="rating-<%= question._id %>-<%= i %>" 
+                                                                               name="responses[<%= question._id %>]" 
+                                                                               value="<%= i %>"
+                                                                               data-section-title="<%= section.title %>"
+                                                                               <% if (question.required) { %>required<% } %>>
+                                                                        <label class="form-check-label" 
+                                                                               for="rating-<%= question._id %>-<%= i %>"><%= i %></label>
+                                                                    </div>
+                                                                <% } %>
+                                                            <% } %>
+                                                        </div>
+                                                        
+                                                    <% } else if (question.type === 'yes_no') { %>
+                                                        <div class="yes-no-container d-flex flex-wrap gap-4 my-2">
+                                                            <div class="option form-check">
+                                                                <input type="radio" class="form-check-input" 
+                                                                       id="yes-<%= question._id %>" 
+                                                                       name="responses[<%= question._id %>]" 
+                                                                       value="yes"
+                                                                       data-section-title="<%= section.title %>"
+                                                                       <% if (question.required) { %>required<% } %>>
+                                                                <label class="form-check-label" for="yes-<%= question._id %>">
+                                                                    <%= question.yesNoLabels && question.yesNoLabels.yes ? question.yesNoLabels.yes : 'Yes' %>
+                                                                </label>
+                                                            </div>
+                                                            <div class="option form-check">
+                                                                <input type="radio" class="form-check-input" 
+                                                                       id="no-<%= question._id %>" 
+                                                                       name="responses[<%= question._id %>]" 
+                                                                       value="no"
+                                                                       data-section-title="<%= section.title %>"
+                                                                       <% if (question.required) { %>required<% } %>>
+                                                                <label class="form-check-label" for="no-<%= question._id %>">
+                                                                    <%= question.yesNoLabels && question.yesNoLabels.no ? question.yesNoLabels.no : 'No' %>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                    <% } else if (question.type === 'mcq' || question.type === 'radio') { %>
+                                                        <div class="mcq-container my-2">
+                                                            <% if (question.options && Array.isArray(question.options)) { %>
+                                                                <div class="row">
+                                                                    <% question.options.forEach((option, index) => { %>
+                                                                        <div class="col-md-6 col-sm-12 mb-2">
+                                                                            <div class="option form-check">
+                                                                                <input type="radio" class="form-check-input" 
+                                                                                       id="mcq-<%= question._id %>-<%= index %>" 
+                                                                                       name="responses[<%= question._id %>]" 
+                                                                                       value="<%= option %>"
+                                                                                       data-section-title="<%= section.title %>"
+                                                                                       <% if (question.required) { %>required<% } %>>
+                                                                                <label class="form-check-label" 
+                                                                                       for="mcq-<%= question._id %>-<%= index %>"><%= option %></label>
+                                                                            </div>
+                                                                        </div>
+                                                                    <% }); %>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                        
+                                                    <% } else if (question.type === 'checkbox') { %>
+                                                        <div class="checkbox-container my-2">
+                                                            <% if (question.options && Array.isArray(question.options)) { %>
+                                                                <div class="row">
+                                                                    <% question.options.forEach((option, index) => { %>
+                                                                        <div class="col-md-6 col-sm-12 mb-2">
+                                                                            <div class="option form-check">
+                                                                                <input type="checkbox" class="form-check-input" 
+                                                                                       id="checkbox-<%= question._id %>-<%= index %>" 
+                                                                                       name="responses[<%= question._id %>][]" 
+                                                                                       value="<%= option %>"
+                                                                                       data-section-title="<%= section.title %>">
+                                                                                <label class="form-check-label" 
+                                                                                       for="checkbox-<%= question._id %>-<%= index %>"><%= option %></label>
+                                                                            </div>
+                                                                        </div>
+                                                                    <% }); %>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                        
+                                                    <% } else if (question.type === 'dropdown') { %>
+                                                        <select name="responses[<%= question._id %>]" class="form-select"
+                                                                data-section-title="<%= section.title %>"
+                                                                <% if (question.required) { %>required<% } %>>
+                                                            <option value="">Select an option</option>
+                                                            <% if (question.options && Array.isArray(question.options)) { %>
+                                                                <% question.options.forEach(option => { %>
+                                                                    <option value="<%= option %>"><%= option %></option>
+                                                                <% }); %>
+                                                            <% } %>
+                                                        </select>
+                                                        
+                                                    <% } else if (question.type === 'date') { %>
+                                                        <input type="date" name="responses[<%= question._id %>]" class="form-control"
+                                                                data-section-title="<%= section.title %>"
+                                                                <% if (question.required) { %>required<% } %>>
+                                                                
+                                                    <% } else if (question.type === 'grid') { %>
+                                                        <div class="table-responsive">
+                                                            <table class="grid-question-table table table-bordered">
+                                                                <thead class="table-light">
+                                                                    <tr>
+                                                                        <th></th>
+                                                                        <% if (question.gridOptions && Array.isArray(question.gridOptions.columns)) { %>
+                                                                            <% question.gridOptions.columns.forEach(column => { %>
+                                                                                <th class="text-center"><%= column %></th>
+                                                                            <% }); %>
+                                                                        <% } %>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <% if (question.gridOptions && Array.isArray(question.gridOptions.rows)) { %>
+                                                                        <% question.gridOptions.rows.forEach(row => { %>
+                                                                            <tr>
+                                                                                <td class="fw-semibold"><%= row %></td>
+                                                                                <% if (question.gridOptions && Array.isArray(question.gridOptions.columns)) { %>
+                                                                                    <% question.gridOptions.columns.forEach((column, colIndex) => { %>
+                                                                                        <td class="text-center">
+                                                                                            <input type="radio" class="form-check-input" 
+                                                                                                   name="responses[<%= question._id %>][<%= row %>]" 
+                                                                                                   value="<%= column %>"
+                                                                                                   data-section-title="<%= section.title %>"
+                                                                                                   <% if (question.required) { %>required<% } %>>
+                                                                                        </td>
+                                                                                    <% }); %>
+                                                                                <% } %>
+                                                                            </tr>
+                                                                        <% }); %>
+                                                                    <% } %>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                        
+                                                    <% } else { %>
+                                                        <!-- Default to text input if type is not recognized -->
+                                                        <input type="text" name="responses[<%= question._id %>]" class="form-control"
+                                                                data-section-title="<%= section.title %>"
+                                                                <% if (question.required) { %>required<% } %>>
+                                                    <% } %>
+                                                </div>
+                                            </div>
+                                        <% }); %>
                                     <% } %>
                                 </div>
-                            </div>
-                        <% }) %>
+                            <% }); %>
+                        <% } %>
                         
                         <div class="d-flex justify-content-end mt-4 mb-2">
                             <a href="/student/studentFormsPage" class="btn btn-outline-secondary me-2">
                                 <i class="fas fa-times me-1"></i> Cancel
                             </a>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary btn-submit">
                                 <i class="fas fa-paper-plane me-1"></i> Submit Response
                             </button>
                         </div>
@@ -349,113 +450,321 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check for flash messages from the server
-            const showToast = (message, type) => {
-                const backgroundColor = type === 'error' ? '#e74c3c' : 
-                                        type === 'success' ? '#2ecc71' : 
-                                        type === 'warning' ? '#f39c12' : '#3498db';
+       document.addEventListener('DOMContentLoaded', function() {
+    // Check for flash messages from the server (keeping your existing toast code)
+    const showToast = (message, type) => {
+        const backgroundColor = type === 'error' ? '#e74c3c' : 
+                                type === 'success' ? '#2ecc71' : 
+                                type === 'warning' ? '#f39c12' : '#3498db';
+        
+        Toastify({
+            text: message,
+            duration: 5000,
+            close: true,
+            gravity: "top",
+            position: "right", 
+            backgroundColor: backgroundColor,
+            stopOnFocus: true
+        }).showToast();
+    };
+    
+    // Display flash messages if they exist (keeping your existing code)
+    if (typeof messages !== 'undefined') {
+        if (messages.error) {
+            messages.error.forEach(function(message) {
+                showToast(message, 'error');
+            });
+        }
+        if (messages.success) {
+            messages.success.forEach(function(message) {
+                showToast(message, 'success');
+            });
+        }
+    }
+    
+    if (typeof successMessage !== 'undefined' && successMessage) {
+        showToast(successMessage, 'success');
+    }
+    
+    // Form validation and submission handling
+    const form = document.getElementById('feedbackForm');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            
+            // Validate required fields
+            let isValid = true;
+            const requiredElements = form.querySelectorAll('[required]');
+            
+            // Reset validation flags
+            document.querySelectorAll('.question-container').forEach(container => {
+                delete container.dataset.validated;
+                container.style.borderLeft = '';
+                container.style.borderColor = '';
+            });
+            
+            requiredElements.forEach(element => {
+                if ((element.type === 'radio' || element.type === 'checkbox') && 
+                    !document.querySelector(`input[name="${element.name}"]:checked`)) {
+                    // For radio buttons and checkboxes, check if any in the group is checked
+                    const questionContainer = element.closest('.question-container');
+                    if (questionContainer && !questionContainer.dataset.validated) {
+                        isValid = false;
+                        questionContainer.dataset.validated = true; // Mark as validated to avoid duplicate errors
+                        questionContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        questionContainer.style.borderLeft = '4px solid #e74c3c';
+                        questionContainer.style.borderColor = '#e74c3c';
+                    }
+                } else if (!element.value && element.type !== 'radio' && element.type !== 'checkbox') {
+                    isValid = false;
+                    // Find the parent question container
+                    const questionContainer = element.closest('.question-container');
+                    if (questionContainer) {
+                        questionContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        questionContainer.style.borderLeft = '4px solid #e74c3c';
+                        questionContainer.style.borderColor = '#e74c3c';
+                        
+                        // Highlight the input
+                        if (element.classList.contains('form-control') || element.classList.contains('form-select')) {
+                            element.classList.add('is-invalid');
+                        }
+                    }
+                }
+            });
+            
+            if (!isValid) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            // Format data to match the route handler expectations
+            const formId = document.querySelector('input[name="formId"]').value;
+            const formTitle = document.querySelector('input[name="formTitle"]').value;
+            const formType = document.querySelector('input[name="formType"]').value;
+            const commonSemester = document.querySelector('input[name="commonSemester"]').value;
+            
+            // Get all question responses
+            const answers = [];
+            const responseInputs = document.querySelectorAll('[name^="responses["]');
+            
+            responseInputs.forEach(input => {
+                // Extract questionID from the input name (format: responses[questionID])
+                const match = input.name.match(/responses\[(.*?)\]/);
+                if (!match) return;
                 
-                Toastify({
-                    text: message,
-                    duration: 5000,
-                    close: true,
-                    gravity: "top",
-                    position: "right", 
-                    backgroundColor: backgroundColor,
-                    stopOnFocus: true
-                }).showToast();
+                const questionID = match[1];
+                
+                // Skip if this question was already processed (needed for radio buttons with same name)
+                if (answers.some(a => a.questionID === questionID)) return;
+                
+                // Get section title from data attribute
+                const sectionTitle = input.getAttribute('data-section-title') || '';
+                
+                // Get question text from hidden field
+                const questionTextInput = document.querySelector(`input[name="questionTexts[${questionID}]"]`);
+                const questionText = questionTextInput ? questionTextInput.value : '';
+                
+                // Determine the question type based on input type
+                let questionType = '';
+                let responseValue = null;
+                let responseOptions = [];
+                
+                if (input.type === 'text' || input.type === 'date') {
+                    questionType = input.type;
+                    responseValue = input.value;
+                } else if (input.type === 'textarea') {
+                    questionType = 'textarea';
+                    responseValue = input.value;
+                } else if (input.type === 'radio') {
+                    // Handle radio buttons (rating, yes_no, mcq)
+                    const radioName = input.name;
+                    const checkedRadio = document.querySelector(`input[name="${radioName}"]:checked`);
+                    
+                    // Determine specific radio type
+                    if (radioName.includes('rating')) {
+                        questionType = 'rating';
+                        responseValue = checkedRadio ? parseInt(checkedRadio.value) : null;
+                    } else if (input.id.includes('yes-') || input.id.includes('no-')) {
+                        questionType = 'yes_no';
+                        responseValue = checkedRadio ? checkedRadio.value : null;
+                    } else {
+                        questionType = 'radio';
+                        responseValue = checkedRadio ? checkedRadio.value : null;
+                    }
+                } else if (input.type === 'checkbox') {
+                    questionType = 'checkbox';
+                    // Get all checked checkboxes with the same name
+                    const checkboxes = document.querySelectorAll(`input[name="${input.name}"]:checked`);
+                    responseOptions = Array.from(checkboxes).map(cb => cb.value);
+                } else if (input.tagName === 'SELECT') {
+                    questionType = 'dropdown';
+                    responseValue = input.value;
+                }
+                
+                // Prepare the answer object
+                const answer = {
+                    questionID,
+                    questionText,
+                    sectionTitle,
+                    questionType,
+                    responseText: ['text', 'textarea', 'date', 'yes_no', 'radio', 'dropdown'].includes(questionType) ? responseValue : null,
+                    responseOptions: questionType === 'checkbox' ? responseOptions : [],
+                    responseRating: questionType === 'rating' ? responseValue : null,
+                    responseDate: questionType === 'date' ? responseValue : null
+                };
+                
+                answers.push(answer);
+            });
+            
+            // Handle grid questions separately as they have a different structure
+            const gridQuestions = document.querySelectorAll('table.grid-question-table');
+            gridQuestions.forEach(table => {
+                const questionContainer = table.closest('.question-container');
+                if (!questionContainer) return;
+                
+                // Find the question ID from any radio button in the grid
+                const firstRadio = table.querySelector('input[type="radio"]');
+                if (!firstRadio) return;
+                
+                const match = firstRadio.name.match(/responses\[(.*?)\]/);
+                if (!match) return;
+                
+                const questionID = match[1];
+                const sectionTitle = firstRadio.getAttribute('data-section-title') || '';
+                
+                // Get question text from hidden field
+                const questionTextInput = document.querySelector(`input[name="questionTexts[${questionID}]"]`);
+                const questionText = questionTextInput ? questionTextInput.value : '';
+                
+                // For grid questions, we'll create an object with row -> selected column
+                const gridResponses = {};
+                
+                // Get all rows
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const rowTitle = row.querySelector('td').textContent.trim();
+                    const checkedRadio = row.querySelector('input[type="radio"]:checked');
+                    
+                    if (checkedRadio) {
+                        gridResponses[rowTitle] = checkedRadio.value;
+                    }
+                });
+                
+                // Add this as a special answer
+                answers.push({
+                    questionID,
+                    questionText,
+                    sectionTitle,
+                    questionType: 'grid',
+                    responseText: JSON.stringify(gridResponses),
+                    responseOptions: [],
+                    responseRating: null,
+                    responseDate: null
+                });
+            });
+            
+            // Create the final payload
+            const payload = {
+                formId,
+                formTitle,
+                formType,
+                commonSemester,
+                answers
             };
             
-            // Example of how to display flash messages
-            <% if (typeof messages !== 'undefined' && messages.error) { %>
-                <% messages.error.forEach(function(message) { %>
-                    showToast(`<%= message %>`, 'error');
-                <% }); %>
-            <% } %>
-            
-            <% if (typeof messages !== 'undefined' && messages.success) { %>
-                <% messages.success.forEach(function(message) { %>
-                    showToast(`<%= message %>`, 'success');
-                <% }); %>
-            <% } %>
-            
-            // Form validation
-            const form = document.getElementById('feedbackForm');
-            if (form) {
-                form.addEventListener('submit', function(event) {
-                    let isValid = true;
-                    const requiredElements = form.querySelectorAll('[required]');
-                    
-                    requiredElements.forEach(element => {
-                        if (!element.value) {
-                            isValid = false;
-                            // Find the parent question card
-                            const questionCard = element.closest('.question-card');
-                            if (questionCard) {
-                                questionCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                questionCard.style.borderLeft = '4px solid #e74c3c';
-                                
-                                // Highlight the input
-                                if (element.classList.contains('form-control') || element.classList.contains('form-select')) {
-                                    element.classList.add('is-invalid');
-                                }
-                            }
-                            
-                            showToast('Please fill in all required fields', 'error');
-                        }
+            // Now send the data using fetch
+            fetch(`/student/submitFormResponse/${formId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Submission failed');
                     });
-                    
-                    if (!isValid) {
-                        event.preventDefault();
-                    }
-                });
-                
-                // Remove error highlighting when field is edited
-                form.addEventListener('input', function(event) {
-                    const element = event.target;
-                    
-                    if (element.classList.contains('is-invalid')) {
-                        element.classList.remove('is-invalid');
-                    }
-                    
-                    // Find the parent question card and reset its style
-                    const questionCard = element.closest('.question-card');
-                    if (questionCard && questionCard.style.borderLeft.includes('#e74c3c')) {
-                        questionCard.style.borderLeft = '4px solid var(--primary-color)';
-                    }
-                });
+                }
+                return response.json();
+            })
+            .then(data => {
+                showToast('Your feedback has been submitted successfully', 'success');
+                setTimeout(() => {
+                    window.location.href = '/student/studentFormsPage?submitted=true';
+                }, 1000);
+            })
+            .catch(error => {
+                showToast(error.message || 'An error occurred while submitting your response', 'error');
+            });
+        });
+        
+        // Remove error highlighting when field is edited (keeping your existing code)
+        form.addEventListener('input', function(event) {
+            const element = event.target;
+            
+            if (element.classList.contains('is-invalid')) {
+                element.classList.remove('is-invalid');
             }
             
-            // Deadline countdown
-            const deadlineElement = document.querySelector('.metadata-item:nth-child(2) span:last-child');
-            if (deadlineElement) {
-                const deadlineDate = new Date('<%= form.deadline %>');
-                const now = new Date();
-                
-                // If deadline is within 24 hours, show countdown
-                if (deadlineDate - now < 24 * 60 * 60 * 1000 && deadlineDate > now) {
-                    const updateCountdown = () => {
-                        const currentTime = new Date();
-                        const timeLeft = deadlineDate - currentTime;
-                        
-                        if (timeLeft <= 0) {
-                            deadlineElement.innerHTML += ' <span class="badge bg-danger">Expired</span>';
-                            return;
-                        }
-                        
-                        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-                        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                        
-                        deadlineElement.innerHTML = `${new Date(deadlineDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} <span class="badge bg-warning text-dark">${hours}h ${minutes}m ${seconds}s left</span>`;
-                    };
-                    
-                    updateCountdown();
-                    setInterval(updateCountdown, 1000);
-                }
+            // Find the parent question container and reset its style
+            const questionContainer = element.closest('.question-container');
+            if (questionContainer && (questionContainer.style.borderLeft.includes('#e74c3c') || 
+                                     questionContainer.style.borderColor.includes('#e74c3c'))) {
+                questionContainer.style.borderLeft = '';
+                questionContainer.style.borderColor = '';
+                delete questionContainer.dataset.validated; // Reset validation flag
             }
         });
+    }
+    
+    // Deadline countdown (keeping your existing code)
+    const deadlineElement = document.querySelector('.metadata-item:nth-child(2) span:last-child');
+    if (deadlineElement) {
+        const deadlineDate = new Date(deadlineElement.getAttribute('data-deadline') || deadlineElement.textContent);
+        const now = new Date();
+        
+        // If deadline is within 24 hours, show countdown
+        if (deadlineDate - now < 24 * 60 * 60 * 1000 && deadlineDate > now) {
+            const updateCountdown = () => {
+                const currentTime = new Date();
+                const timeLeft = deadlineDate - currentTime;
+                
+                if (timeLeft <= 0) {
+                    deadlineElement.innerHTML += ' <span class="badge bg-danger">Expired</span>';
+                    return;
+                }
+                
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                
+                deadlineElement.innerHTML = `${deadlineDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} <span class="badge bg-warning text-dark">${hours}h ${minutes}m ${seconds}s left</span>`;
+            };
+            
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+    }
+
+    // Responsive design adjustments (keeping your existing code)
+    const checkScreenSize = () => {
+        const buttonsContainer = document.querySelector('.d-flex.justify-content-end');
+        if (buttonsContainer) {
+            if (window.innerWidth <= 768) {
+                buttonsContainer.classList.remove('justify-content-end');
+                buttonsContainer.classList.add('flex-column');
+            } else {
+                buttonsContainer.classList.add('justify-content-end');
+                buttonsContainer.classList.remove('flex-column');
+            }
+        }
+    };
+    
+    // Check on load and when window resizes
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+});
     </script>
 </body>
 </html>
