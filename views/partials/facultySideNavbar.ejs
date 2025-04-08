@@ -1,24 +1,36 @@
 <div class="sidebar" id="sidebar">
-    <!-- This would be your partial include in a real application -->
+    <button class="sidebar-close-btn" aria-label="Close sidebar">&times;</button>
     <div class="logo">
         <h4>Faculty Portal</h4>
     </div>
-    <div class="nav-item active">
-        <a href="/dashboard" style="text-decoration: none; color: white;"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a>
+    <div class="nav-item <%= locals.activePage === 'dashboard' ? 'active' : '' %>">
+        <a href="/faculty/dashboard" style="text-decoration: none; color: white;">
+            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+        </a>
+    </div>
+    <div class="nav-item <%= locals.activePage === 'students' ? 'active' : '' %>">
+        <a href="/faculty/students" style="text-decoration: none; color: white;">
+            <i class="fas fa-user-graduate me-2"></i> Students
+        </a>
+    </div>
+    <div class="nav-item <%= locals.activePage === 'forms' ? 'active' : '' %>">
+        <a href="/forms" style="text-decoration: none; color: white;">
+            <i class="fas fa-clipboard-list me-2"></i> Forms
+        </a>
+    </div>
+    <div class="nav-item <%= locals.activePage === 'analytics' ? 'active' : '' %>">
+        <a href="/analytics" style="text-decoration: none; color: white;">
+            <i class="fas fa-chart-bar me-2"></i> Analytics
+        </a>
+    </div>
+    <div class="nav-item <%= locals.activePage === 'settings' ? 'active' : '' %>">
+        <a href="/settings" style="text-decoration: none; color: white;">
+            <i class="fas fa-cog me-2"></i> Settings
+        </a>
     </div>
     <div class="nav-item">
-        <a href="/students" style="text-decoration: none; color: white;"><i class="fas fa-user-graduate me-2"></i> Students</a>
-    </div>
-    <div class="nav-item">
-        <a href="/forms" style="text-decoration: none; color: white;"><i class="fas fa-clipboard-list me-2"></i> Forms</a>
-    </div>
-    <div class="nav-item">
-        <a href="/analytics" style="text-decoration: none; color: white;"><i class="fas fa-chart-bar me-2"></i> Analytics</a>
-    </div>
-    <div class="nav-item">
-        <a href="/settings" style="text-decoration: none; color: white;"><i class="fas fa-cog me-2"></i> Settings</a>
-    </div>
-    <div class="nav-item">
-        <a href="/faculty/logout" style="text-decoration: none; color: white;"><i class="fas fa-sign-out-alt me-2"></i> Logout</a> 
+        <a href="/faculty/logout" style="text-decoration: none; color: white;">
+            <i class="fas fa-sign-out-alt me-2"></i> Logout
+        </a> 
     </div>
 </div>

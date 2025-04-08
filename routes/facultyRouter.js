@@ -399,4 +399,11 @@ router.get("/logout", (req, res) => {
   }
 });
 
+
+router.get('/students', (req, res) => {
+  // Just render the static HTML page
+
+ res.render("faculty-students");
+});
+
 module.exports = router;

@@ -17,6 +17,8 @@
             --accent-color: #ff4081;
             --text-color: #333;
             --light-gray: #eee;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
         }
 
         body {
@@ -132,119 +134,95 @@
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
-        .student-list-item {
-            cursor: pointer;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: all 0.2s;
-        }
-
-        .student-list-item:hover {
-            background-color: var(--light-gray);
-        }
-
-        .student-list-item.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .feedback-pill {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .feedback-submitted {
-            background-color: #e8f5e9;
-            color: #388e3c;
-        }
-
-        .feedback-pending {
-            background-color: #fff8e1;
-            color: #ffa000;
-        }
-
         .toggle-btn {
             display: none;
             position: fixed;
             top: 20px;
-            /* Increased from 10px */
             left: 20px;
-            /* Increased from 10px */
             z-index: 1001;
             background-color: var(--primary-color);
             color: white;
             border: none;
             border-radius: 5px;
             padding: 10px 15px;
-            /* Slightly larger padding */
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            /* Add shadow for better visibility */
         }
 
-        .form-type-badge {
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 12px;
+        .stat-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
         }
 
-        .type-institutional {
-            background-color: #e3f2fd;
-            color: #1976d2;
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
         }
 
-        .type-academic {
-            background-color: #e8f5e9;
-            color: #388e3c;
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
         }
 
-        .type-training {
-            background-color: #fce4ec;
-            color: #d81b60;
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-title {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .filter-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 60vh;
+            width: 100%;
         }
 
         @media (max-width: 768px) {
             .toggle-btn {
                 display: block;
             }
+
+            .chart-container {
+                height: 40vh;
+            }
         }
 
-        .filter-buttons .btn {
-            margin-right: 5px;
-            margin-bottom: 5px;
+        .forms-count-card {
+            border-left: 5px solid var(--primary-color);
         }
 
-        .filter-buttons .btn.active {
-            background-color: var(--primary-color);
+        .sidebar-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px 10px;
             color: white;
+            display: none;
         }
 
-        .attendance-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .attendance-excellent {
-            background-color: #e8f5e9;
-            color: #388e3c;
-        }
-
-        .attendance-good {
-            background-color: #e3f2fd;
-            color: #1976d2;
-        }
-
-        .attendance-average {
-            background-color: #fff8e1;
-            color: #ffa000;
-        }
-
-        .attendance-poor {
-            background-color: #ffebee;
-            color: #d32f2f;
+        @media (max-width: 768px) {
+            .sidebar-close-btn {
+                display: block;
+            }
         }
     </style>
 </head>
@@ -255,788 +233,541 @@
         <i class="fas fa-bars"></i>
     </button>
 
-    <!-- Include Navbar Partial -->
-    <%- include('partials/facultySideNavbar') %>
+    <!-- Sidebar -->
+    <%- include('partials/facultySideNavbar', {activePage: 'dashboard'}) %>
 
-        <!-- Main Content -->
-        <div class="content" id="content">
-            <div class="container-fluid">
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <h2 class="mb-0">Faculty Dashboard</h2>
-                        <small class="text-muted">View and manage assigned forms and student feedback</small>
+    <!-- Main Content -->
+    <div class="content" id="content">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h2 class="mb-0">Faculty Dashboard</h2>
+                    <small class="text-muted">View student feedback statistics and assigned forms</small>
+                </div>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="filter-section mb-4">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="semesterFilter" class="form-label">Semester</label>
+                        <select class="form-select" id="semesterFilter">
+                            <option value="all">All Semesters</option>
+                            <option value="Spring2025">Spring 2025</option>
+                            <option value="Fall2024">Fall 2024</option>
+                            <option value="Spring2024">Spring 2024</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="sectionFilter" class="form-label">Section</label>
+                        <select class="form-select" id="sectionFilter">
+                            <option value="all">All Sections</option>
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="courseFilter" class="form-label">Course</label>
+                        <select class="form-select" id="courseFilter">
+                            <option value="all">All Courses</option>
+                            <option value="CS101">CS101 - Intro to Programming</option>
+                            <option value="CS201">CS201 - Data Structures</option>
+                            <option value="CS301">CS301 - Database Systems</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="formFilter" class="form-label">Form Type</label>
+                        <select class="form-select" id="formFilter">
+                            <option value="all">All Forms</option>
+                            <option value="institutional">Institutional</option>
+                            <option value="academic">Academic</option>
+                            <option value="training">Training</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card bg-white">
+                        <div class="stat-icon text-primary">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-number" id="totalStudents">120</div>
+                        <div class="stat-title">Total Students</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card bg-white">
+                        <div class="stat-icon text-success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-number" id="submittedFeedback">85</div>
+                        <div class="stat-title">Feedback Submitted</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card bg-white">
+                        <div class="stat-icon text-warning">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-number" id="pendingFeedback">35</div>
+                        <div class="stat-title">Feedback Pending</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card bg-white">
+                        <div class="stat-icon text-info">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div class="stat-number" id="totalForms">6</div>
+                        <div class="stat-title">Assigned Forms</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Feedback Completion Chart -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>Student Feedback Completion Status</span>
+                            <select class="form-select form-select-sm" style="width: auto;" id="chartViewSelector">
+                                <option value="overall">Overall</option>
+                                <option value="bySemester">By Semester</option>
+                                <option value="bySection">By Section</option>
+                                <option value="byCourse">By Course</option>
+                            </select>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="feedbackCompletionChart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <!-- Student List and Filters -->
-                    <div class="col-lg-4">
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <span>Section Students</span>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                                        id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Filter
-                                    </button>
-                                    <ul class="dropdown-menu" aria-labelledby="filterDropdown">
-                                        <li><a class="dropdown-item" href="#" data-filter="all">All Students</a></li>
-                                        <li><a class="dropdown-item" href="#" data-filter="submitted">Feedback
-                                                Submitted</a>
-                                        </li>
-                                        <li><a class="dropdown-item" href="#" data-filter="pending">Feedback Pending</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                    <input type="text" class="form-control" placeholder="Search students..."
-                                        id="studentSearch">
-                                </div>
-
-                                <div class="student-list" id="studentList">
-                                    <!-- Student list items will be dynamically added here -->
-                                </div>
-                            </div>
+                <!-- Form Count Cards -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <span>Forms by Type</span>
                         </div>
-                    </div>
-
-                    <!-- Forms Section and Charts -->
-                    <div class="col-lg-8">
-                        <div class="card mb-4">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <span>Admin Assigned Forms</span>
-                                <div class="filter-buttons">
-                                    <button class="btn btn-sm btn-outline-primary active"
-                                        data-form-type="all">All</button>
-                                    <button class="btn btn-sm btn-outline-primary"
-                                        data-form-type="institutional">Institutional</button>
-                                    <button class="btn btn-sm btn-outline-primary"
-                                        data-form-type="academic">Academic</button>
-                                    <button class="btn btn-sm btn-outline-primary"
-                                        data-form-type="training">Training</button>
+                        <div class="card-body">
+                            <div class="forms-count-card p-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small">Institutional Forms</div>
+                                        <h4 class="mb-0 mt-2">2</h4>
+                                    </div>
+                                    <i class="fas fa-building fa-2x text-primary opacity-50"></i>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <div class="row" id="assignedForms">
-                                    <!-- Assigned forms will be dynamically added here -->
+                            <div class="forms-count-card p-3 mb-3" style="border-left-color: #4caf50;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small">Academic Forms</div>
+                                        <h4 class="mb-0 mt-2">2</h4>
+                                    </div>
+                                    <i class="fas fa-book fa-2x text-success opacity-50"></i>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <span>Feedback Analytics</span>
-                            </div>
-                            <div class="card-body">
-                                <!-- Enhanced Analytics Controls -->
-                                <div class="row mb-4">
-                                    <div class="col-md-6">
-                                        <label for="studentSelector" class="form-label">Select Student:</label>
-                                        <select class="form-select" id="studentSelector">
-                                            <option value="all">All Students</option>
-                                            <!-- Student options will be dynamically added here -->
-                                        </select>
+                            <div class="forms-count-card p-3" style="border-left-color: #ff9800;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small">Training Forms</div>
+                                        <h4 class="mb-0 mt-2">2</h4>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label for="attendanceFilter" class="form-label">Attendance Criteria:</label>
-                                        <select class="form-select" id="attendanceFilter">
-                                            <option value="all">All Attendance Levels</option>
-                                            <option value="excellent">Excellent (>90%)</option>
-                                            <option value="good">Good (75-90%)</option>
-                                            <option value="average">Average (60-75%)</option>
-                                            <option value="poor">Poor (<60%)< /option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Analytics Charts -->
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="chart-container">
-                                            <canvas id="ratingChart"></canvas>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="chart-container">
-                                            <canvas id="categoryChart"></canvas>
-                                        </div>
-                                    </div>
+                                    <i class="fas fa-chalkboard-teacher fa-2x text-warning opacity-50"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <!-- JavaScript Libraries -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
-        <script>
-            // SECTION 1: DATA MODELS AND STATE MANAGEMENT
-            // Sample data - In a real application, this would come from your backend
-            const sampleStudents = [
-                { id: 1, name: 'Aisha Khan', rollNumber: 'CS2021-001', section: 'A', submitted: true, attendance: 95 },
-                { id: 2, name: 'Rahul Sharma', rollNumber: 'CS2021-002', section: 'A', submitted: true, attendance: 88 },
-                { id: 3, name: 'Priya Patel', rollNumber: 'CS2021-003', section: 'A', submitted: false, attendance: 76 },
-                { id: 4, name: 'Muhammad Ali', rollNumber: 'CS2021-004', section: 'A', submitted: true, attendance: 92 },
-                { id: 5, name: 'Zainab Ahmed', rollNumber: 'CS2021-005', section: 'A', submitted: false, attendance: 65 },
-                { id: 6, name: 'Vikram Singh', rollNumber: 'CS2021-006', section: 'A', submitted: true, attendance: 87 },
-                { id: 7, name: 'Sarah Khan', rollNumber: 'CS2021-007', section: 'A', submitted: true, attendance: 55 },
-                { id: 8, name: 'Arjun Reddy', rollNumber: 'CS2021-008', section: 'A', submitted: false, attendance: 78 },
-                { id: 9, name: 'Fatima Zahra', rollNumber: 'CS2021-009', section: 'A', submitted: true, attendance: 91 },
-                { id: 10, name: 'Rajesh Kumar', rollNumber: 'CS2021-010', section: 'A', submitted: false, attendance: 68 }
-            ];
-
-            // Updated forms data with form types
-            const sampleForms = [
-                {
-                    id: 1,
-                    title: 'Annual Faculty Satisfaction Survey',
-                    description: 'Assessment of institutional facilities and work environment',
-                    deadline: '2025-03-15',
-                    type: 'institutional'
-                },
-                {
-                    id: 2,
-                    title: 'Course Curriculum Review',
-                    description: 'Feedback on course structure and learning outcomes',
-                    deadline: '2025-03-20',
-                    type: 'academic'
-                },
-                {
-                    id: 3,
-                    title: 'Department Resources Evaluation',
-                    description: 'Assessment of departmental resources and support systems',
-                    deadline: '2025-03-18',
-                    type: 'institutional'
-                },
-                {
-                    id: 4,
-                    title: 'Teaching Methodology Workshop',
-                    description: 'Feedback on recent teaching methodology training program',
-                    deadline: '2025-03-25',
-                    type: 'training'
-                },
-                {
-                    id: 5,
-                    title: 'Research Grant Application Workshop',
-                    description: 'Feedback on research grant writing workshop',
-                    deadline: '2025-03-22',
-                    type: 'training'
-                },
-                {
-                    id: 6,
-                    title: 'Semester Assessment Criteria Review',
-                    description: 'Review of current assessment methods and grading criteria',
-                    deadline: '2025-03-30',
-                    type: 'academic'
-                }
-            ];
-
-            // Enhanced feedback data to include individual student data
-            const sampleFeedbackData = {
-                all: {
-                    ratings: {
-                        'Course Content': 4.2,
-                        'Teaching Method': 3.9,
-                        'Faculty Engagement': 4.5,
-                        'Learning Resources': 3.7,
-                        'Assessment Methods': 4.0
-                    },
-                    categories: {
-                        'Excellent': 30,
-                        'Good': 40,
-                        'Average': 20,
-                        'Poor': 10
-                    }
-                },
-                // Individual student feedback
-                students: {
-                    1: { // Aisha Khan
-                        ratings: {
-                            'Course Content': 4.5,
-                            'Teaching Method': 4.2,
-                            'Faculty Engagement': 4.8,
-                            'Learning Resources': 3.9,
-                            'Assessment Methods': 4.1
-                        },
-                        categories: {
-                            'Excellent': 35,
-                            'Good': 45,
-                            'Average': 15,
-                            'Poor': 5
-                        }
-                    },
-                    2: { // Rahul Sharma
-                        ratings: {
-                            'Course Content': 4.7,
-                            'Teaching Method': 4.0,
-                            'Faculty Engagement': 4.5,
-                            'Learning Resources': 3.8,
-                            'Assessment Methods': 4.2
-                        },
-                        categories: {
-                            'Excellent': 40,
-                            'Good': 40,
-                            'Average': 15,
-                            'Poor': 5
-                        }
-                    },
-                    4: { // Muhammad Ali
-                        ratings: {
-                            'Course Content': 4.3,
-                            'Teaching Method': 4.1,
-                            'Faculty Engagement': 4.6,
-                            'Learning Resources': 3.5,
-                            'Assessment Methods': 3.9
-                        },
-                        categories: {
-                            'Excellent': 30,
-                            'Good': 45,
-                            'Average': 20,
-                            'Poor': 5
-                        }
-                    },
-                    6: { // Vikram Singh
-                        ratings: {
-                            'Course Content': 4.0,
-                            'Teaching Method': 3.8,
-                            'Faculty Engagement': 4.4,
-                            'Learning Resources': 3.7,
-                            'Assessment Methods': 3.8
-                        },
-                        categories: {
-                            'Excellent': 25,
-                            'Good': 50,
-                            'Average': 20,
-                            'Poor': 5
-                        }
-                    },
-                    7: { // Sarah Khan
-                        ratings: {
-                            'Course Content': 3.9,
-                            'Teaching Method': 3.7,
-                            'Faculty Engagement': 4.2,
-                            'Learning Resources': 3.6,
-                            'Assessment Methods': 3.5
-                        },
-                        categories: {
-                            'Excellent': 20,
-                            'Good': 45,
-                            'Average': 25,
-                            'Poor': 10
-                        }
-                    },
-                    9: { // Fatima Zahra
-                        ratings: {
-                            'Course Content': 4.6,
-                            'Teaching Method': 4.3,
-                            'Faculty Engagement': 4.7,
-                            'Learning Resources': 4.0,
-                            'Assessment Methods': 4.2
-                        },
-                        categories: {
-                            'Excellent': 45,
-                            'Good': 35,
-                            'Average': 15,
-                            'Poor': 5
-                        }
-                    }
-                },
-                // Feedback data by attendance category
-                attendance: {
-                    excellent: {
-                        ratings: {
-                            'Course Content': 4.6,
-                            'Teaching Method': 4.3,
-                            'Faculty Engagement': 4.7,
-                            'Learning Resources': 4.0,
-                            'Assessment Methods': 4.2
-                        },
-                        categories: {
-                            'Excellent': 45,
-                            'Good': 40,
-                            'Average': 10,
-                            'Poor': 5
-                        }
-                    },
-                    good: {
-                        ratings: {
-                            'Course Content': 4.3,
-                            'Teaching Method': 4.0,
-                            'Faculty Engagement': 4.5,
-                            'Learning Resources': 3.8,
-                            'Assessment Methods': 4.0
-                        },
-                        categories: {
-                            'Excellent': 35,
-                            'Good': 45,
-                            'Average': 15,
-                            'Poor': 5
-                        }
-                    },
-                    average: {
-                        ratings: {
-                            'Course Content': 4.0,
-                            'Teaching Method': 3.7,
-                            'Faculty Engagement': 4.2,
-                            'Learning Resources': 3.5,
-                            'Assessment Methods': 3.7
-                        },
-                        categories: {
-                            'Excellent': 25,
-                            'Good': 40,
-                            'Average': 25,
-                            'Poor': 10
-                        }
-                    },
-                    poor: {
-                        ratings: {
-                            'Course Content': 3.5,
-                            'Teaching Method': 3.3,
-                            'Faculty Engagement': 3.8,
-                            'Learning Resources': 3.0,
-                            'Assessment Methods': 3.2
-                        },
-                        categories: {
-                            'Excellent': 15,
-                            'Good': 35,
-                            'Average': 35,
-                            'Poor': 15
-                        }
-                    }
-                }
-            };
-
-            // DOM Elements
-            const studentList = document.getElementById('studentList');
-            const assignedForms = document.getElementById('assignedForms');
-            const studentSearch = document.getElementById('studentSearch');
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebar = document.getElementById('sidebar');
-            const content = document.getElementById('content');
-            const studentSelector = document.getElementById('studentSelector');
-            const attendanceFilter = document.getElementById('attendanceFilter');
-
-            // Charts
-            let ratingChart, categoryChart;
-
-            // Current state
-            let currentFilter = 'all';
-            let selectedStudent = null;
-            let currentFormType = 'all';
-            let selectedStudentId = 'all';
-            let selectedAttendanceFilter = 'all';
-
-            // SECTION 2: UI RENDERING AND EVENT HANDLING
-            // Initialize the dashboard
-            function initDashboard() {
-                renderStudentList();
-                renderAssignedForms();
-                populateStudentSelector();
-                initCharts();
-                setupEventListeners();
-            }
-
-            // Render student list based on filter
-            function renderStudentList() {
-                studentList.innerHTML = '';
-
-                const filteredStudents = sampleStudents.filter(student => {
-                    if (currentFilter === 'submitted') return student.submitted;
-                    if (currentFilter === 'pending') return !student.submitted;
-                    return true; // 'all' filter
-                });
-
-                if (filteredStudents.length === 0) {
-                    studentList.innerHTML = `<div class="text-center py-4 text-muted">No students match the selected filter</div>`;
-                    return;
-                }
-
-                filteredStudents.forEach(student => {
-                    const listItem = document.createElement('div');
-                    listItem.className = `student-list-item ${selectedStudent === student.id ? 'active' : ''}`;
-                    listItem.dataset.id = student.id;
-
-                    // Determine attendance badge type
-                    let attendanceBadgeClass = '';
-                    if (student.attendance >= 90) attendanceBadgeClass = 'attendance-excellent';
-                    else if (student.attendance >= 75) attendanceBadgeClass = 'attendance-good';
-                    else if (student.attendance >= 60) attendanceBadgeClass = 'attendance-average';
-                    else attendanceBadgeClass = 'attendance-poor';
-
-                    listItem.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="fw-bold">${student.name}</div>
-                            <div class="text-muted small">${student.rollNumber}</div>
-                            <span class="attendance-badge ${attendanceBadgeClass}">${student.attendance}% Attendance</span>
+            <!-- Forms Progress Section -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <span>Form Completion Progress</span>
                         </div>
-                        <span class="feedback-pill ${student.submitted ? 'feedback-submitted' : 'feedback-pending'}">
-                            ${student.submitted ? 'Submitted' : 'Pending'}
-                        </span>
-                    </div>
-                `;
-
-                    listItem.addEventListener('click', () => {
-                        selectStudent(student.id);
-                    });
-
-                    studentList.appendChild(listItem);
-                });
-            }
-
-            // Select a student and update UI
-            function selectStudent(studentId) {
-                selectedStudent = studentId;
-
-                // Update active class
-                document.querySelectorAll('.student-list-item').forEach(item => {
-                    item.classList.remove('active');
-                    if (parseInt(item.dataset.id) === studentId) {
-                        item.classList.add('active');
-                    }
-                });
-
-                // Also update the student selector in analytics
-                studentSelector.value = studentId;
-
-                // Update charts for selected student
-                updateChartsForSelectedFilters();
-            }
-            // Populate student selector dropdown with students who have submitted feedback
-            function populateStudentSelector() {
-                // Clear existing options except the 'All Students' option
-                const allOption = studentSelector.querySelector('option[value="all"]');
-                studentSelector.innerHTML = '';
-                studentSelector.appendChild(allOption);
-
-                // Add students who have submitted feedback
-                const submittedStudents = sampleStudents.filter(student => student.submitted);
-
-                submittedStudents.forEach(student => {
-                    const option = document.createElement('option');
-                    option.value = student.id;
-                    option.textContent = `${student.name} (${student.rollNumber})`;
-                    studentSelector.appendChild(option);
-                });
-            }
-
-            // Render assigned forms based on form type filter
-            function renderAssignedForms() {
-                assignedForms.innerHTML = '';
-
-                const filteredForms = sampleForms.filter(form => {
-                    if (currentFormType === 'all') return true;
-                    return form.type === currentFormType;
-                });
-
-                if (filteredForms.length === 0) {
-                    assignedForms.innerHTML = `<div class="col-12 text-center py-4 text-muted">No forms match the selected type</div>`;
-                    return;
-                }
-
-                filteredForms.forEach(form => {
-                    const formCard = document.createElement('div');
-                    formCard.className = 'col-md-6 col-lg-4 mb-3';
-
-                    const deadline = new Date(form.deadline);
-                    const today = new Date();
-                    const daysLeft = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
-                    const isUrgent = daysLeft <= 3;
-
-                    // Get the appropriate CSS class based on form type
-                    const typeClass = `type-${form.type}`;
-
-                    formCard.innerHTML = `
-                    <div class="card form-card h-100">
                         <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title">${form.title}</h5>
-                                <span class="form-type-badge ${typeClass}">${form.type.charAt(0).toUpperCase() + form.type.slice(1)}</span>
-                            </div>
-                            <p class="card-text small">${form.description}</p>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="badge ${isUrgent ? 'bg-danger' : 'bg-primary'}">
-                                    Deadline: ${form.deadline}
-                                </span>
-                                <button class="btn btn-sm btn-outline-primary" onclick="viewForm(${form.id}, '${form.type}')">
-                                    View Form
-                                </button>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Form Title</th>
+                                            <th>Type</th>
+                                            <th>Deadline</th>
+                                            <th>Completed</th>
+                                            <th>Progress</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="formsProgressTable">
+                                        <!-- Form progress rows will be added dynamically -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <script>
+        // SECTION 1: DATA MODELS AND STATE MANAGEMENT
+        // Sample data - In a real application, this would come from your backend
+        const sampleForms = [
+            {
+                id: 1,
+                title: 'Annual Faculty Satisfaction Survey',
+                description: 'Assessment of institutional facilities and work environment',
+                deadline: '2025-04-15',
+                type: 'institutional',
+                completed: 92,
+                total: 120
+            },
+            {
+                id: 2,
+                title: 'Course Curriculum Review',
+                description: 'Feedback on course structure and learning outcomes',
+                deadline: '2025-04-20',
+                type: 'academic',
+                completed: 78,
+                total: 120
+            },
+            {
+                id: 3,
+                title: 'Department Resources Evaluation',
+                description: 'Assessment of departmental resources and support systems',
+                deadline: '2025-04-18',
+                type: 'institutional',
+                completed: 65,
+                total: 120
+            },
+            {
+                id: 4,
+                title: 'Teaching Methodology Workshop',
+                description: 'Feedback on recent teaching methodology training program',
+                deadline: '2025-04-25',
+                type: 'training',
+                completed: 45,
+                total: 120
+            },
+            {
+                id: 5,
+                title: 'Research Grant Application Workshop',
+                description: 'Feedback on research grant writing workshop',
+                deadline: '2025-04-22',
+                type: 'training',
+                completed: 30,
+                total: 120
+            },
+            {
+                id: 6,
+                title: 'Semester Assessment Criteria Review',
+                description: 'Review of current assessment methods and grading criteria',
+                deadline: '2025-04-30',
+                type: 'academic',
+                completed: 25,
+                total: 120
+            }
+        ];
+
+        // Sample data for different views
+        const feedbackData = {
+            overall: {
+                submitted: 85,
+                pending: 35
+            },
+            bySemester: {
+                labels: ['Spring 2025', 'Fall 2024', 'Spring 2024'],
+                submitted: [45, 25, 15],
+                pending: [15, 10, 10]
+            },
+            bySection: {
+                labels: ['Section A', 'Section B', 'Section C'],
+                submitted: [35, 30, 20],
+                pending: [15, 12, 8]
+            },
+            byCourse: {
+                labels: ['CS101', 'CS201', 'CS301'],
+                submitted: [30, 25, 30],
+                pending: [10, 15, 10]
+            }
+        };
+
+        // DOM Elements
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const sidebar = document.getElementById('sidebar');
+        const content = document.getElementById('content');
+        const chartViewSelector = document.getElementById('chartViewSelector');
+        const semesterFilter = document.getElementById('semesterFilter');
+        const sectionFilter = document.getElementById('sectionFilter');
+        const courseFilter = document.getElementById('courseFilter');
+        const formFilter = document.getElementById('formFilter');
+        const formsProgressTable = document.getElementById('formsProgressTable');
+
+        // Stats elements
+        const totalStudentsEl = document.getElementById('totalStudents');
+        const submittedFeedbackEl = document.getElementById('submittedFeedback');
+        const pendingFeedbackEl = document.getElementById('pendingFeedback');
+        const totalFormsEl = document.getElementById('totalForms');
+
+        // Chart
+        let feedbackCompletionChart;
+        let currentChartView = 'overall';
+
+        // SECTION 2: INITIALIZATION AND EVENT HANDLING
+        // Initialize the dashboard
+        function initDashboard() {
+            renderFormsProgress();
+            initCharts();
+            setupEventListeners();
+            updateStatistics();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Sidebar toggle
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            sidebarClose.addEventListener('click', toggleSidebar);
+
+            // Chart view selector
+            chartViewSelector.addEventListener('change', function() {
+                currentChartView = this.value;
+                updateChart();
+            });
+
+            // Filter changes
+            semesterFilter.addEventListener('change', handleFilterChange);
+            sectionFilter.addEventListener('change', handleFilterChange);
+            courseFilter.addEventListener('change', handleFilterChange);
+            formFilter.addEventListener('change', handleFilterChange);
+
+            // Handle click outside sidebar to close it on mobile
+            content.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                    toggleSidebar();
+                }
+            });
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            content.classList.toggle('active');
+        }
+
+        // Handle filter changes
+        function handleFilterChange() {
+            // In a real app, this would fetch new data based on filters
+            // For demo, we'll simulate a data refresh
+            updateStatistics();
+            updateChart();
+        }
+
+        // Update statistics based on filters
+        function updateStatistics() {
+            // In a real app, these values would be calculated based on filters
+            // For demo purposes, we'll just set them based on sample data
+            const semester = semesterFilter.value;
+            const section = sectionFilter.value;
+            
+            // Simulate different counts based on filters
+            let totalStudents = 120;
+            let submitted = 85;
+            let pending = 35;
+            
+            if (semester !== 'all') {
+                totalStudents = semester === 'Spring2025' ? 80 : (semester === 'Fall2024' ? 60 : 40);
+                submitted = Math.floor(totalStudents * 0.7);
+                pending = totalStudents - submitted;
+            }
+            
+            if (section !== 'all') {
+                totalStudents = section === 'A' ? 50 : (section === 'B' ? 42 : 28);
+                submitted = Math.floor(totalStudents * 0.7);
+                pending = totalStudents - submitted;
+            }
+            
+            // Update stats display
+            totalStudentsEl.textContent = totalStudents;
+            submittedFeedbackEl.textContent = submitted;
+            pendingFeedbackEl.textContent = pending;
+            totalFormsEl.textContent = sampleForms.length;
+        }
+
+        // Render forms progress table
+        function renderFormsProgress() {
+            formsProgressTable.innerHTML = '';
+            
+            sampleForms.forEach(form => {
+                const progress = Math.round((form.completed / form.total) * 100);
+                const row = document.createElement('tr');
+                
+                // Get badge class based on form type
+                let typeBadgeClass = '';
+                switch(form.type) {
+                    case 'institutional':
+                        typeBadgeClass = 'bg-primary';
+                        break;
+                    case 'academic':
+                        typeBadgeClass = 'bg-success';
+                        break;
+                    case 'training':
+                        typeBadgeClass = 'bg-warning text-dark';
+                        break;
+                }
+                
+                row.innerHTML = `
+                    <td>${form.title}</td>
+                    <td><span class="badge ${typeBadgeClass}">${form.type}</span></td>
+                    <td>${form.deadline}</td>
+                    <td>${form.completed}/${form.total}</td>
+                    <td>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar ${progress >= 70 ? 'bg-success' : progress >= 40 ? 'bg-warning' : 'bg-danger'}" 
+                                role="progressbar" 
+                                style="width: ${progress}%;" 
+                                aria-valuenow="${progress}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100">
+                            </div>
+                        </div>
+                        <small class="text-muted">${progress}% complete</small>
+                    </td>
                 `;
+                
+                formsProgressTable.appendChild(row);
+            });
+        }
 
-                    assignedForms.appendChild(formCard);
-                });
-            }
-
-            // Set up event listeners
-            function setupEventListeners() {
-                // Search functionality
-                studentSearch.addEventListener('input', (e) => {
-                    const searchTerm = e.target.value.toLowerCase();
-                    const listItems = document.querySelectorAll('.student-list-item');
-
-                    listItems.forEach(item => {
-                        const studentName = item.querySelector('.fw-bold').textContent.toLowerCase();
-                        const rollNumber = item.querySelector('.text-muted.small').textContent.toLowerCase();
-
-                        if (studentName.includes(searchTerm) || rollNumber.includes(searchTerm)) {
-                            item.style.display = 'block';
-                        } else {
-                            item.style.display = 'none';
+        // SECTION 3: CHARTS
+        // Initialize charts
+        function initCharts() {
+            const ctx = document.getElementById('feedbackCompletionChart').getContext('2d');
+            
+            // Initial chart setup with overall data
+            feedbackCompletionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Feedback Status'],
+                    datasets: [
+                        {
+                            label: 'Submitted',
+                            data: [feedbackData.overall.submitted],
+                            backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                            borderColor: 'rgba(76, 175, 80, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Pending',
+                            data: [feedbackData.overall.pending],
+                            backgroundColor: 'rgba(244, 67, 54, 0.7)',
+                            borderColor: 'rgba(244, 67, 54, 1)',
+                            borderWidth: 1
                         }
-                    });
-                });
-
-                // Filter dropdown for student list
-                document.querySelectorAll('[data-filter]').forEach(filter => {
-                    filter.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        currentFilter = e.target.dataset.filter;
-                        renderStudentList();
-                    });
-                });
-
-                // Form type filter buttons
-                document.querySelectorAll('[data-form-type]').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        // Update active button style
-                        document.querySelectorAll('[data-form-type]').forEach(btn => {
-                            btn.classList.remove('active');
-                        });
-                        e.target.classList.add('active');
-
-                        // Update current form type filter
-                        currentFormType = e.target.dataset.formType;
-                        renderAssignedForms();
-                    });
-                });
-
-                // Student selector change
-                studentSelector.addEventListener('change', (e) => {
-                    selectedStudentId = e.target.value;
-                    updateChartsForSelectedFilters();
-                });
-
-                // Attendance filter change
-                attendanceFilter.addEventListener('change', (e) => {
-                    selectedAttendanceFilter = e.target.value;
-                    updateChartsForSelectedFilters();
-                });
-
-                // Modified sidebar toggle for mobile
-                sidebarToggle.addEventListener('click', () => {
-                    sidebar.classList.toggle('active');
-                    content.classList.toggle('active');
-
-                    // Toggle aria-expanded attribute for accessibility
-                    const isExpanded = sidebar.classList.contains('active');
-                    sidebarToggle.setAttribute('aria-expanded', isExpanded);
-
-                    // Prevent scrolling on the body when sidebar is open
-                    if (isExpanded) {
-                        document.body.style.overflow = 'hidden';
-                    } else {
-                        document.body.style.overflow = '';
-                    }
-                });
-
-                // Close sidebar when clicking on the blur overlay
-                content.addEventListener('click', (e) => {
-                    if (content.classList.contains('active') && e.target === content) {
-                        sidebar.classList.remove('active');
-                        content.classList.remove('active');
-                        document.body.style.overflow = '';
-                        sidebarToggle.setAttribute('aria-expanded', 'false');
-                    }
-                });
-
-                // Add close button to sidebar
-                const closeBtn = document.createElement('button');
-                closeBtn.classList.add('sidebar-close-btn');
-                closeBtn.innerHTML = '&times;'; // × symbol
-                closeBtn.setAttribute('aria-label', 'Close sidebar');
-                sidebar.prepend(closeBtn);
-
-                // Style the close button (you can also add this to your CSS file)
-                closeBtn.style.position = 'absolute';
-                closeBtn.style.top = '10px';
-                closeBtn.style.right = '10px';
-                closeBtn.style.background = 'transparent';
-                closeBtn.style.border = 'none';
-                closeBtn.style.fontSize = '24px';
-                closeBtn.style.cursor = 'pointer';
-                closeBtn.style.padding = '5px 10px';
-                closeBtn.style.color = 'white'; 
-
-                // Hide close button on desktop
-                // This media query will hide the button on screens wider than 768px
-                const styleElement = document.createElement('style');
-                styleElement.textContent = `
-  @media (min-width: 768px) {
-    .sidebar-close-btn {
-      display: none;
-    }
-  }
-`;
-                document.head.appendChild(styleElement);
-
-                // Close sidebar when clicking the close button
-                closeBtn.addEventListener('click', () => {
-                    sidebar.classList.remove('active');
-                    content.classList.remove('active');
-                    document.body.style.overflow = '';
-                    sidebarToggle.setAttribute('aria-expanded', 'false');
-                });
-
-                // Close sidebar when clicking on any navigation item
-                const navItems = sidebar.querySelectorAll('nav a');
-                navItems.forEach(item => {
-                    item.addEventListener('click', () => {
-                        sidebar.classList.remove('active');
-                        content.classList.remove('active');
-                        document.body.style.overflow = '';
-                        sidebarToggle.setAttribute('aria-expanded', 'false');
-                    });
-                });
-            }
-
-
-            // Function to view form details (would open a modal in a real application)
-            function viewForm(formId, formType) {
-                // In a real application, this would open a modal or navigate to a form view page
-                console.log(`Viewing form ${formId} of type ${formType}`);
-                alert(`Form details will open here. Form ID: ${formId}, Type: ${formType}`);
-            }
-
-            // SECTION 3: CHART INITIALIZATION AND UPDATES
-            // Initialize charts
-            function initCharts() {
-                // Rating chart setup
-                const ratingCtx = document.getElementById('ratingChart').getContext('2d');
-                ratingChart = new Chart(ratingCtx, {
-                    type: 'radar',
-                    data: {
-                        labels: Object.keys(sampleFeedbackData.all.ratings),
-                        datasets: [{
-                            label: 'Average Rating',
-                            data: Object.values(sampleFeedbackData.all.ratings),
-                            backgroundColor: 'rgba(63, 81, 181, 0.2)',
-                            borderColor: 'rgba(63, 81, 181, 1)',
-                            borderWidth: 2,
-                            pointBackgroundColor: 'rgba(63, 81, 181, 1)',
-                            pointRadius: 4
-                        }]
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true
+                        }
                     },
-                    options: {
-                        scales: {
-                            r: {
-                                beginAtZero: true,
-                                max: 5,
-                                ticks: {
-                                    stepSize: 1
-                                }
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Student Feedback Completion Status',
+                            font: {
+                                size: 16
                             }
                         },
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Average Ratings by Category'
-                            }
+                        legend: {
+                            position: 'top',
                         }
                     }
-                });
+                }
+            });
+        }
 
-                // Category chart setup
-                const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-                categoryChart = new Chart(categoryCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: Object.keys(sampleFeedbackData.all.categories),
-                        datasets: [{
-                            data: Object.values(sampleFeedbackData.all.categories),
-                            backgroundColor: [
-                                'rgba(76, 175, 80, 0.7)',
-                                'rgba(33, 150, 243, 0.7)',
-                                'rgba(255, 193, 7, 0.7)',
-                                'rgba(244, 67, 54, 0.7)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Feedback Distribution by Category'
-                            }
-                        }
-                    }
-                });
+        // Update chart based on selected view
+        function updateChart() {
+            // Clear existing data
+            feedbackCompletionChart.data.labels = [];
+            feedbackCompletionChart.data.datasets[0].data = [];
+            feedbackCompletionChart.data.datasets[1].data = [];
+            
+            // Update chart based on selected view
+            switch(currentChartView) {
+                case 'overall':
+                    feedbackCompletionChart.data.labels = ['Feedback Status'];
+                    feedbackCompletionChart.data.datasets[0].data = [feedbackData.overall.submitted];
+                    feedbackCompletionChart.data.datasets[1].data = [feedbackData.overall.pending];
+                    feedbackCompletionChart.options.scales.x.stacked = true;
+                    feedbackCompletionChart.options.scales.y.stacked = true;
+                    break;
+                case 'bySemester':
+                    feedbackCompletionChart.data.labels = feedbackData.bySemester.labels;
+                    feedbackCompletionChart.data.datasets[0].data = feedbackData.bySemester.submitted;
+                    feedbackCompletionChart.data.datasets[1].data = feedbackData.bySemester.pending;
+                    feedbackCompletionChart.options.scales.x.stacked = true;
+                    feedbackCompletionChart.options.scales.y.stacked = true;
+                    break;
+                case 'bySection':
+                    feedbackCompletionChart.data.labels = feedbackData.bySection.labels;
+                    feedbackCompletionChart.data.datasets[0].data = feedbackData.bySection.submitted;
+                    feedbackCompletionChart.data.datasets[1].data = feedbackData.bySection.pending;
+                    feedbackCompletionChart.options.scales.x.stacked = true;
+                    feedbackCompletionChart.options.scales.y.stacked = true;
+                    break;
+                case 'byCourse':
+                    feedbackCompletionChart.data.labels = feedbackData.byCourse.labels;
+                    feedbackCompletionChart.data.datasets[0].data = feedbackData.byCourse.submitted;
+                    feedbackCompletionChart.data.datasets[1].data = feedbackData.byCourse.pending;
+                    feedbackCompletionChart.options.scales.x.stacked = true;
+                    feedbackCompletionChart.options.scales.y.stacked = true;
+                    break;
             }
+            
+            // Update chart title
+            const titleMap = {
+                'overall': 'Overall Student Feedback Completion Status',
+                'bySemester': 'Student Feedback Completion Status by Semester',
+                'bySection': 'Student Feedback Completion Status by Section',
+                'byCourse': 'Student Feedback Completion Status by Course'
+            };
+            
+            feedbackCompletionChart.options.plugins.title.text = titleMap[currentChartView];
+            
+            // Apply changes
+            feedbackCompletionChart.update();
+        }
 
-            // Update charts based on selected filters (student and attendance)
-            function updateChartsForSelectedFilters() {
-                let feedbackData;
-
-                // Determine which data to use based on filters
-                if (selectedStudentId !== 'all') {
-                    // If a specific student is selected, use their data
-                    feedbackData = sampleFeedbackData.students[selectedStudentId];
-                } else if (selectedAttendanceFilter !== 'all') {
-                    // If an attendance filter is selected, use that data
-                    feedbackData = sampleFeedbackData.attendance[selectedAttendanceFilter];
-                } else {
-                    // Default to all data
-                    feedbackData = sampleFeedbackData.all;
-                }
-
-                // Update rating chart
-                ratingChart.data.datasets[0].data = Object.values(feedbackData.ratings);
-
-                // Update title based on selection
-                if (selectedStudentId !== 'all') {
-                    const student = sampleStudents.find(s => s.id.toString() === selectedStudentId);
-                    ratingChart.options.plugins.title.text = `Ratings by Category - ${student.name}`;
-                } else if (selectedAttendanceFilter !== 'all') {
-                    ratingChart.options.plugins.title.text = `Ratings by Category - ${selectedAttendanceFilter.charAt(0).toUpperCase() + selectedAttendanceFilter.slice(1)} Attendance`;
-                } else {
-                    ratingChart.options.plugins.title.text = 'Average Ratings by Category';
-                }
-
-                ratingChart.update();
-
-                // Update category chart
-                categoryChart.data.datasets[0].data = Object.values(feedbackData.categories);
-
-                // Update title based on selection
-                if (selectedStudentId !== 'all') {
-                    const student = sampleStudents.find(s => s.id.toString() === selectedStudentId);
-                    categoryChart.options.plugins.title.text = `Feedback Distribution - ${student.name}`;
-                } else if (selectedAttendanceFilter !== 'all') {
-                    categoryChart.options.plugins.title.text = `Feedback Distribution - ${selectedAttendanceFilter.charAt(0).toUpperCase() + selectedAttendanceFilter.slice(1)} Attendance`;
-                } else {
-                    categoryChart.options.plugins.title.text = 'Feedback Distribution by Category';
-                }
-
-                categoryChart.update();
-            }
-
-            // Initialize the dashboard when the page loads
-            document.addEventListener('DOMContentLoaded', initDashboard);
-        </script>
+        // Initialize the dashboard when the page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
 </body>
 
 </html>
-
 
 <!-- is ejs me jha forms ke card hai wha pe useable items ka use kro jisse form show ho and list of students bhi show kro jese hai or attendance ki jgah N/A rkho and feedbcak analytics jesa work karr rha hai same bese hi data pe work krabbao dynamicaaly me me aapko bta du mere forms ka data FeedbackForm se and student ka data Student model se aa rha hai  or is page me excel down load bhi lhaao  ikk feedback analytics me jha faculty uske assigned form ka feedback dekh skhe mannualy or bulk students  and ikk excell  student table me rkho jha se faculty unhe filter krke us filtered data ki excel down load kr ske.
 ye sbh dynamically kro. -->

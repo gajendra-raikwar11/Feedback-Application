@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard - Student Management</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap5.min.css">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --secondary-color: #f5f5f5;
+            --accent-color: #ff4081;
+            --text-color: #333;
+            --light-gray: #eee;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+            background-color: #f9f9f9;
+        }
+
+        .sidebar {
+            background-color: var(--primary-color);
+            color: white;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .toggle-btn {
+                display: block;
+            }
+
+            .sidebar {
+                margin-left: -250px;
+                z-index: 1100;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .sidebar.active {
+                margin-left: 0;
+            }
+
+            .content {
+                margin-left: 0;
+                transition: all 0.3s;
+            }
+
+            .content.active::before {
+                content: "";
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.4);
+                backdrop-filter: blur(3px);
+                -webkit-backdrop-filter: blur(3px);
+                z-index: 1050;
+                transition: all 0.3s ease;
+            }
+        }
+
+        .logo {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid var(--light-gray);
+            font-weight: 600;
+            border-radius: 10px 10px 0 0 !important;
+        }
+
+        .toggle-btn {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .filter-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .badge-forms {
+            font-size: 85%;
+            padding: 5px 8px;
+            border-radius: 20px;
+        }
+
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+        }
+        
+        .student-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        
+        .status-active {
+            background-color: #4CAF50;
+        }
+        
+        .status-inactive {
+            background-color: #F44336;
+        }
+        
+        .form-select, .form-control {
+            box-shadow: none !important;
+            border-color: #ddd;
+        }
+        
+        .form-select:focus, .form-control:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .stats-card {
+            border-left: 4px solid;
+            transition: transform 0.2s;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .pagination .page-link {
+            color: var(--primary-color);
+        }
+        
+        .dt-button {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 4px !important;
+            padding: 6px 14px !important;
+            margin-right: 8px !important;
+        }
+        
+        .dt-button:hover {
+            background-color: #303f9f !important;
+        }
+        
+        .sidebar-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px 10px;
+            color: white;
+        }
+        
+        @media (min-width: 768px) {
+            .sidebar-close-btn {
+                display: none;
+            }
+        }
+        
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="toggle-btn mb-2" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <%- include('partials/facultySideNavbar', {activePage: 'students'}) %>
+
+    <!-- Main Content -->
+    <div class="content" id="content">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h2 class="mb-0">Student Management</h2>
+                    <small class="text-muted">View and manage assigned students & their form submissions</small>
+                </div>
+            </div>
+
+            <!-- Stats Cards Row -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card stats-card" style="border-left-color: #3f51b5;">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted mb-0">Total Students</h6>
+                            <h3 class="mt-2 mb-0">45</h3>
+                            <small class="text-success">Across 4 Sections</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card" style="border-left-color: #4CAF50;">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted mb-0">Forms Submitted</h6>
+                            <h3 class="mt-2 mb-0">128</h3>
+                            <small class="text-success">+12 new today</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card" style="border-left-color: #FF9800;">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted mb-0">Pending Forms</h6>
+                            <h3 class="mt-2 mb-0">27</h3>
+                            <small class="text-warning">Due within 7 days</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card" style="border-left-color: #F44336;">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted mb-0">Unresponsive Students</h6>
+                            <h3 class="mt-2 mb-0">8</h3>
+                            <small class="text-danger">Need attention</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section mb-4">
+                <div class="row align-items-end">
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <label for="sectionFilter" class="form-label">Section</label>
+                        <select class="form-select" id="sectionFilter">
+                            <option value="all">All Sections</option>
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                            <option value="D">Section D</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <label for="submissionFilter" class="form-label">Form Submission</label>
+                        <select class="form-select" id="submissionFilter">
+                            <option value="all">All Statuses</option>
+                            <option value="submitted">Submitted</option>
+                            <option value="pending">Pending</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <label for="attendanceFilter" class="form-label">Attendance</label>
+                        <select class="form-select" id="attendanceFilter">
+                            <option value="all">All</option>
+                            <option value="excellent">Excellent (>90%)</option>
+                            <option value="good">Good (75-90%)</option>
+                            <option value="average">Average (60-75%)</option>
+                            <option value="poor">Poor (<60%)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button id="applyFilters" class="btn btn-primary me-2 w-100">
+                            <i class="fas fa-filter me-2"></i>Apply Filters
+                        </button>
+                        <button id="resetFilters" class="btn btn-outline-secondary w-auto">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Data Table -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Student Records</span>
+                    <div>
+                        <button id="exportExcel" class="btn btn-success btn-sm">
+                            <i class="fas fa-file-excel me-2"></i>Export to Excel
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="studentTable" class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Section</th>
+                                    <th>Form Submissions</th>
+                                    <th>Attendance</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Table data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
+
+    <script>
+        // Sample Student Data - In a real application, this would come from your backend
+        const sampleStudents = [
+            { 
+                id: "CS2021-001", name: "Aisha Khan", section: "A", 
+                formsAssigned: 8, formsSubmitted: 7, formsPending: 1, formsOverdue: 0,
+                attendance: 95, status: "active", email: "aisha.khan@example.com" 
+            },
+            { 
+                id: "CS2021-002", name: "Rahul Sharma", section: "A", 
+                formsAssigned: 8, formsSubmitted: 6, formsPending: 2, formsOverdue: 0,
+                attendance: 88, status: "active", email: "rahul.sharma@example.com" 
+            },
+            { 
+                id: "CS2021-003", name: "Priya Patel", section: "B", 
+                formsAssigned: 8, formsSubmitted: 5, formsPending: 2, formsOverdue: 1,
+                attendance: 76, status: "active", email: "priya.patel@example.com" 
+            },
+            { 
+                id: "CS2021-004", name: "Muhammad Ali", section: "B", 
+                formsAssigned: 8, formsSubmitted: 8, formsPending: 0, formsOverdue: 0,
+                attendance: 92, status: "active", email: "muhammad.ali@example.com" 
+            },
+            { 
+                id: "CS2021-005", name: "Zainab Ahmed", section: "A", 
+                formsAssigned: 8, formsSubmitted: 3, formsPending: 3, formsOverdue: 2,
+                attendance: 65, status: "active", email: "zainab.ahmed@example.com" 
+            },
+            { 
+                id: "CS2021-006", name: "Vikram Singh", section: "C", 
+                formsAssigned: 8, formsSubmitted: 7, formsPending: 1, formsOverdue: 0,
+                attendance: 87, status: "active", email: "vikram.singh@example.com" 
+            },
+            { 
+                id: "CS2021-007", name: "Sarah Khan", section: "C", 
+                formsAssigned: 8, formsSubmitted: 2, formsPending: 2, formsOverdue: 4,
+                attendance: 55, status: "inactive", email: "sarah.khan@example.com" 
+            },
+            { 
+                id: "CS2021-008", name: "Arjun Reddy", section: "B", 
+                formsAssigned: 8, formsSubmitted: 5, formsPending: 3, formsOverdue: 0,
+                attendance: 78, status: "active", email: "arjun.reddy@example.com" 
+            },
+            { 
+                id: "CS2021-009", name: "Fatima Zahra", section: "A", 
+                formsAssigned: 8, formsSubmitted: 8, formsPending: 0, formsOverdue: 0,
+                attendance: 91, status: "active", email: "fatima.zahra@example.com" 
+            },
+            { 
+                id: "CS2021-010", name: "Rajesh Kumar", section: "D", 
+                formsAssigned: 8, formsSubmitted: 4, formsPending: 3, formsOverdue: 1,
+                attendance: 68, status: "active", email: "rajesh.kumar@example.com" 
+            },
+            { 
+                id: "CS2021-011", name: "Ayesha Malik", section: "A", 
+                formsAssigned: 8, formsSubmitted: 6, formsPending: 2, formsOverdue: 0,
+                attendance: 86, status: "active", email: "ayesha.malik@example.com" 
+            },
+            { 
+                id: "CS2021-012", name: "Sanjay Gupta", section: "D", 
+                formsAssigned: 8, formsSubmitted: 0, formsPending: 3, formsOverdue: 5,
+                attendance: 45, status: "inactive", email: "sanjay.gupta@example.com" 
+            },
+            { 
+                id: "CS2021-013", name: "Meera Joshi", section: "C", 
+                formsAssigned: 8, formsSubmitted: 7, formsPending: 1, formsOverdue: 0,
+                attendance: 89, status: "active", email: "meera.joshi@example.com" 
+            },
+            { 
+                id: "CS2021-014", name: "Hassan Ahmed", section: "B", 
+                formsAssigned: 8, formsSubmitted: 4, formsPending: 4, formsOverdue: 0,
+                attendance: 72, status: "active", email: "hassan.ahmed@example.com" 
+            },
+            { 
+                id: "CS2021-015", name: "Divya Sharma", section: "D", 
+                formsAssigned: 8, formsSubmitted: 5, formsPending: 3, formsOverdue: 0,
+                attendance: 83, status: "active", email: "divya.sharma@example.com" 
+            }
+        ];
+
+        // DOM Elements and Variables
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const content = document.getElementById('content');
+        const sectionFilter = document.getElementById('sectionFilter');
+        const submissionFilter = document.getElementById('submissionFilter');
+        const attendanceFilter = document.getElementById('attendanceFilter');
+        const applyFiltersBtn = document.getElementById('applyFilters');
+        const resetFiltersBtn = document.getElementById('resetFilters');
+        const exportExcelBtn = document.getElementById('exportExcel');
+        
+        let dataTable;
+        let filteredStudents = [...sampleStudents];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            setupEventListeners();
+        });
+
+        // Initialize page components
+        function initializePage() {
+            // Initialize DataTable
+            dataTable = $('#studentTable').DataTable({
+                data: sampleStudents,
+                columns: [
+                    { data: 'id' },
+                    { data: 'name' },
+                    { data: 'section' },
+                    { 
+                        data: null,
+                        render: function(data, type, row) {
+                            const progress = Math.round((row.formsSubmitted / row.formsAssigned) * 100);
+                            let badgeClass = 'bg-success';
+                            
+                            if (row.formsOverdue > 0) {
+                                badgeClass = 'bg-danger';
+                            } else if (row.formsPending > 0) {
+                                badgeClass = 'bg-warning';
+                            }
+                            
+                            return `
+                                <div>
+                                    <span class="badge ${badgeClass} badge-forms">${row.formsSubmitted}/${row.formsAssigned}</span>
+                                </div>
+                                <div class="progress mt-1">
+                                    <div class="progress-bar ${badgeClass}" role="progressbar" style="width: ${progress}%" 
+                                        aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            `;
+                        }
+                    },
+                    { 
+                        data: 'attendance',
+                        render: function(data, type, row) {
+                            let badgeClass = '';
+                            if (data >= 90) badgeClass = 'bg-success';
+                            else if (data >= 75) badgeClass = 'bg-primary';
+                            else if (data >= 60) badgeClass = 'bg-warning';
+                            else badgeClass = 'bg-danger';
+                            
+                            return `<span class="badge ${badgeClass}">${data}%</span>`;
+                        }
+                    },
+                    { 
+                        data: 'status',
+                        render: function(data, type, row) {
+                            const statusClass = data === 'active' ? 'status-active' : 'status-inactive';
+                            return `<span class="student-status ${statusClass}"></span>${data.charAt(0).toUpperCase() + data.slice(1)}`;
+                        }
+                    },
+                    { 
+                        data: null,
+                        render: function(data, type, row) {
+                            return `
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-primary view-details" data-id="${row.id}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success send-form" data-id="${row.id}">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-info contact-student" data-id="${row.id}">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                ],
+                responsive: true,
+                dom: '<"d-flex justify-content-between align-items-center mb-3"<"#tableTools">f>tip',
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search students..."
+                },
+                initComplete: function() {
+                    $("#tableTools").html(`
+                        <div>
+                            <button class="btn btn-sm btn-primary" id="bulkEmail">
+                                <i class="fas fa-envelope me-1"></i> Bulk Email
+                            </button>
+                            <button class="btn btn-sm btn-info" id="quickSummary">
+                                <i class="fas fa-chart-pie me-1"></i> Quick Summary
+                            </button>
+                        </div>
+                    `);
+                }
+            });
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Sidebar toggle
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                content.classList.toggle('active');
+                
+                const isExpanded = sidebar.classList.contains('active');
+                sidebarToggle.setAttribute('aria-expanded', isExpanded);
+                
+                if (isExpanded) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            });
+            
+            // Close sidebar when clicking on the blur overlay
+            content.addEventListener('click', (e) => {
+                if (content.classList.contains('active') && e.target === content) {
+                    sidebar.classList.remove('active');
+                    content.classList.remove('active');
+                    document.body.style.overflow = '';
+                    sidebarToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close sidebar with close button
+            document.querySelector('.sidebar-close-btn').addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                content.classList.remove('active');
+                document.body.style.overflow = '';
+                sidebarToggle.setAttribute('aria-expanded', 'false');
+            });
+            
+            // Apply filters button
+            applyFiltersBtn.addEventListener('click', function() {
+                applyFilters();
+                showToast('Filters applied successfully', 'success');
+            });
+            
+            // Reset filters button
+            resetFiltersBtn.addEventListener('click', function() {
+                sectionFilter.value = 'all';
+                submissionFilter.value = 'all';
+                attendanceFilter.value = 'all';
+                applyFilters();
+                showToast('Filters have been reset', 'info');
+            });
+            
+            // Export to Excel button
+            exportExcelBtn.addEventListener('click', function() {
+                exportToExcel();
+            });
+            
+            // View student details
+            $('#studentTable').on('click', '.view-details', function() {
+                const studentId = $(this).data('id');
+                const student = sampleStudents.find(s => s.id === studentId);
+                showToast(`Viewing details for ${student.name}`, 'info');
+                // In a real app, this would open a modal with student details
+                console.log('View details for student:', student);
+            });
+            
+            // Send form to student
+            $('#studentTable').on('click', '.send-form', function() {
+                const studentId = $(this).data('id');
+                const student = sampleStudents.find(s => s.id === studentId);
+                showToast(`Form sent successfully to ${student.name}`, 'success');
+                // In a real app, this would open a modal to select forms to send
+                console.log('Send form to student:', student);
+            });
+            
+            // Contact student
+            $('#studentTable').on('click', '.contact-student', function() {
+                const studentId = $(this).data('id');
+                const student = sampleStudents.find(s => s.id === studentId);
+                showToast(`Contacting ${student.name} at ${student.email}`, 'info');
+                // In a real app, this would open an email compose interface
+                console.log('Contact student:', student);
+            });
+            
+            // Bulk email button
+            $(document).on('click', '#bulkEmail', function() {
+                if (filteredStudents.length === 0) {
+                    showToast('No students selected for bulk email', 'error');
+                } else {
+                    showToast(`Preparing to send email to ${filteredStudents.length} students`, 'info');
+                    // In a real app, this would open a bulk email compose interface
+                }
+            });
+            
+            // Quick summary button
+            $(document).on('click', '#quickSummary', function() {
+                const totalStudents = filteredStudents.length;
+                const totalSubmitted = filteredStudents.reduce((sum, student) => sum + student.formsSubmitted, 0);
+                const totalAssigned = filteredStudents.reduce((sum, student) => sum + student.formsAssigned, 0);
+                const submissionRate = totalAssigned > 0 ? ((totalSubmitted / totalAssigned) * 100).toFixed(1) : 0;
+                
+                showToast(`Summary: ${totalStudents} students with ${submissionRate}% form submission rate`, 'info');
+                // In a real app, this would open a summary modal with charts
+            });
+        }
+
+        // Apply filters to the data table
+        function applyFilters() {
+            const section = sectionFilter.value;
+            const submission = submissionFilter.value;
+            const attendance = attendanceFilter.value;
+            
+            // Reset the search
+            dataTable.search('').draw();
+            
+            // Apply section filter
+            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                const student = sampleStudents[dataIndex];
+                
+                // Section filter
+                if (section !== 'all' && student.section !== section) {
+                    return false;
+                }
+                
+                // Submission status filter
+                if (submission === 'submitted' && student.formsSubmitted < student.formsAssigned) {
+                    return false;
+                // Continuation of the applyFilters function which was cut off
+            } else if (submission === 'pending' && student.formsPending === 0) {
+                    return false;
+                } else if (submission === 'overdue' && student.formsOverdue === 0) {
+                    return false;
+                }
+                
+                // Attendance filter
+                if (attendance === 'excellent' && student.attendance <= 90) {
+                    return false;
+                } else if (attendance === 'good' && (student.attendance < 75 || student.attendance > 90)) {
+                    return false;
+                } else if (attendance === 'average' && (student.attendance < 60 || student.attendance > 75)) {
+                    return false;
+                } else if (attendance === 'poor' && student.attendance >= 60) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            // Redraw the table with filters applied
+            dataTable.draw();
+            
+            // Remove all filters after drawing
+            $.fn.dataTable.ext.search.pop();
+            
+            // Update the filtered students array for other operations
+            filteredStudents = [];
+            dataTable.rows({ search: 'applied' }).every(function() {
+                filteredStudents.push(this.data());
+            });
+        }
+
+        // Export table data to Excel
+        function exportToExcel() {
+            // Get the visible/filtered data
+            const exportData = [];
+            dataTable.rows({ search: 'applied' }).every(function() {
+                const student = this.data();
+                exportData.push({
+                    'Student ID': student.id,
+                    'Name': student.name,
+                    'Section': student.section,
+                    'Forms Submitted': student.formsSubmitted,
+                    'Forms Assigned': student.formsAssigned,
+                    'Forms Pending': student.formsPending,
+                    'Forms Overdue': student.formsOverdue,
+                    'Attendance (%)': student.attendance,
+                    'Status': student.status
+                });
+            });
+            
+            // Create worksheet
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Students");
+            
+            // Set column widths
+            const wscols = [
+                { wch: 12 }, // Student ID width
+                { wch: 20 }, // Name width
+                { wch: 10 }, // Section width
+                { wch: 15 }, // Forms Submitted width
+                { wch: 15 }, // Forms Assigned width
+                { wch: 15 }, // Forms Pending width
+                { wch: 15 }, // Forms Overdue width
+                { wch: 15 }, // Attendance width
+                { wch: 10 }  // Status width
+            ];
+            ws['!cols'] = wscols;
+            
+            // Export to file
+            const currentDate = new Date().toISOString().slice(0, 10);
+            const fileName = `student-data-${currentDate}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            showToast('Data exported successfully', 'success');
+        }
+
+        // Show toast messages
+        function showToast(message, type = 'info') {
+            const bgColors = {
+                success: '#4CAF50',
+                info: '#2196F3',
+                warning: '#FF9800',
+                error: '#F44336'
+            };
+            
+            Toastify({
+                text: message,
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: bgColors[type],
+                stopOnFocus: true
+            }).showToast();
+        }
+
+        // Helper function to calculate form submission status
+        function getFormSubmissionStatus(student) {
+            if (student.formsOverdue > 0) return 'overdue';
+            if (student.formsPending > 0) return 'pending';
+            if (student.formsSubmitted === student.formsAssigned) return 'complete';
+            return 'in-progress';
+        }
+
+        // Handle window resize to update sidebar
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                content.classList.remove('active');
+                document.body.style.overflow = '';
+                sidebarToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Confirm action modal function (for actions like delete)
+        function confirmAction(title, message, confirmCallback) {
+            // In a real application, this would create a confirmation modal
+            if (confirm(message)) {
+                confirmCallback();
+            }
+        }
+
+        // Add student functionality (placeholder for a real implementation)
+        function addNewStudent() {
+            // This would typically open a modal form to add a new student
+            showToast('Add student functionality would open a form here', 'info');
+        }
+
+        // Batch update functionality (placeholder for a real implementation)
+        function batchUpdate() {
+            // This would typically allow updating multiple students at once
+            showToast('Batch update functionality would open here', 'info');
+        }
+
+        // Function to handle student status toggle
+        function toggleStudentStatus(studentId, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            const student = sampleStudents.find(s => s.id === studentId);
+            
+            if (student) {
+                student.status = newStatus;
+                dataTable.clear().rows.add(sampleStudents).draw();
+                showToast(`${student.name}'s status changed to ${newStatus}`, 'success');
+            }
+        }
+
+        // Function to load form templates (placeholder)
+        function loadFormTemplates() {
+            // This would load form templates from the server
+            const templates = [
+                { id: 1, name: "Weekly Progress Report" },
+                { id: 2, name: "Course Feedback Form" },
+                { id: 3, name: "Project Submission Form" },
+                { id: 4, name: "Absence Justification Form" }
+            ];
+            return templates;
+        }
+
+        // Function to show student form history (placeholder)
+        function showStudentFormHistory(studentId) {
+            const student = sampleStudents.find(s => s.id === studentId);
+            if (student) {
+                showToast(`Viewing form history for ${student.name}`, 'info');
+                // In a real app, this would fetch and display the form history
+            }
+        }
+
+        // Initialize tooltips
+        function initTooltips() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        // Call initTooltips after DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initTooltips();
+        });
+    </script>
+    </body>
+</html>
