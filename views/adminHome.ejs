@@ -174,6 +174,23 @@
         .badge-pending {
             background-color: #f6c23e;
         }
+        .chart-container {
+        height: 400px;
+        width: 100%;
+        max-width: 600px;
+        margin: auto;
+        padding: 30px;
+        position: relative;
+        }
+
+        /* Responsive height for small screens */
+        @media (max-width: 768px) {
+        .chart-container {
+            height: auto;
+            min-height: 250px;
+        }
+        }
+
     </style>
 </head>
 <body>
@@ -354,183 +371,78 @@
                     
                     <!-- Manage Forms Section -->
                     <!-- Manage Forms Section -->
-<div class="col-lg-6 mb-4">
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Manage Feedback Forms</h6>
-            <div class="input-group" style="width: 200px;">
-                <select class="form-select form-select-sm" id="formStatusFilter">
-                    <option value="all">All Forms</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-
-                <table class="table table-hover">
-                    <thead style="position: sticky; top: 0; background: white; z-index: 10;">
-                        <tr>
-                            <th>Form Title</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if(forms && forms.length > 0) { %>
-                            <% forms.forEach(form => { %>
-                                <tr>
-                                    <td><%= form.title %></td>
-                                    <td><%= form.formType %></td>
-                                    <td>
-                                        <% if(form.status === 'active') { %>
-                                            <span class="badge bg-success">Active</span>
-                                        <% } else if(form.status === 'closed') { %>
-                                            <span class="badge bg-danger">Inactive</span>
-                                        <% } %>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-primary" onclick="editForm('<%= form._id %>')">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            
-                                            <% if(form.status === 'active') { %>
-                                                <button class="btn btn-sm btn-danger" onclick="toggleFormStatus('<%= form._id %>', 'closed')">
-                                                    <i class="fas fa-power-off"></i>
-                                                </button>
-                                            <% } else { %>
-                                                <button class="btn btn-sm btn-success" onclick="toggleFormStatus('<%= form._id %>', 'active')">
-                                                    <i class="fas fa-power-off"></i>
-                                                </button>
-                                            <% } %>
-                
-                                            <button class="btn btn-sm btn-info" onclick="viewForm('<%= form._id %>')">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% }); %>
-                        <% } else { %>
-                            <tr>
-                                <td colspan="4" class="text-center">No forms available</td>
-                            </tr>
-                        <% } %>
-                    </tbody>
-                </table>
-                
-            </div>
-            <div class="d-flex justify-content-between mt-3">
-                <a href="/admin/assign-forms" class="btn btn-outline-primary">Assign Forms</a>
-                <a href="/admin/Total-Forms" class="btn btn-outline-secondary">View All Forms</a>
-            </div>
-        </div>
-    </div>
-</div>
-                </div>
-                
-                <!-- Content Row -->
-                <div class="row">
-                    <!-- Student Feedback Status Section -->
-                    <div class="col-lg-12 mb-4">
+                    <div class="col-lg-6 mb-4">
                         <div class="card shadow mb-4">
                             <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                                <h6 class="m-0 font-weight-bold text-primary">Student Feedback Status</h6>
+                                <h6 class="m-0 font-weight-bold text-primary">Manage Feedback Forms</h6>
                                 <div class="input-group" style="width: 200px;">
-                                    <input type="text" class="form-control form-control-sm" placeholder="Search student...">
+                                    <select class="form-select form-select-sm" id="formStatusFilter">
+                                        <option value="all">All Forms</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="card-body">
-                                <div class="table-responsive">
+                                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+
                                     <table class="table table-hover">
-                                        <thead>
+                                        <thead style="position: sticky; top: 0; background: white; z-index: 10;">
                                             <tr>
-                                                <th>Student ID</th>
-                                                <th>Student Name</th>
-                                                <th>Section</th>
-                                                <th>Academic Feedback</th>
-                                                <th>Institutional Feedback</th>
-                                                <th>Training Feedback</th>
+                                                <th>Form Title</th>
+                                                <th>Type</th>
+                                                <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>S12345</td>
-                                                <td>John Doe</td>
-                                                <td>A</td>
-                                                <td><span class="badge bg-success">Submitted</span></td>
-                                                <td><span class="badge bg-success">Submitted</span></td>
-                                                <td><span class="badge bg-success">Submitted</span></td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i> View</button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>S12346</td>
-                                                <td>Jane Smith</td>
-                                                <td>B</td>
-                                                <td><span class="badge bg-success">Submitted</span></td>
-                                                <td><span class="badge bg-danger">Pending</span></td>
-                                                <td><span class="badge bg-danger">Pending</span></td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i> View</button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>S12347</td>
-                                                <td>Mike Johnson</td>
-                                                <td>A</td>
-                                                <td><span class="badge bg-danger">Pending</span></td>
-                                                <td><span class="badge bg-danger">Pending</span></td>
-                                                <td><span class="badge bg-danger">Pending</span></td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-warning"><i class="fas fa-bell"></i> Remind</button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>S12348</td>
-                                                <td>Sarah Williams</td>
-                                                <td>C</td>
-                                                <td><span class="badge bg-success">Submitted</span></td>
-                                                <td><span class="badge bg-success">Submitted</span></td>
-                                                <td><span class="badge bg-danger">Pending</span></td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i> View</button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>S12349</td>
-                                                <td>Robert Brown</td>
-                                                <td>B</td>
-                                                <td><span class="badge bg-success">Submitted</span></td>
-                                                <td><span class="badge bg-success">Submitted</span></td>
-                                                <td><span class="badge bg-success">Submitted</span></td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i> View</button>
-                                                </td>
-                                            </tr>
+                                            <% if(forms && forms.length > 0) { %>
+                                                <% forms.forEach(form => { %>
+                                                    <tr>
+                                                        <td><%= form.title %></td>
+                                                        <td><%= form.formType %></td>
+                                                        <td>
+                                                            <% if(form.status === 'active') { %>
+                                                                <span class="badge bg-success">Active</span>
+                                                            <% } else if(form.status === 'closed') { %>
+                                                                <span class="badge bg-danger">Inactive</span>
+                                                            <% } %>
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group">
+                                                                <button class="btn btn-sm btn-primary" onclick="editForm('<%= form._id %>')">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </button>
+                                                                
+                                                                <% if(form.status === 'active') { %>
+                                                                    <button class="btn btn-sm btn-danger" onclick="toggleFormStatus('<%= form._id %>', 'closed')">
+                                                                        <i class="fas fa-power-off"></i>
+                                                                    </button>
+                                                                <% } else { %>
+                                                                    <button class="btn btn-sm btn-success" onclick="toggleFormStatus('<%= form._id %>', 'active')">
+                                                                        <i class="fas fa-power-off"></i>
+                                                                    </button>
+                                                                <% } %>
+                                    
+                                                                <button class="btn btn-sm btn-info" onclick="viewForm('<%= form._id %>')">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <% }); %>
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="4" class="text-center">No forms available</td>
+                                                </tr>
+                                            <% } %>
                                         </tbody>
                                     </table>
+                                    
                                 </div>
                                 <div class="d-flex justify-content-between mt-3">
-                                    <div>
-                                        <button class="btn btn-outline-warning">Send Reminders</button>
-                                        <button class="btn btn-outline-primary ml-2">Export List</button>
-                                    </div>
-                                    <nav aria-label="Page navigation">
-                                        <ul class="pagination pagination-sm">
-                                            <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-                                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">4</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                                        </ul>
-                                    </nav>
+                                    <a href="/admin/assign-forms" class="btn btn-outline-primary">Assign Forms</a>
+                                    <a href="/admin/Total-Forms" class="btn btn-outline-secondary">View All Forms</a>
                                 </div>
                             </div>
                         </div>
@@ -541,85 +453,280 @@
         </div>
         <!-- Data Visualization -->
         <!-- Data Visualization Section -->
-<main class="flex-1 p-4 md:p-6 lg:p-10 overflow-y-auto">
-    <div class="mb-6 md:mb-8">
-        <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 text-center mt-4 md:mt-6">FACULTY FEEDBACK VISUALIZATION</h1>
-        <p class="text-center text-gray-600 mt-2" id="facultyInfo">
-            <span id="currentFaculty">Loading...</span> | <span id="currentSection">Loading...</span>
-        </p>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
-        <!-- Course Organization and Delivery -->
-        <div class="bg-white p-3 md:p-5 rounded shadow">
-            <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Course Organization</h3>
-            <canvas id="courseOrganizationChart"></canvas>
-        </div>
-        
-        <!-- Teacher Effectiveness -->
-        <div class="bg-white p-3 md:p-5 rounded shadow">
-            <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Teacher Effectiveness</h3>
-            <canvas id="teacherEffectivenessChart"></canvas>
-        </div>
-        
-        <!-- Student Learning Experience -->
-        <div class="bg-white p-3 md:p-5 rounded shadow">
-            <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Student Learning Experience</h3>
-            <canvas id="studentExperienceChart"></canvas>
-        </div>
-        
-        <!-- Exams and Evaluation -->
-        <div class="bg-white p-3 md:p-5 rounded shadow">
-            <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Exams and Evaluation</h3>
-            <canvas id="examsEvaluationChart"></canvas>
-        </div>
-        
-        <!-- General Course Questions -->
-        <div class="bg-white p-3 md:p-5 rounded shadow">
-            <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">General Course Questions</h3>
-            <canvas id="generalQuestionsChart"></canvas>
-        </div>
-        
-        <!-- Tutorial & Lab Components -->
-        <div class="bg-white p-3 md:p-5 rounded shadow">
-            <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Tutorial & Lab Components</h3>
-            <canvas id="tutorialLabChart"></canvas>
-        </div>
-    </div>
-    
-    <!-- Metadata display -->
-    <div class="mt-8 bg-white p-4 rounded shadow">
-        <h3 class="text-lg font-semibold mb-3">Feedback Information</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-gray-50 p-3 rounded">
-                <p class="text-sm text-gray-500">Form ID</p>
-                <p class="font-medium" id="formID">Loading...</p>
-            </div>
-            <div class="bg-gray-50 p-3 rounded">
-                <p class="text-sm text-gray-500">Responses</p>
-                <p class="font-medium" id="responseCount">Loading...</p>
-            </div>
-            <div class="bg-gray-50 p-3 rounded">
-                <p class="text-sm text-gray-500">Last Updated</p>
-                <p class="font-medium" id="lastUpdated">Loading...</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="flex justify-center mt-6 md:mt-8 lg:mt-10">
-        <button id="downloadExcel"
-            class="bg-green-300 hover:bg-green-200 text-green-800 font-semibold py-2 md:py-3 px-4 md:px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center space-x-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="lucide lucide-download">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" x2="12" y1="15" y2="3"></line>
-            </svg>
-            <span>Download Feedback Data</span>
-        </button>
-    </div>
-</main>
+       <!-- Tab Navigation for different form types -->
+       ```html
+       <div class="mt-4 mb-6">
+           <div class="flex space-x-1 bg-gray-100 p-1 rounded-xl">
+             <a href="/admin/adminHome?formType=Academic<%= subjectFilter ? '&subject=' + subjectFilter : '' %>" 
+               class="flex-1 text-center py-2 px-4 rounded-lg <%= feedbackData.responseMetadata.currentFormType === 'Academic' ? 'bg-white shadow' : 'hover:bg-gray-200' %>">
+               Academic Feedback
+             </a>
+             <a href="/admin/adminHome?formType=Institutional<%= subjectFilter ? '&subject=' + subjectFilter : '' %>" 
+               class="flex-1 text-center py-2 px-4 rounded-lg <%= feedbackData.responseMetadata.currentFormType === 'Institutional' ? 'bg-white shadow' : 'hover:bg-gray-200' %>">
+               Institutional Feedback
+             </a>
+             <a href="/admin/adminHome?formType=Training<%= subjectFilter ? '&subject=' + subjectFilter : '' %>" 
+               class="flex-1 text-center py-2 px-4 rounded-lg <%= feedbackData.responseMetadata.currentFormType === 'Training' ? 'bg-white shadow' : 'hover:bg-gray-200' %>">
+               Training Feedback
+             </a>
+           </div>
+         </div>
+         
+         <main class="flex-1 p-4 md:p-6 lg:p-10 overflow-y-auto">
+           <div class="mb-6 md:mb-8">
+               <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 text-center mt-4 md:mt-6">
+                   <%= feedbackData.responseMetadata.currentFormType.toUpperCase() %> FEEDBACK VISUALIZATION
+               </h1>
+               <p class="text-center text-gray-600 mt-2" id="dataInfo">
+                   <span id="currentFilter"><%= subjectFilter || 'All Subjects' %></span> | 
+                   <span id="responseCount"><%= feedbackData.responseMetadata.totalResponses %> Responses</span>
+               </p>
+           </div>
+           
+           <!-- Faculty Selector (for Academic feedback) -->
+           <% if (feedbackData.responseMetadata.currentFormType === 'Academic') { %>
+           <div class="mb-6">
+               <label for="facultySelect" class="block text-sm font-medium text-gray-700 mb-1">Select Faculty:</label>
+               <select id="facultySelect" class="border border-gray-300 rounded-md p-2 w-full md:w-1/2 lg:w-1/3">
+                   <option value="">All Faculty</option>
+                   <% faculties.forEach(faculty => { %>
+                       <option value="<%= faculty._id %>" <%= selectedFaculty === faculty._id.toString() ? 'selected' : '' %>><%= faculty.name %> (<%= faculty.subjects.join(', ') %>)</option>
+                   <% }); %>
+               </select>
+           </div>
+           <% } %>
+           
+           <!-- Charts Grid -->
+           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
+               <% if (feedbackData.responseMetadata.currentFormType === 'Academic') { %>
+                   <!-- Academic Feedback Charts -->
+                   <% if (Object.keys(feedbackData.sectionData).includes('Teacher Effectiveness')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Teacher Effectiveness</h3>
+                       <canvas id="teacherEffectivenessChart" 
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Teacher Effectiveness'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Teacher Effectiveness'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+                   
+                   <% if (Object.keys(feedbackData.sectionData).includes('Student Learning Experience')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Student Learning Experience</h3>
+                       <canvas id="studentExperienceChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Student Learning Experience'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Student Learning Experience'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+                   
+                   <% if (Object.keys(feedbackData.sectionData).includes('Exams and Evaluation')) { %>
+                   <div class="chart-container chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Exams and Evaluation</h3>
+                       <canvas id="examsEvaluationChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Exams and Evaluation'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Exams and Evaluation'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+                   
+                   <% if (Object.keys(feedbackData.sectionData).includes('Overall Satisfaction')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Overall Satisfaction</h3>
+                       <canvas id="overallSatisfactionChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Overall Satisfaction'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Overall Satisfaction'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+               <% } else if (feedbackData.responseMetadata.currentFormType === 'Institutional') { %>
+                   <!-- Institutional Feedback Charts -->
+                   <% if (Object.keys(feedbackData.sectionData).includes('Resources and Administration')) { %>
+                   <div class="chart-container  bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Resources and Administration</h3>
+                       <canvas id="resourcesAdminChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Resources and Administration'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Resources and Administration'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+                   
+                   <% if (Object.keys(feedbackData.sectionData).includes('Curriculum Aspects')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Curriculum Aspects</h3>
+                       <canvas id="curriculumAspectsChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Curriculum Aspects'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Curriculum Aspects'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+                   
+                   <% if (Object.keys(feedbackData.sectionData).includes('Administrative Services')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Administrative Services</h3>
+                       <canvas id="adminServicesChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Administrative Services'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Administrative Services'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+                   
+                   <% if (Object.keys(feedbackData.sectionData).includes('Student Support')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Student Support</h3>
+                       <canvas id="studentSupportChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Student Support'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Student Support'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+                   
+                   <% if (Object.keys(feedbackData.sectionData).includes('Technology Resources')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Technology Resources</h3>
+                       <canvas id="techResourcesChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Technology Resources'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Technology Resources'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+                   
+                   <% if (Object.keys(feedbackData.sectionData).includes('Campus Life')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Campus Life</h3>
+                       <canvas id="campusLifeChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Campus Life'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Campus Life'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+               <% } else if (feedbackData.responseMetadata.currentFormType === 'Training') { %>
+                   <!-- Training Feedback Charts -->
+                   <% if (Object.keys(feedbackData.sectionData).includes('Training Content')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Training Content</h3>
+                       <canvas id="trainingContentChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Training Content'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Training Content'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+                   
+                   <% if (Object.keys(feedbackData.sectionData).includes('Trainer Effectiveness')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Trainer Effectiveness</h3>
+                       <canvas id="trainerEffectivenessChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Trainer Effectiveness'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Trainer Effectiveness'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+                   
+                   <% if (Object.keys(feedbackData.sectionData).includes('Training Materials')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Training Materials</h3>
+                       <canvas id="trainingMaterialsChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Training Materials'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Training Materials'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+                   
+                   <% if (Object.keys(feedbackData.sectionData).includes('Workshop Facilities')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Workshop Facilities</h3>
+                       <canvas id="workshopFacilitiesChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Workshop Facilities'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Workshop Facilities'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+                   
+                   <% if (Object.keys(feedbackData.sectionData).includes('Practical Application')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Practical Application</h3>
+                       <canvas id="practicalApplicationChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Practical Application'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Practical Application'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+                   
+                   <% if (Object.keys(feedbackData.sectionData).includes('Overall Value')) { %>
+                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Overall Value</h3>
+                       <canvas id="overallValueChart"
+                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Overall Value'].labels) %>"
+                           data-values="<%= JSON.stringify(feedbackData.sectionData['Overall Value'].values) %>">
+                       </canvas>
+                   </div>
+                   <% } %>
+               <% } %>
+           </div>
+           
+           <!-- Summary Section -->
+           <div class="mt-8 bg-white p-4 rounded shadow">
+               <h3 class="text-lg font-semibold mb-3">Overall Averages by Section</h3>
+               <div class="overflow-x-auto">
+                   <table class="min-w-full divide-y divide-gray-200">
+                       <thead class="bg-gray-50">
+                           <tr>
+                               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
+                               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average Score</th>
+                           </tr>
+                       </thead>
+                       <tbody class="bg-white divide-y divide-gray-200">
+                           <% feedbackData.sectionAverages.forEach(section => { %>
+                           <tr>
+                               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= section.sectionTitle %></td>
+                               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                   <div class="flex items-center">
+                                       <span class="mr-2"><%= section.averageScore.toFixed(2) %></span>
+                                       <div class="w-32 bg-gray-200 rounded-full h-2.5">
+                                           <div class="bg-blue-600 h-2.5 rounded-full" style="width: <%= (section.averageScore/5)*100 %>%"></div>
+                                       </div>
+                                   </div>
+                               </td>
+                           </tr>
+                           <% }); %>
+                       </tbody>
+                   </table>
+               </div>
+           </div>
+           
+           <!-- Metadata display -->
+           <div class="mt-8 bg-white p-4 rounded shadow">
+               <h3 class="text-lg font-semibold mb-3">Feedback Information</h3>
+               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                   <div class="bg-gray-50 p-3 rounded">
+                       <p class="text-sm text-gray-500">Form Type</p>
+                       <p class="font-medium" id="formType"><%= feedbackData.responseMetadata.currentFormType %></p>
+                   </div>
+                   <div class="bg-gray-50 p-3 rounded">
+                       <p class="text-sm text-gray-500">Responses</p>
+                       <p class="font-medium" id="responseCount"><%= feedbackData.responseMetadata.totalResponses %></p>
+                   </div>
+                   <div class="bg-gray-50 p-3 rounded">
+                       <p class="text-sm text-gray-500">Last Updated</p>
+                       <p class="font-medium" id="lastUpdated"><%= feedbackData.responseMetadata.lastUpdated.toLocaleString() %></p>
+                   </div>
+               </div>
+           </div>
+           
+           <div class="flex justify-center mt-6 md:mt-8 lg:mt-10">
+               <button id="downloadExcel"
+                   class="bg-green-300 hover:bg-green-200 text-green-800 font-semibold py-2 md:py-3 px-4 md:px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center space-x-2">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                       class="lucide lucide-download">
+                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                       <polyline points="7 10 12 15 17 10"></polyline>
+                       <line x1="12" x2="12" y1="15" y2="3"></line>
+                   </svg>
+                   <span>Download Feedback Data</span>
+               </button>
+           </div>
+       </main>
 
         <!-- Footer -->
         <%- include('partials/adminBottomNavbar') %>
@@ -701,547 +808,428 @@
 
 
      // Gender Preferences Chart
-       // Function to process MongoDB-style feedback data
-function processFeedbackData(feedbackResponses) {
-    // Initialize aggregated data structure
-    const aggregatedData = {
-        facultyInfo: {
-            name: "Loading...",
-            department: "Loading...",
-            courses: []
+//     // Initialize feedback charts with data from the server
+//     document.addEventListener('DOMContentLoaded', function () {
+//   const chartInstances = {}; // 🔁 Track chart instances to prevent duplicates
+
+//   const chartConfig = {
+//     type: 'bar',
+//     options: {
+//       responsive: true,
+//       maintainAspectRatio: false,
+//       scales: {
+//         y: {
+//           beginAtZero: true,
+//           max: 5,
+//           ticks: {
+//             stepSize: 1
+//           }
+//         }
+//       },
+//       plugins: {
+//         legend: { display: false },
+//         tooltip: {
+//           callbacks: {
+//             label: function (context) {
+//               return `Average: ${context.raw.toFixed(2)}/5`;
+//             }
+//           }
+//         }
+//       }
+//     }
+//   };
+
+//   function createSectionChart(sectionId, sectionData) {
+//     const ctx = document.getElementById(sectionId);
+//     if (!ctx) return;
+
+//     // 🔁 Destroy existing chart if present
+//     if (chartInstances[sectionId]) {
+//       chartInstances[sectionId].destroy();
+//     }
+
+//     const questions = Object.keys(sectionData.questions);
+//     const averages = questions.map(q => sectionData.questions[q].average);
+//     const labels = questions.map(q => (q.length > 30 ? q.substring(0, 27) + '...' : q));
+
+//     const config = {
+//       ...chartConfig,
+//       data: {
+//         labels: labels,
+//         datasets: [{
+//           data: averages,
+//           backgroundColor: 'rgba(54, 162, 235, 0.7)',
+//           borderColor: 'rgba(54, 162, 235, 1)',
+//           borderWidth: 1
+//         }]
+//       }
+//     };
+
+//     chartInstances[sectionId] = new Chart(ctx, config); // 🆕 Track chart
+//   }
+
+//   // 👇 Ensure data is available before attempting charts
+//   const formType = document.getElementById('formType')?.textContent;
+//   const feedbackData = <%- JSON.stringify(feedbackData?.sectionData || {}) %>;
+
+//   if (feedbackData && Object.keys(feedbackData).length > 0) {
+//     const sectionMap = {
+//       Academic: {
+//         'Course Organization': 'courseOrganizationChart',
+//         'Teacher Effectiveness': 'teacherEffectivenessChart',
+//         'Student Learning Experience': 'studentExperienceChart',
+//         'Exams and Evaluation': 'examsEvaluationChart',
+//         'General Course Questions': 'generalQuestionsChart',
+//         'Tutorial & Lab Components': 'tutorialLabChart'
+//       },
+//       Institutional: {
+//         'Campus Infrastructure': 'infrastructureChart',
+//         'Administrative Services': 'adminServicesChart',
+//         'Student Support': 'studentSupportChart',
+//         'Technology Resources': 'techResourcesChart',
+//         'Campus Life': 'campusLifeChart',
+//         'Overall Experience': 'overallExpChart'
+//       },
+//       Training: {
+//         'Training Content': 'trainingContentChart',
+//         'Trainer Effectiveness': 'trainerEffectivenessChart',
+//         'Training Materials': 'trainingMaterialsChart',
+//         'Workshop Facilities': 'workshopFacilitiesChart',
+//         'Practical Application': 'practicalApplicationChart',
+//         'Overall Value': 'overallValueChart'
+//       }
+//     };
+
+//     const currentSections = sectionMap[formType] || {};
+//     Object.keys(currentSections).forEach(sectionTitle => {
+//       if (feedbackData[sectionTitle]) {
+//         createSectionChart(currentSections[sectionTitle], feedbackData[sectionTitle]);
+//       }
+//     });
+//   }
+
+//   // Faculty selector filter
+//   const facultySelect = document.getElementById('facultySelect');
+//   if (facultySelect) {
+//     facultySelect.addEventListener('change', function () {
+//       const facultyId = this.value;
+//       const currentUrl = new URL(window.location);
+
+//       if (facultyId) {
+//         currentUrl.searchParams.set('facultyId', facultyId);
+//       } else {
+//         currentUrl.searchParams.delete('facultyId');
+//       }
+
+//       window.location = currentUrl.toString();
+//     });
+//   }
+
+//   // Excel download handler
+//   const downloadBtn = document.getElementById('downloadExcel');
+//   if (downloadBtn) {
+//     downloadBtn.addEventListener('click', function () {
+//       const formType = document.getElementById('formType').textContent;
+//       const facultyId = facultySelect ? facultySelect.value : '';
+//       window.location = `/admin/download-feedback?formType=${formType}${facultyId ? '&facultyId=' + facultyId : ''}`;
+//     });
+//   }
+// });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const formType = document.getElementById('formType').textContent.trim();
+    
+    // Set common chart options with improved animation settings
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 5
+            }
         },
-        courseOrganization: [0, 0, 0, 0],
-        teacherEffectiveness: [0, 0, 0, 0],
-        studentExperience: [0, 0, 0, 0],
-        examsEvaluation: [0, 0, 0, 0],
-        generalQuestions: [0, 0, 0, 0, 0],
-        tutorialLabData: [
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0]
-        ]
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        },
+        animation: {
+            duration: 800,  // Shorter animation duration
+            easing: 'easeOutQuad',  // Smoother easing function
+            mode: 'fade'  // Fade in instead of growing from bottom
+        }
     };
     
-    // If no feedback data, return default structure
-    if (!feedbackResponses || feedbackResponses.length === 0) {
-        console.warn("No feedback data available");
-        return aggregatedData;
+    // Create charts based on form type
+    if (formType === 'Academic') {
+        createAcademicCharts();
+    } else if (formType === 'Institutional') {
+        createInstitutionalCharts();
+    } else if (formType === 'Training') {
+        createTrainingCharts();
     }
     
-    // Count for averaging
-    let responseCount = 0;
-    
-    // Process each feedback response
-    feedbackResponses.forEach(response => {
-        if (response.answers && Array.isArray(response.answers)) {
-            responseCount++;
-            
-            // Process answers array
-            // This assumes each answer corresponds to a specific feedback category
-            // You'll need to adjust this based on your actual data structure
-            response.answers.forEach((answer, index) => {
-                // Determine which category this answer belongs to
-                // This is a simplified example - adjust to match your actual data structure
-                if (index < 4) {
-                    // Course Organization (first 4 answers)
-                    aggregatedData.courseOrganization[index] += parseFloat(answer) || 0;
-                } else if (index < 8) {
-                    // Teacher Effectiveness (next 4 answers)
-                    aggregatedData.teacherEffectiveness[index - 4] += parseFloat(answer) || 0;
-                } else if (index < 12) {
-                    // Student Experience (next 4 answers)
-                    aggregatedData.studentExperience[index - 8] += parseFloat(answer) || 0;
-                } else if (index < 16) {
-                    // Exams Evaluation (next 4 answers)
-                    aggregatedData.examsEvaluation[index - 12] += parseFloat(answer) || 0;
-                } else if (index < 21) {
-                    // General Questions (next 5 answers)
-                    aggregatedData.generalQuestions[index - 16] += parseFloat(answer) || 0;
-                } else if (index < 26) {
-                    // Tutorial data (next 5 answers)
-                    aggregatedData.tutorialLabData[0][index - 21] += parseFloat(answer) || 0;
-                } else if (index < 31) {
-                    // Lab data (next 5 answers)
-                    aggregatedData.tutorialLabData[1][index - 26] += parseFloat(answer) || 0;
-                }
+    // Faculty selector for Academic feedback
+    if (formType === 'Academic') {
+        const facultySelect = document.getElementById('facultySelect');
+        if (facultySelect) {
+            facultySelect.addEventListener('change', function() {
+                // Add AJAX call to filter data by faculty
+                const facultyId = this.value;
+                window.location.href = `/admin/adminHome?formType=Academic&faculty=${facultyId}`;
             });
         }
-    });
-    
-    // Average all values if we have responses
-    if (responseCount > 0) {
-        // Calculate averages for each category
-        aggregatedData.courseOrganization = aggregatedData.courseOrganization.map(val => val / responseCount);
-        aggregatedData.teacherEffectiveness = aggregatedData.teacherEffectiveness.map(val => val / responseCount);
-        aggregatedData.studentExperience = aggregatedData.studentExperience.map(val => val / responseCount);
-        aggregatedData.examsEvaluation = aggregatedData.examsEvaluation.map(val => val / responseCount);
-        aggregatedData.generalQuestions = aggregatedData.generalQuestions.map(val => val / responseCount);
-        aggregatedData.tutorialLabData[0] = aggregatedData.tutorialLabData[0].map(val => val / responseCount);
-        aggregatedData.tutorialLabData[1] = aggregatedData.tutorialLabData[1].map(val => val / responseCount);
     }
     
-    // Get faculty info from the first response
-    // You'll need to fetch this from your database or another source
-    if (feedbackResponses[0].facultyID) {
-        // You would typically fetch faculty details using this ID
-        // For now, we'll use a placeholder
-        aggregatedData.facultyInfo = {
-            name: `Faculty ID: ${feedbackResponses[0].facultyID}`,
-            department: feedbackResponses[0].section || "Unknown Department",
-            courses: [feedbackResponses[0].section || "Unknown Course"]
-        };
-    }
-    
-    return aggregatedData;
-}
-
-// Function to create responsive charts based on processed data
-function createResponsiveCharts(feedbackData) {
-    // Reset any existing charts
-    Chart.helpers.each(Chart.instances, function(instance) {
-        instance.destroy();
-    });
-    
-    // Update faculty name display
-    document.getElementById('currentFaculty').textContent = 
-        feedbackData.facultyInfo.name || "Unknown Faculty";
-        
-    // Course Organization Chart
-    new Chart(document.getElementById('courseOrganizationChart'), {
-        type: 'bar',
-        data: {
-            labels: ['Content', 'Structure', 'Materials', 'Delivery'],
-            datasets: [{
-                label: 'Rating',
-                data: feedbackData.courseOrganization || [0, 0, 0, 0],
-                backgroundColor: 'rgba(54, 162, 235, 0.8)',
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 5,
-                    title: {
-                        display: true,
-                        text: 'Average Score (0-5)'
-                    }
-                }
-            }
-        }
-    });
-
-    // Teacher Effectiveness Chart
-    new Chart(document.getElementById('teacherEffectivenessChart'), {
-        type: 'bar',
-        data: {
-            labels: ['Communication', 'Knowledge', 'Engagement', 'Feedback'],
-            datasets: [{
-                label: 'Effectiveness',
-                data: feedbackData.teacherEffectiveness || [0, 0, 0, 0],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.8)',
-                    'rgba(54, 162, 235, 0.8)',
-                    'rgba(255, 206, 86, 0.8)',
-                    'rgba(75, 192, 192, 0.8)'
-                ],
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 5,
-                    title: {
-                        display: true,
-                        text: 'Average Score (0-5)'
-                    }
-                }
-            }
-        }
-    });
-
-    // Student Learning Experience Chart - Converting scores to percentages
-    const studentExpTotal = feedbackData.studentExperience.reduce((a, b) => a + b, 0);
-    const studentExpPercentages = studentExpTotal > 0 ? 
-        feedbackData.studentExperience.map(score => (score / studentExpTotal) * 100) : 
-        [25, 25, 25, 25];
-        
-    new Chart(document.getElementById('studentExperienceChart'), {
-        type: 'pie',
-        data: {
-            labels: ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied'],
-            datasets: [{
-                data: studentExpPercentages,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.8)',
-                    'rgba(54, 162, 235, 0.8)',
-                    'rgba(255, 206, 86, 0.8)',
-                    'rgba(75, 192, 192, 0.8)'
-                ],
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: {
-                        boxWidth: 12
-                    }
-                },
-                title: {
-                    display: true,
-                    text: 'Overall Learning Experience'
-                }
-            }
-        }
-    });
-
-    // Exams and Evaluation Chart - Converting scores to percentages
-    const examsTotal = feedbackData.examsEvaluation.reduce((a, b) => a + b, 0);
-    const examsPercentages = examsTotal > 0 ? 
-        feedbackData.examsEvaluation.map(score => (score / examsTotal) * 100) : 
-        [25, 25, 25, 25];
-        
-    new Chart(document.getElementById('examsEvaluationChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Fair', 'Challenging', 'Well-structured', 'Needs Improvement'],
-            datasets: [{
-                data: examsPercentages,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.8)',
-                    'rgba(54, 162, 235, 0.8)',
-                    'rgba(255, 206, 86, 0.8)',
-                    'rgba(75, 192, 192, 0.8)'
-                ],
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: {
-                        boxWidth: 12
-                    }
-                },
-                title: {
-                    display: true,
-                    text: 'Exam and Evaluation Quality'
-                }
-            }
-        }
-    });
-
-    // General Course Questions Chart
-    new Chart(document.getElementById('generalQuestionsChart'), {
-        type: 'bar',
-        data: {
-            labels: ['Course Relevance', 'Material Quality', 'Workload', 'Support Available', 'Overall Satisfaction'],
-            datasets: [{
-                label: 'Average Score',
-                data: feedbackData.generalQuestions || [0, 0, 0, 0, 0],
-                backgroundColor: 'rgba(54, 162, 235, 0.8)',
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: 'y',
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    max: 5,
-                    title: {
-                        display: true,
-                        text: 'Score (out of 5)'
-                    }
-                }
-            }
-        }
-    });
-
-    // Tutorial & Lab Components Chart
-    new Chart(document.getElementById('tutorialLabChart'), {
-        type: 'radar',
-        data: {
-            labels: ['Clarity', 'Relevance', 'Equipment', 'Assistance', 'Time Allocation'],
-            datasets: [{
-                label: 'Tutorials',
-                data: feedbackData.tutorialLabData[0] || [0, 0, 0, 0, 0],
-                fill: true,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgb(255, 99, 132)',
-                pointBackgroundColor: 'rgb(255, 99, 132)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgb(255, 99, 132)'
-            }, {
-                label: 'Labs',
-                data: feedbackData.tutorialLabData[1] || [0, 0, 0, 0, 0],
-                fill: true,
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgb(54, 162, 235)',
-                pointBackgroundColor: 'rgb(54, 162, 235)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgb(54, 162, 235)'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            elements: {
-                line: {
-                    borderWidth: 3
-                }
-            },
-            scales: {
-                r: {
-                    angleLines: {
-                        display: false
-                    },
-                    suggestedMin: 0,
-                    suggestedMax: 5
-                }
-            }
-        }
-    });
-}
-
-// Function to load feedback responses from API or static data
-async function loadFeedbackResponses() {
-    try {
-        // Example of how you might fetch data from your API
-        // const response = await fetch('/api/feedback-responses');
-        // const data = await response.json();
-        // return data;
-        
-        // For demonstration, we'll use static data that matches your MongoDB structure
-        return [{
-            "_id": ObjectId('67de9569a4d397927b10667b'),
-            "formID": ObjectId('67de8e79f662182314628b5c'),
-            "studentID": ObjectId('67dd68e0f675f5672111512d'),
-            "facultyID": ObjectId('67dd94fcf675f56721115247'),
-            "section": "CSE-A",
-            "answers": [4.5, 4.2, 4.3, 4.0, 4.8, 4.6, 4.5, 4.3, 4, 3, 2, 1, 4, 3, 2, 1, 4.5, 4.2, 3.8, 4.1, 4.3, 4.5, 4.2, 4.0, 4.3, 3.8, 4.2, 4.5, 4.1, 4.4, 4.0],
-            "timestamp": "2025-03-22T10:48:09.405+00:00",
-            "__v": 0
-        }];
-    } catch (error) {
-        console.error("Error loading feedback responses:", error);
-        return [];
-    }
-}
-
-// Function to set up Excel download with modified data structure
-function setupExcelDownload(feedbackData) {
-    document.getElementById('downloadExcel').addEventListener('click', function () {
-        // Get faculty information
-        const facultyInfo = feedbackData.facultyInfo || {
-            name: "Unknown Faculty",
-            department: "Unknown Department",
-            courses: ["Unknown Course"]
-        };
-        
-        // Create faculty information sheet
-        const facultyInfoData = [
-            ['Faculty Information'],
-            ['Name', facultyInfo.name],
-            ['Department', facultyInfo.department],
-            ['Section/Course', facultyInfo.courses.join(", ")]
-        ];
-
-        // Define data for each chart with appropriate scaling
-        const courseOrganizationData = [
-            ['Aspect', 'Rating (out of 5)'],
-            ['Content', feedbackData.courseOrganization[0] || 0],
-            ['Structure', feedbackData.courseOrganization[1] || 0],
-            ['Materials', feedbackData.courseOrganization[2] || 0],
-            ['Delivery', feedbackData.courseOrganization[3] || 0]
-        ];
-
-        const teacherEffectivenessData = [
-            ['Category', 'Effectiveness (out of 5)'],
-            ['Communication', feedbackData.teacherEffectiveness[0] || 0],
-            ['Knowledge', feedbackData.teacherEffectiveness[1] || 0],
-            ['Engagement', feedbackData.teacherEffectiveness[2] || 0],
-            ['Feedback', feedbackData.teacherEffectiveness[3] || 0]
-        ];
-
-        // Calculate percentages for pie/doughnut charts
-        const studentExpTotal = feedbackData.studentExperience.reduce((a, b) => a + b, 0);
-        const studentExpPercentages = studentExpTotal > 0 ? 
-            feedbackData.studentExperience.map(score => (score / studentExpTotal) * 100) : 
-            [25, 25, 25, 25];
-            
-        const studentExperienceData = [
-            ['Experience', 'Raw Score', 'Percentage (%)'],
-            ['Very Satisfied', feedbackData.studentExperience[0] || 0, studentExpPercentages[0].toFixed(1)],
-            ['Satisfied', feedbackData.studentExperience[1] || 0, studentExpPercentages[1].toFixed(1)],
-            ['Neutral', feedbackData.studentExperience[2] || 0, studentExpPercentages[2].toFixed(1)],
-            ['Dissatisfied', feedbackData.studentExperience[3] || 0, studentExpPercentages[3].toFixed(1)]
-        ];
-
-        const examsTotal = feedbackData.examsEvaluation.reduce((a, b) => a + b, 0);
-        const examsPercentages = examsTotal > 0 ? 
-            feedbackData.examsEvaluation.map(score => (score / examsTotal) * 100) : 
-            [25, 25, 25, 25];
-            
-        const examsEvaluationData = [
-            ['Aspect', 'Raw Score', 'Percentage (%)'],
-            ['Fair', feedbackData.examsEvaluation[0] || 0, examsPercentages[0].toFixed(1)],
-            ['Challenging', feedbackData.examsEvaluation[1] || 0, examsPercentages[1].toFixed(1)],
-            ['Well-structured', feedbackData.examsEvaluation[2] || 0, examsPercentages[2].toFixed(1)],
-            ['Needs Improvement', feedbackData.examsEvaluation[3] || 0, examsPercentages[3].toFixed(1)]
-        ];
-
-        const generalQuestionsData = [
-            ['Question', 'Response (out of 5)'],
-            ['Course Relevance to Career', feedbackData.generalQuestions[0] || 0],
-            ['Material Quality', feedbackData.generalQuestions[1] || 0],
-            ['Workload Manageability', feedbackData.generalQuestions[2] || 0],
-            ['Support Availability', feedbackData.generalQuestions[3] || 0],
-            ['Overall Satisfaction', feedbackData.generalQuestions[4] || 0]
-        ];
-
-        const tutorialLabData = [
-            ['Component', 'Tutorials Rating', 'Labs Rating'],
-            ['Clarity of Instructions', feedbackData.tutorialLabData[0][0] || 0, feedbackData.tutorialLabData[1][0] || 0],
-            ['Relevance to Course', feedbackData.tutorialLabData[0][1] || 0, feedbackData.tutorialLabData[1][1] || 0],
-            ['Equipment/Resources', feedbackData.tutorialLabData[0][2] || 0, feedbackData.tutorialLabData[1][2] || 0],
-            ['Staff Assistance', feedbackData.tutorialLabData[0][3] || 0, feedbackData.tutorialLabData[1][3] || 0],
-            ['Time Allocation', feedbackData.tutorialLabData[0][4] || 0, feedbackData.tutorialLabData[1][4] || 0]
-        ];
-
-        // Add metadata sheet with information about the feedback
-        const metadataData = [
-            ['Feedback Metadata'],
-            ['Form ID', feedbackData._id || 'Unknown'],
-            ['Section', feedbackData.section || 'Unknown'],
-            ['Number of Responses', '1'],
-            ['Generated Date', new Date().toISOString()]
-        ];
-
-        // Function to apply styling to a sheet
-        function styleSheet(sheet) {
-            const range = XLSX.utils.decode_range(sheet['!ref']);
-            const columnWidths = [];
-
-            // Style for headers
-            const headerStyle = {
-                font: { bold: true, color: { rgb: "FFFFFF" } },
-                fill: { fgColor: { rgb: "4472C4" } },
-                alignment: { horizontal: "center", vertical: "center" }
-            };
-
-            // Style for data cells
-            const dataStyle = {
-                alignment: { horizontal: "center", vertical: "center" },
-                border: {
-                    top: { style: "thin" },
-                    bottom: { style: "thin" },
-                    left: { style: "thin" },
-                    right: { style: "thin" }
-                }
-            };
-
-            for (let C = range.s.c; C <= range.e.c; ++C) {
-                let maxColWidth = 10; // Minimum width
-                for (let R = range.s.r; R <= range.e.r; ++R) {
-                    const cell = sheet[XLSX.utils.encode_cell({ c: C, r: R })];
-                    if (!cell) continue;
-                    const cellValue = cell.v.toString();
-                    maxColWidth = Math.max(maxColWidth, cellValue.length);
-
-                    // Apply styles
-                    if (R === 0) {
-                        cell.s = headerStyle;
-                    } else {
-                        cell.s = dataStyle;
-                    }
-                }
-                columnWidths[C] = maxColWidth;
-            }
-
-            sheet['!cols'] = columnWidths.map(w => ({ wch: w }));
-        }
-
-        // Create a new workbook and add data
-        const workbook = XLSX.utils.book_new();
-        const sheets = [
-            { name: 'Metadata', data: metadataData },
-            { name: 'Faculty Information', data: facultyInfoData },
-            { name: 'Course Organization', data: courseOrganizationData },
-            { name: 'Teacher Effectiveness', data: teacherEffectivenessData },
-            { name: 'Student Experience', data: studentExperienceData },
-            { name: 'Exams Evaluation', data: examsEvaluationData },
-            { name: 'General Questions', data: generalQuestionsData },
-            { name: 'Tutorial & Lab', data: tutorialLabData }
-        ];
-
-        sheets.forEach(sheet => {
-            const ws = XLSX.utils.aoa_to_sheet(sheet.data);
-            styleSheet(ws);
-            XLSX.utils.book_append_sheet(workbook, ws, sheet.name);
+    // Download Excel button
+    const downloadBtn = document.getElementById('downloadExcel');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', function() {
+            window.location.href = `/feedback/download/${formType.toLowerCase()}`;
         });
-
-        // Export workbook with section name in the filename
-        const section = feedbackData.section || 'Unknown';
-        const fileName = `Faculty_Feedback_${section.replace(/\s+/g, '_')}.xlsx`;
-        XLSX.writeFile(workbook, fileName);
-    });
-}
-
-// Function to handle window resize for responsiveness
-function handleResize() {
-    const chartContainers = document.querySelectorAll('.chart-container');
-    chartContainers.forEach(container => {
-        const chartCanvas = container.querySelector('canvas');
-        if (chartCanvas) {
-            const containerWidth = container.clientWidth;
-            // Adjust height based on width, but with reasonable limits
-            const containerHeight = Math.max(200, Math.min(containerWidth * 0.75, 350));
-            container.style.height = `${containerHeight}px`;
+    }
+    
+    // Function to get data from canvas attributes
+    function getChartData(chartId) {
+        const canvas = document.getElementById(chartId);
+        if (!canvas) return null;
+        
+        try {
+            const labels = JSON.parse(canvas.getAttribute('data-labels') || '[]');
+            const values = JSON.parse(canvas.getAttribute('data-values') || '[]');
+            
+            return { labels, values };
+        } catch (e) {
+            console.error(`Error parsing data for ${chartId}:`, e);
+            return { labels: [], values: [] };
         }
-    });
-}
-
-// Initialize everything when the page loads
-document.addEventListener('DOMContentLoaded', async function() {
-    // Create chart containers for better responsiveness
-    const chartCanvases = document.querySelectorAll('canvas');
-    chartCanvases.forEach(canvas => {
-        const container = document.createElement('div');
-        container.className = 'chart-container';
-        container.style.position = 'relative';
-        container.style.height = '300px'; // Default height
-        canvas.parentNode.insertBefore(container, canvas);
-        container.appendChild(canvas);
-    });
+    }
     
-    // Load feedback responses
-    const feedbackResponses = await loadFeedbackResponses();
+    // Function to create Academic charts
+    function createAcademicCharts() {
+        // Teacher Effectiveness Chart
+        if (document.getElementById('teacherEffectivenessChart')) {
+            const chartData = getChartData('teacherEffectivenessChart');
+            if (chartData) {
+                new Chart(document.getElementById('teacherEffectivenessChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Average Rating (1-5)',
+                            data: chartData.values,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: chartOptions
+                });
+            }
+        }
+        
+        // Student Learning Experience Chart
+        if (document.getElementById('studentExperienceChart')) {
+            const chartData = getChartData('studentExperienceChart');
+            if (chartData) {
+                new Chart(document.getElementById('studentExperienceChart'), {
+                    type: 'radar',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Average Rating (1-5)',
+                            data: chartData.values,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1,
+                            pointBackgroundColor: 'rgba(255, 99, 132, 1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                min: 0,
+                                max: 5,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 500,
+                            easing: 'linear'
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Exams and Evaluation Chart
+        if (document.getElementById('examsEvaluationChart')) {
+            const chartData = getChartData('examsEvaluationChart');
+            if (chartData) {
+                new Chart(document.getElementById('examsEvaluationChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Average Rating (1-5)',
+                            data: chartData.values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: chartOptions
+                });
+            }
+        }
+        
+        // Overall Satisfaction Chart
+        if (document.getElementById('overallSatisfactionChart')) {
+            const chartData = getChartData('overallSatisfactionChart');
+            if (chartData) {
+                // For pie/doughnut charts, we need labels and count data
+                // If values are average scores, we format appropriately
+                
+                let displayData = chartData.values;
+                // If we have a response distribution for satisfaction levels
+                if (chartData.labels.some(label => ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied', 'Very Dissatisfied'].includes(label))) {
+                    displayData = chartData.values; // Keep as is - these are counts
+                } else {
+                    // If we just have question averages, adapt the display
+                    displayData = chartData.values;
+                }
+                
+                new Chart(document.getElementById('overallSatisfactionChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            data: displayData,
+                            backgroundColor: [
+                                'rgba(75, 192, 192, 0.6)',
+                                'rgba(54, 162, 235, 0.6)',
+                                'rgba(255, 206, 86, 0.6)',
+                                'rgba(255, 159, 64, 0.6)',
+                                'rgba(255, 99, 132, 0.6)'
+                            ],
+                            borderColor: [
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(255, 159, 64, 1)',
+                                'rgba(255, 99, 132, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        },
+                        animation: {
+                            animateRotate: true,
+                            animateScale: false,
+                            duration: 500,
+                            easing: 'easeOutCirc'
+                        }
+                    }
+                });
+            }
+        }
+    }
     
-    // Process the data
-    const processedData = processFeedbackData(feedbackResponses);
+    // Function to create Institutional charts
+    function createInstitutionalCharts() {
+        // Resources and Administration Chart
+        renderDynamicChart('resourcesAdminChart', 'bar', 'rgba(153, 102, 255, 0.6)', 'rgba(153, 102, 255, 1)');
+        
+        // Curriculum Aspects Chart
+        if (document.getElementById('curriculumAspectsChart')) {
+            const chartData = getChartData('curriculumAspectsChart');
+            if (chartData) {
+                new Chart(document.getElementById('curriculumAspectsChart'), {
+                    type: 'radar',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Average Rating (1-5)',
+                            data: chartData.values,
+                            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            borderWidth: 1,
+                            pointBackgroundColor: 'rgba(255, 159, 64, 1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                min: 0,
+                                max: 5,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 500,
+                            easing: 'linear'
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Render other charts
+        renderDynamicChart('adminServicesChart', 'bar', 'rgba(54, 162, 235, 0.6)', 'rgba(54, 162, 235, 1)');
+        renderDynamicChart('studentSupportChart', 'bar', 'rgba(75, 192, 192, 0.6)', 'rgba(75, 192, 192, 1)');
+        renderDynamicChart('techResourcesChart', 'bar', 'rgba(153, 102, 255, 0.6)', 'rgba(153, 102, 255, 1)');
+        renderDynamicChart('campusLifeChart', 'bar', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 159, 64, 1)');
+    }
     
-    // Create charts with the processed data
-    createResponsiveCharts(processedData);
+    // Function to create Training charts
+    function createTrainingCharts() {
+        renderDynamicChart('trainingContentChart', 'bar', 'rgba(54, 162, 235, 0.6)', 'rgba(54, 162, 235, 1)');
+        renderDynamicChart('trainerEffectivenessChart', 'bar', 'rgba(75, 192, 192, 0.6)', 'rgba(75, 192, 192, 1)');
+        renderDynamicChart('trainingMaterialsChart', 'bar', 'rgba(153, 102, 255, 0.6)', 'rgba(153, 102, 255, 1)');
+        renderDynamicChart('workshopFacilitiesChart', 'bar', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 159, 64, 1)');
+        renderDynamicChart('practicalApplicationChart', 'bar', 'rgba(255, 99, 132, 0.6)', 'rgba(255, 99, 132, 1)');
+        renderDynamicChart('overallValueChart', 'bar', 'rgba(0, 128, 128, 0.6)', 'rgba(0, 128, 128, 1)');
+    }
     
-    // Setup Excel download
-    setupExcelDownload(processedData);
-    
-    // Handle initial sizing and window resize
-    handleResize();
-    window.addEventListener('resize', handleResize);
+    // Helper function to render dynamic charts
+    function renderDynamicChart(chartId, chartType, bgColor, borderColor) {
+        const chartElement = document.getElementById(chartId);
+        if (chartElement) {
+            const chartData = getChartData(chartId);
+            if (chartData) {
+                new Chart(chartElement, {
+                    type: chartType,
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Average Rating (1-5)',
+                            data: chartData.values,
+                            backgroundColor: bgColor,
+                            borderColor: borderColor,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: chartOptions
+                });
+            }
+        }
+    }
 });
 </script>
 </body>

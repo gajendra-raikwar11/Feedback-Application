@@ -184,9 +184,7 @@
         }
     </style>
 </head>
-<body>
-    <!-- Navbar partial will be included here -->
-    
+<body> 
     <div class="container-fluid py-4">
         <div class="row justify-content-center">
             <div class="col-lg-10 col-md-12 col-sm-12">
@@ -210,7 +208,7 @@
                             <div class="col-md-4 col-sm-12 mb-2 mb-md-0">
                                 <div class="metadata-item d-flex">
                                     <span class="metadata-label fw-semibold me-2"><i class="fas fa-calendar-alt me-2"></i>Deadline:</span>
-                                    <span><%= new Date(form.deadline).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+                                    <span data-deadline="<%= form.deadline %>"><%= new Date(form.deadline).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></span>
                                 </div>
                             </div>
                             <div class="col-md-4 col-sm-12">
@@ -223,16 +221,26 @@
                     </div>
                     
                     <form id="feedbackForm" action="/student/submitFormResponse/<%= form._id %>" method="POST">
-                        <input type="hidden" name="formId" value="<%= form._id %>">
+                        <!-- Form identification fields -->
+                        <input type="hidden" name="formID" value="<%= form._id %>">
                         <input type="hidden" name="formTitle" value="<%= form.title %>">
                         <input type="hidden" name="formType" value="<%= form.formType %>">
+                        <input type="hidden" name="studentID" value="<%= studentID %>">
+                        <% if (form.facultyID) { %>
+                        <input type="hidden" name="facultyID" value="<%= form.facultyID %>">
+                        <% } %>
+                        <input type="hidden" name="section" value="<%= section %>">
+                        <input type="hidden" name="semester" value="<%= semester %>">
                         <input type="hidden" name="commonSemester" value="<%= form.commonSemester %>">
+                        <input type="hidden" name="sectionCount" value="<%= form.sections ? form.sections.length : 0 %>">
                         
+                        <% let globalQuestionIndex = 0; %>
                         <% if (form.sections && form.sections.length > 0) { %>
                             <% form.sections.forEach((section, sIndex) => { %>
-                                <div class="section-card mb-4">
+                                <div class="section-card mb-4" data-section-id="<%= section._id %>" data-section-index="<%= sIndex %>">
                                     <h3 class="section-title mb-3"><%= section.title %></h3>
-                                    <input type="hidden" name="sectionTitles[<%= section._id %>]" value="<%= section.title %>">
+                                    <input type="hidden" name="sections[<%= sIndex %>][sectionID]" value="<%= section._id %>">
+                                    <input type="hidden" name="sections[<%= sIndex %>][sectionTitle]" value="<%= section.title %>">
                                     
                                     <% if (section.description) { %>
                                         <p class="section-description text-muted mb-4"><%= section.description %></p>
@@ -240,7 +248,10 @@
                                     
                                     <% if (section.questions && section.questions.length > 0) { %>
                                         <% section.questions.forEach((question, qIndex) => { %>
-                                            <div class="question-container <%= qIndex % 2 === 0 ? 'bg-light' : 'bg-white' %> rounded border p-3 mb-3">
+                                            <div class="question-container <%= qIndex % 2 === 0 ? 'bg-light' : 'bg-white' %> rounded border p-3 mb-3" 
+                                                 data-question-id="<%= question._id %>" 
+                                                 data-global-index="<%= globalQuestionIndex %>"
+                                                 data-section-index="<%= sIndex %>">
                                                 <h4 class="mb-3 fw-semibold fs-5">
                                                     <%= question.text %> 
                                                     <% if (question.required) { %>
@@ -248,47 +259,67 @@
                                                     <% } %>
                                                 </h4>
                                                 
-                                                <!-- Store question text for schema compatibility -->
-                                                <input type="hidden" name="questionTexts[<%= question._id %>]" value="<%= question.text %>">
+                                                <!-- Store question metadata -->
+                                                <input type="hidden" name="answers[<%= globalQuestionIndex %>][questionID]" value="<%= question._id %>">
+                                                <input type="hidden" name="answers[<%= globalQuestionIndex %>][questionText]" value="<%= question.text %>">
+                                                <input type="hidden" name="answers[<%= globalQuestionIndex %>][sectionID]" value="<%= section._id %>">
+                                                <input type="hidden" name="answers[<%= globalQuestionIndex %>][sectionTitle]" value="<%= section.title %>">
+                                                <input type="hidden" name="answers[<%= globalQuestionIndex %>][sectionIndex]" value="<%= sIndex %>">
+                                                <input type="hidden" name="answers[<%= globalQuestionIndex %>][questionType]" value="<%= question.type %>">
+                                                <input type="hidden" name="answers[<%= globalQuestionIndex %>][questionIndex]" value="<%= qIndex %>">
                                                 
                                                 <div class="question-input mt-3">
                                                     <% if (question.type === 'text') { %>
-                                                        <input type="text" name="responses[<%= question._id %>]" class="form-control" 
+                                                        <input type="text" 
+                                                               name="answers[<%= globalQuestionIndex %>][responseText]" 
+                                                               class="form-control" 
                                                                data-section-title="<%= section.title %>"
+                                                               data-section-id="<%= section._id %>"
+                                                               data-section-index="<%= sIndex %>"
                                                                <% if (question.required) { %>required<% } %>>
                                                                
                                                     <% } else if (question.type === 'textarea') { %>
-                                                        <textarea name="responses[<%= question._id %>]" class="form-control" rows="4"
-                                                                data-section-title="<%= section.title %>"
-                                                                <% if (question.required) { %>required<% } %>></textarea>
+                                                        <textarea name="answers[<%= globalQuestionIndex %>][responseText]" 
+                                                                  class="form-control" 
+                                                                  rows="4"
+                                                                  data-section-title="<%= section.title %>"
+                                                                  data-section-id="<%= section._id %>"
+                                                                  data-section-index="<%= sIndex %>"
+                                                                  <% if (question.required) { %>required<% } %>></textarea>
                                                                
                                                     <% } else if (question.type === 'rating') { %>
                                                         <div class="rating-container d-flex flex-wrap align-items-center justify-content-start gap-3 my-2">
                                                             <% if (question.options && question.options.length > 0) { %>
                                                                 <% question.options.forEach((option, i) => { %>
                                                                     <div class="rating-option form-check">
-                                                                        <input type="radio" class="form-check-input" 
-                                                                               id="rating-<%= question._id %>-<%= i %>" 
-                                                                               name="responses[<%= question._id %>]" 
+                                                                        <input type="radio" 
+                                                                               class="form-check-input" 
+                                                                               id="rating-<%= section._id %>-<%= question._id %>-<%= i %>" 
+                                                                               name="answers[<%= globalQuestionIndex %>][responseRating]" 
                                                                                value="<%= option %>"
                                                                                data-section-title="<%= section.title %>"
+                                                                               data-section-id="<%= section._id %>"
+                                                                               data-section-index="<%= sIndex %>"
                                                                                <% if (question.required) { %>required<% } %>>
                                                                         <label class="form-check-label" 
-                                                                               for="rating-<%= question._id %>-<%= i %>"><%= option %></label>
+                                                                               for="rating-<%= section._id %>-<%= question._id %>-<%= i %>"><%= option %></label>
                                                                     </div>
                                                                 <% }); %>
                                                             <% } else { %>
                                                                 <!-- Default 1-5 rating if no options provided -->
                                                                 <% for (let i = 1; i <= 5; i++) { %>
                                                                     <div class="rating-option form-check">
-                                                                        <input type="radio" class="form-check-input" 
-                                                                               id="rating-<%= question._id %>-<%= i %>" 
-                                                                               name="responses[<%= question._id %>]" 
+                                                                        <input type="radio" 
+                                                                               class="form-check-input" 
+                                                                               id="rating-<%= section._id %>-<%= question._id %>-<%= i %>" 
+                                                                               name="answers[<%= globalQuestionIndex %>][responseRating]" 
                                                                                value="<%= i %>"
                                                                                data-section-title="<%= section.title %>"
+                                                                               data-section-id="<%= section._id %>"
+                                                                               data-section-index="<%= sIndex %>"
                                                                                <% if (question.required) { %>required<% } %>>
                                                                         <label class="form-check-label" 
-                                                                               for="rating-<%= question._id %>-<%= i %>"><%= i %></label>
+                                                                               for="rating-<%= section._id %>-<%= question._id %>-<%= i %>"><%= i %></label>
                                                                     </div>
                                                                 <% } %>
                                                             <% } %>
@@ -297,26 +328,46 @@
                                                     <% } else if (question.type === 'yes_no') { %>
                                                         <div class="yes-no-container d-flex flex-wrap gap-4 my-2">
                                                             <div class="option form-check">
-                                                                <input type="radio" class="form-check-input" 
-                                                                       id="yes-<%= question._id %>" 
-                                                                       name="responses[<%= question._id %>]" 
-                                                                       value="yes"
+                                                                <input type="radio" 
+                                                                       class="form-check-input" 
+                                                                       id="yes-<%= section._id %>-<%= question._id %>" 
+                                                                       name="answers[<%= globalQuestionIndex %>][responseOptions]" 
+                                                                       value="Yes"
                                                                        data-section-title="<%= section.title %>"
+                                                                       data-section-id="<%= section._id %>"
+                                                                       data-section-index="<%= sIndex %>"
                                                                        <% if (question.required) { %>required<% } %>>
-                                                                <label class="form-check-label" for="yes-<%= question._id %>">
+                                                                <label class="form-check-label" 
+                                                                       for="yes-<%= section._id %>-<%= question._id %>">
                                                                     <%= question.yesNoLabels && question.yesNoLabels.yes ? question.yesNoLabels.yes : 'Yes' %>
                                                                 </label>
                                                             </div>
                                                             <div class="option form-check">
-                                                                <input type="radio" class="form-check-input" 
-                                                                       id="no-<%= question._id %>" 
-                                                                       name="responses[<%= question._id %>]" 
-                                                                       value="no"
+                                                                <input type="radio" 
+                                                                       class="form-check-input" 
+                                                                       id="no-<%= section._id %>-<%= question._id %>" 
+                                                                       name="answers[<%= globalQuestionIndex %>][responseOptions]" 
+                                                                       value="No"
                                                                        data-section-title="<%= section.title %>"
+                                                                       data-section-id="<%= section._id %>"
+                                                                       data-section-index="<%= sIndex %>"
                                                                        <% if (question.required) { %>required<% } %>>
-                                                                <label class="form-check-label" for="no-<%= question._id %>">
+                                                                <label class="form-check-label" 
+                                                                       for="no-<%= section._id %>-<%= question._id %>">
                                                                     <%= question.yesNoLabels && question.yesNoLabels.no ? question.yesNoLabels.no : 'No' %>
                                                                 </label>
+                                                            </div>
+                                                            <div class="option form-check">
+                                                                <input type="radio" 
+                                                                       class="form-check-input" 
+                                                                       id="no-opinion-<%= section._id %>-<%= question._id %>" 
+                                                                       name="answers[<%= globalQuestionIndex %>][responseOptions]" 
+                                                                       value="No Opinion"
+                                                                       data-section-title="<%= section.title %>"
+                                                                       data-section-id="<%= section._id %>"
+                                                                       data-section-index="<%= sIndex %>">
+                                                                <label class="form-check-label" 
+                                                                       for="no-opinion-<%= section._id %>-<%= question._id %>">No Opinion</label>
                                                             </div>
                                                         </div>
                                                         
@@ -327,14 +378,17 @@
                                                                     <% question.options.forEach((option, index) => { %>
                                                                         <div class="col-md-6 col-sm-12 mb-2">
                                                                             <div class="option form-check">
-                                                                                <input type="radio" class="form-check-input" 
-                                                                                       id="mcq-<%= question._id %>-<%= index %>" 
-                                                                                       name="responses[<%= question._id %>]" 
+                                                                                <input type="radio" 
+                                                                                       class="form-check-input" 
+                                                                                       id="mcq-<%= section._id %>-<%= question._id %>-<%= index %>" 
+                                                                                       name="answers[<%= globalQuestionIndex %>][responseOptions]" 
                                                                                        value="<%= option %>"
                                                                                        data-section-title="<%= section.title %>"
+                                                                                       data-section-id="<%= section._id %>"
+                                                                                       data-section-index="<%= sIndex %>"
                                                                                        <% if (question.required) { %>required<% } %>>
                                                                                 <label class="form-check-label" 
-                                                                                       for="mcq-<%= question._id %>-<%= index %>"><%= option %></label>
+                                                                                       for="mcq-<%= section._id %>-<%= question._id %>-<%= index %>"><%= option %></label>
                                                                             </div>
                                                                         </div>
                                                                     <% }); %>
@@ -349,13 +403,16 @@
                                                                     <% question.options.forEach((option, index) => { %>
                                                                         <div class="col-md-6 col-sm-12 mb-2">
                                                                             <div class="option form-check">
-                                                                                <input type="checkbox" class="form-check-input" 
-                                                                                       id="checkbox-<%= question._id %>-<%= index %>" 
-                                                                                       name="responses[<%= question._id %>][]" 
+                                                                                <input type="checkbox" 
+                                                                                       class="form-check-input" 
+                                                                                       id="checkbox-<%= section._id %>-<%= question._id %>-<%= index %>" 
+                                                                                       name="answers[<%= globalQuestionIndex %>][responseOptions][]" 
                                                                                        value="<%= option %>"
-                                                                                       data-section-title="<%= section.title %>">
+                                                                                       data-section-title="<%= section.title %>"
+                                                                                       data-section-id="<%= section._id %>"
+                                                                                       data-section-index="<%= sIndex %>">
                                                                                 <label class="form-check-label" 
-                                                                                       for="checkbox-<%= question._id %>-<%= index %>"><%= option %></label>
+                                                                                       for="checkbox-<%= section._id %>-<%= question._id %>-<%= index %>"><%= option %></label>
                                                                             </div>
                                                                         </div>
                                                                     <% }); %>
@@ -364,8 +421,11 @@
                                                         </div>
                                                         
                                                     <% } else if (question.type === 'dropdown') { %>
-                                                        <select name="responses[<%= question._id %>]" class="form-select"
+                                                        <select name="answers[<%= globalQuestionIndex %>][responseOptions]" 
+                                                                class="form-select"
                                                                 data-section-title="<%= section.title %>"
+                                                                data-section-id="<%= section._id %>"
+                                                                data-section-index="<%= sIndex %>"
                                                                 <% if (question.required) { %>required<% } %>>
                                                             <option value="">Select an option</option>
                                                             <% if (question.options && Array.isArray(question.options)) { %>
@@ -376,13 +436,17 @@
                                                         </select>
                                                         
                                                     <% } else if (question.type === 'date') { %>
-                                                        <input type="date" name="responses[<%= question._id %>]" class="form-control"
-                                                                data-section-title="<%= section.title %>"
-                                                                <% if (question.required) { %>required<% } %>>
+                                                        <input type="date" 
+                                                               name="answers[<%= globalQuestionIndex %>][responseDate]" 
+                                                               class="form-control"
+                                                               data-section-title="<%= section.title %>"
+                                                               data-section-id="<%= section._id %>"
+                                                               data-section-index="<%= sIndex %>"
+                                                               <% if (question.required) { %>required<% } %>>
                                                                 
                                                     <% } else if (question.type === 'grid') { %>
                                                         <div class="table-responsive">
-                                                            <table class="grid-question-table table table-bordered">
+                                                            <table class="grid-question-table table table-bordered" data-grid-id="<%= question._id %>">
                                                                 <thead class="table-light">
                                                                     <tr>
                                                                         <th></th>
@@ -401,10 +465,14 @@
                                                                                 <% if (question.gridOptions && Array.isArray(question.gridOptions.columns)) { %>
                                                                                     <% question.gridOptions.columns.forEach((column, colIndex) => { %>
                                                                                         <td class="text-center">
-                                                                                            <input type="radio" class="form-check-input" 
-                                                                                                   name="responses[<%= question._id %>][<%= row %>]" 
+                                                                                            <input type="radio" 
+                                                                                                   class="form-check-input" 
+                                                                                                   name="answers[<%= globalQuestionIndex %>][gridResponses][<%= row %>]" 
                                                                                                    value="<%= column %>"
                                                                                                    data-section-title="<%= section.title %>"
+                                                                                                   data-section-id="<%= section._id %>"
+                                                                                                   data-section-index="<%= sIndex %>"
+                                                                                                   data-row="<%= row %>"
                                                                                                    <% if (question.required) { %>required<% } %>>
                                                                                         </td>
                                                                                     <% }); %>
@@ -415,20 +483,46 @@
                                                                 </tbody>
                                                             </table>
                                                         </div>
+                                                        <input type="hidden" name="answers[<%= globalQuestionIndex %>][responseText]" id="grid-data-<%= section._id %>-<%= question._id %>">
                                                         
                                                     <% } else { %>
                                                         <!-- Default to text input if type is not recognized -->
-                                                        <input type="text" name="responses[<%= question._id %>]" class="form-control"
-                                                                data-section-title="<%= section.title %>"
-                                                                <% if (question.required) { %>required<% } %>>
+                                                        <input type="text" 
+                                                               name="answers[<%= globalQuestionIndex %>][responseText]" 
+                                                               class="form-control"
+                                                               data-section-title="<%= section.title %>"
+                                                               data-section-id="<%= section._id %>"
+                                                               data-section-index="<%= sIndex %>"
+                                                               <% if (question.required) { %>required<% } %>>
                                                     <% } %>
                                                 </div>
                                             </div>
+                                            <% globalQuestionIndex++; %>
                                         <% }); %>
                                     <% } %>
                                 </div>
                             <% }); %>
                         <% } %>
+                        
+                        <!-- Section summary (will be populated dynamically) -->
+                        <div class="section-summary mb-4 p-3 border rounded bg-light">
+                            <h4 class="mb-3">Response Summary</h4>
+                            <div id="sectionSummaries"></div>
+                            <div class="total-summary mt-3 pt-3 border-top">
+                                <div class="d-flex justify-content-between">
+                                    <strong>Total Questions:</strong>
+                                    <span id="totalQuestions">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <strong>Questions Answered:</strong>
+                                    <span id="questionsAnswered">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <strong>Completion Rate:</strong>
+                                    <span id="completionRate">0%</span>
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="d-flex justify-content-end mt-4 mb-2">
                             <a href="/student/studentFormsPage" class="btn btn-outline-secondary me-2">
@@ -450,321 +544,421 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     
     <script>
-       document.addEventListener('DOMContentLoaded', function() {
-    // Check for flash messages from the server (keeping your existing toast code)
-    const showToast = (message, type) => {
-        const backgroundColor = type === 'error' ? '#e74c3c' : 
-                                type === 'success' ? '#2ecc71' : 
-                                type === 'warning' ? '#f39c12' : '#3498db';
-        
-        Toastify({
-            text: message,
-            duration: 5000,
-            close: true,
-            gravity: "top",
-            position: "right", 
-            backgroundColor: backgroundColor,
-            stopOnFocus: true
-        }).showToast();
-    };
-    
-    // Display flash messages if they exist (keeping your existing code)
-    if (typeof messages !== 'undefined') {
-        if (messages.error) {
-            messages.error.forEach(function(message) {
-                showToast(message, 'error');
-            });
-        }
-        if (messages.success) {
-            messages.success.forEach(function(message) {
-                showToast(message, 'success');
-            });
-        }
-    }
-    
-    if (typeof successMessage !== 'undefined' && successMessage) {
-        showToast(successMessage, 'success');
-    }
-    
-    // Form validation and submission handling
-    const form = document.getElementById('feedbackForm');
-    if (form) {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            
-            // Validate required fields
-            let isValid = true;
-            const requiredElements = form.querySelectorAll('[required]');
-            
-            // Reset validation flags
-            document.querySelectorAll('.question-container').forEach(container => {
-                delete container.dataset.validated;
-                container.style.borderLeft = '';
-                container.style.borderColor = '';
-            });
-            
-            requiredElements.forEach(element => {
-                if ((element.type === 'radio' || element.type === 'checkbox') && 
-                    !document.querySelector(`input[name="${element.name}"]:checked`)) {
-                    // For radio buttons and checkboxes, check if any in the group is checked
-                    const questionContainer = element.closest('.question-container');
-                    if (questionContainer && !questionContainer.dataset.validated) {
-                        isValid = false;
-                        questionContainer.dataset.validated = true; // Mark as validated to avoid duplicate errors
-                        questionContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        questionContainer.style.borderLeft = '4px solid #e74c3c';
-                        questionContainer.style.borderColor = '#e74c3c';
-                    }
-                } else if (!element.value && element.type !== 'radio' && element.type !== 'checkbox') {
-                    isValid = false;
-                    // Find the parent question container
-                    const questionContainer = element.closest('.question-container');
-                    if (questionContainer) {
-                        questionContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        questionContainer.style.borderLeft = '4px solid #e74c3c';
-                        questionContainer.style.borderColor = '#e74c3c';
-                        
-                        // Highlight the input
-                        if (element.classList.contains('form-control') || element.classList.contains('form-select')) {
-                            element.classList.add('is-invalid');
-                        }
-                    }
-                }
-            });
-            
-            if (!isValid) {
-                showToast('Please fill in all required fields', 'error');
-                return;
-            }
-            
-            // Format data to match the route handler expectations
-            const formId = document.querySelector('input[name="formId"]').value;
-            const formTitle = document.querySelector('input[name="formTitle"]').value;
-            const formType = document.querySelector('input[name="formType"]').value;
-            const commonSemester = document.querySelector('input[name="commonSemester"]').value;
-            
-            // Get all question responses
-            const answers = [];
-            const responseInputs = document.querySelectorAll('[name^="responses["]');
-            
-            responseInputs.forEach(input => {
-                // Extract questionID from the input name (format: responses[questionID])
-                const match = input.name.match(/responses\[(.*?)\]/);
-                if (!match) return;
-                
-                const questionID = match[1];
-                
-                // Skip if this question was already processed (needed for radio buttons with same name)
-                if (answers.some(a => a.questionID === questionID)) return;
-                
-                // Get section title from data attribute
-                const sectionTitle = input.getAttribute('data-section-title') || '';
-                
-                // Get question text from hidden field
-                const questionTextInput = document.querySelector(`input[name="questionTexts[${questionID}]"]`);
-                const questionText = questionTextInput ? questionTextInput.value : '';
-                
-                // Determine the question type based on input type
-                let questionType = '';
-                let responseValue = null;
-                let responseOptions = [];
-                
-                if (input.type === 'text' || input.type === 'date') {
-                    questionType = input.type;
-                    responseValue = input.value;
-                } else if (input.type === 'textarea') {
-                    questionType = 'textarea';
-                    responseValue = input.value;
-                } else if (input.type === 'radio') {
-                    // Handle radio buttons (rating, yes_no, mcq)
-                    const radioName = input.name;
-                    const checkedRadio = document.querySelector(`input[name="${radioName}"]:checked`);
-                    
-                    // Determine specific radio type
-                    if (radioName.includes('rating')) {
-                        questionType = 'rating';
-                        responseValue = checkedRadio ? parseInt(checkedRadio.value) : null;
-                    } else if (input.id.includes('yes-') || input.id.includes('no-')) {
-                        questionType = 'yes_no';
-                        responseValue = checkedRadio ? checkedRadio.value : null;
-                    } else {
-                        questionType = 'radio';
-                        responseValue = checkedRadio ? checkedRadio.value : null;
-                    }
-                } else if (input.type === 'checkbox') {
-                    questionType = 'checkbox';
-                    // Get all checked checkboxes with the same name
-                    const checkboxes = document.querySelectorAll(`input[name="${input.name}"]:checked`);
-                    responseOptions = Array.from(checkboxes).map(cb => cb.value);
-                } else if (input.tagName === 'SELECT') {
-                    questionType = 'dropdown';
-                    responseValue = input.value;
-                }
-                
-                // Prepare the answer object
-                const answer = {
-                    questionID,
-                    questionText,
-                    sectionTitle,
-                    questionType,
-                    responseText: ['text', 'textarea', 'date', 'yes_no', 'radio', 'dropdown'].includes(questionType) ? responseValue : null,
-                    responseOptions: questionType === 'checkbox' ? responseOptions : [],
-                    responseRating: questionType === 'rating' ? responseValue : null,
-                    responseDate: questionType === 'date' ? responseValue : null
-                };
-                
-                answers.push(answer);
-            });
-            
-            // Handle grid questions separately as they have a different structure
-            const gridQuestions = document.querySelectorAll('table.grid-question-table');
-            gridQuestions.forEach(table => {
-                const questionContainer = table.closest('.question-container');
-                if (!questionContainer) return;
-                
-                // Find the question ID from any radio button in the grid
-                const firstRadio = table.querySelector('input[type="radio"]');
-                if (!firstRadio) return;
-                
-                const match = firstRadio.name.match(/responses\[(.*?)\]/);
-                if (!match) return;
-                
-                const questionID = match[1];
-                const sectionTitle = firstRadio.getAttribute('data-section-title') || '';
-                
-                // Get question text from hidden field
-                const questionTextInput = document.querySelector(`input[name="questionTexts[${questionID}]"]`);
-                const questionText = questionTextInput ? questionTextInput.value : '';
-                
-                // For grid questions, we'll create an object with row -> selected column
-                const gridResponses = {};
-                
-                // Get all rows
-                const rows = table.querySelectorAll('tbody tr');
-                rows.forEach(row => {
-                    const rowTitle = row.querySelector('td').textContent.trim();
-                    const checkedRadio = row.querySelector('input[type="radio"]:checked');
-                    
-                    if (checkedRadio) {
-                        gridResponses[rowTitle] = checkedRadio.value;
-                    }
-                });
-                
-                // Add this as a special answer
-                answers.push({
-                    questionID,
-                    questionText,
-                    sectionTitle,
-                    questionType: 'grid',
-                    responseText: JSON.stringify(gridResponses),
-                    responseOptions: [],
-                    responseRating: null,
-                    responseDate: null
-                });
-            });
-            
-            // Create the final payload
-            const payload = {
-                formId,
-                formTitle,
-                formType,
-                commonSemester,
-                answers
-            };
-            
-            // Now send the data using fetch
-            fetch(`/student/submitFormResponse/${formId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.message || 'Submission failed');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                showToast('Your feedback has been submitted successfully', 'success');
-                setTimeout(() => {
-                    window.location.href = '/student/studentFormsPage?submitted=true';
-                }, 1000);
-            })
-            .catch(error => {
-                showToast(error.message || 'An error occurred while submitting your response', 'error');
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+          // Show toast function
+          const showToast = (message, type) => {
+              const backgroundColor = type === 'error' ? '#e74c3c' : 
+                                      type === 'success' ? '#2ecc71' : 
+                                      type === 'warning' ? '#f39c12' : '#3498db';
+              
+              Toastify({
+                  text: message,
+                  duration: 5000,
+                  close: true,
+                  gravity: "top",
+                  position: "right", 
+                  backgroundColor: backgroundColor,
+                  stopOnFocus: true
+              }).showToast();
+          };
+          
+          // Display flash messages if they exist
+          if (typeof messages !== 'undefined') {
+              if (messages.error) {
+                  messages.error.forEach(function(message) {
+                      showToast(message, 'error');
+                  });
+              }
+              if (messages.success) {
+                  messages.success.forEach(function(message) {
+                      showToast(message, 'success');
+                  });
+              }
+          }
+          
+          if (typeof successMessage !== 'undefined' && successMessage) {
+              showToast(successMessage, 'success');
+          }
+          
+          // Form validation and submission handling
+          const form = document.getElementById('feedbackForm');
+          if (form) {
+              // Create a response tracker to store all form responses
+              const formResponses = {};
+              
+              // Create section data tracker
+              const sectionData = {};
+              
+              // Initialize section data
+              document.querySelectorAll('.section-card').forEach(sectionEl => {
+                  const sectionId = sectionEl.getAttribute('data-section-id');
+                  const sectionIndex = parseInt(sectionEl.getAttribute('data-section-index'));
+                  const sectionTitle = sectionEl.querySelector('.section-title').textContent;
+                  
+                  sectionData[sectionIndex] = {
+                      sectionID: sectionId,
+                      sectionTitle: sectionTitle,
+                      totalQuestions: 0,
+                      answeredQuestions: 0,
+                      questions: {}
+                  };
+                  
+                  // Count questions in this section
+                  const questionContainers = sectionEl.querySelectorAll('.question-container');
+                  sectionData[sectionIndex].totalQuestions = questionContainers.length;
+                  
+                  // Initialize question data
+                  questionContainers.forEach(container => {
+                      const globalIndex = container.getAttribute('data-global-index');
+                      const questionId = container.getAttribute('data-question-id');
+                      
+                      sectionData[sectionIndex].questions[globalIndex] = {
+                          questionID: questionId,
+                          answered: false
+                      };
+                  });
+              });
+              
+              // Process grid questions to collect their data 
+              const processGridQuestions = () => {
+                  document.querySelectorAll('.grid-question-table').forEach(table => {
+                      const questionContainer = table.closest('.question-container');
+                      if (!questionContainer) return;
+                      
+                      const globalIndex = questionContainer.getAttribute('data-global-index');
+                      const sectionIndex = questionContainer.getAttribute('data-section-index');
+                      const questionIdInput = questionContainer.querySelector('[name$="[questionID]"]');
+                      if (!questionIdInput) return;
+                      
+                      const questionId = questionIdInput.value;
+                      const gridData = {};
+                      
+                      // Get all rows with selected values
+                      table.querySelectorAll('tbody tr').forEach(row => {
+                          const rowTitle = row.querySelector('td').textContent.trim();
+                          const checkedRadio = row.querySelector('input[type="radio"]:checked');
+                          
+                          if (checkedRadio) {
+                              gridData[rowTitle] = checkedRadio.value;
+                          }
+                      });
+                      
+                      // Store in formResponses
+                      if (!formResponses[globalIndex]) {
+                          formResponses[globalIndex] = {
+                              questionID: questionId,
+                              questionText: questionContainer.querySelector('[name$="[questionText]"]').value,
+                              sectionTitle: questionContainer.querySelector('[name$="[sectionTitle]"]').value,
+                              sectionID: questionContainer.querySelector('[name$="[sectionID]"]').value,
+                              sectionIndex: parseInt(sectionIndex),
+                              questionType: questionContainer.querySelector('[name$="[questionType]"]').value,
+                              responseText: JSON.stringify(gridData),
+                              responseOptions: [],
+                              gridResponses: gridData
+                          };
+                      } else {
+                          formResponses[globalIndex].responseText = JSON.stringify(gridData);
+                          formResponses[globalIndex].gridResponses = gridData;
+                      }
+                      
+                      // Set the JSON string in the hidden input
+                      const hiddenInput = document.getElementById(`grid-data-${questionContainer.querySelector('[name$="[sectionID]"]').value}-${questionId}`);
+                      if (hiddenInput) {
+                          hiddenInput.value = JSON.stringify(gridData);
+                      }
+                      
+                      // Check if this question is answered
+                      const hasAnswers = Object.keys(gridData).length > 0;
+                      if (hasAnswers && sectionData[sectionIndex] && sectionData[sectionIndex].questions[globalIndex]) {
+                          sectionData[sectionIndex].questions[globalIndex].answered = true;
+                          
+                          // If this is a newly answered question, increment the section's answered count
+                          if (!sectionData[sectionIndex].questions[globalIndex].previouslyAnswered) {
+                              sectionData[sectionIndex].answeredQuestions++;
+                              sectionData[sectionIndex].questions[globalIndex].previouslyAnswered = true;
+                          }
+                      }
+                  });
+              };
+      
+              // Add event listeners to all form inputs to track responses
+              document.querySelectorAll('#feedbackForm input, #feedbackForm textarea, #feedbackForm select').forEach(input => {
+                  // Skip hidden inputs for metadata
+                  if (input.type === 'hidden' && !input.name.includes('responseText')) return;
+                  
+                  // Extract question index from input name
+                  const indexMatch = input.name.match(/answers\[(\d+)\]/);
+                  if (!indexMatch) return;
+                  
+                  const globalIndex = indexMatch[1];
+                  
+                  // Input change handler
+                  const handleInputChange = function() {
+                      const container = this.closest('.question-container');
+                      if (!container) return;
+                      
+                      const sectionIndex = container.getAttribute('data-section-index');
+                      
+                      // Initialize response object if it doesn't exist
+                      if (!formResponses[globalIndex]) {
+                          const questionIdInput = container.querySelector('[name$="[questionID]"]');
+                          const questionTextInput = container.querySelector('[name$="[questionText]"]');
+                          const sectionIdInput = container.querySelector('[name$="[sectionID]"]');
+                          const sectionTitleInput = container.querySelector('[name$="[sectionTitle]"]');
+                          const questionTypeInput = container.querySelector('[name$="[questionType]"]');
+                          
+                          if (!questionIdInput || !questionTextInput || !sectionTitleInput || !questionTypeInput) return;
+                          
+                          formResponses[globalIndex] = {
+                              questionID: questionIdInput.value,
+                              questionText: questionTextInput.value,
+                              sectionID: sectionIdInput.value,
+                              sectionTitle: sectionTitleInput.value,
+                              sectionIndex: parseInt(sectionIndex),
+                              questionType: questionTypeInput.value,
+                              responseText: '',
+                              responseOptions: []
+                          };
+                      }
+                      
+                      // Update the response data based on input type
+                      if (this.type === 'text' || this.type === 'date' || this.tagName === 'TEXTAREA' || this.tagName === 'SELECT') {
+                          formResponses[globalIndex].responseText = this.value.trim();
+                      } else if (this.type === 'radio') {
+                          if (this.checked) {
+                              formResponses[globalIndex].responseOptions = [this.value];
+                          }
+                      } else if (this.type === 'checkbox') {
+                          // For checkboxes, we need to collect all selected values
+                          if (!Array.isArray(formResponses[globalIndex].responseOptions)) {
+                              formResponses[globalIndex].responseOptions = [];
+                          }
+                          
+                          if (this.checked) {
+                              if (!formResponses[globalIndex].responseOptions.includes(this.value)) {
+                                  formResponses[globalIndex].responseOptions.push(this.value);
+                              }
+                          } else {
+                              const index = formResponses[globalIndex].responseOptions.indexOf(this.value);
+                              if (index > -1) {
+                                  formResponses[globalIndex].responseOptions.splice(index, 1);
+                              }
+                          }
+                      }
+                      
+                      // Update section data - mark as answered if there's a value
+                      if (sectionData[sectionIndex] && sectionData[sectionIndex].questions[globalIndex]) {
+                          const wasAnswered = sectionData[sectionIndex].questions[globalIndex].answered;
+                          
+                          // Check if question is now answered
+                          let isAnswered = false;
+                          
+                          if (this.type === 'text' || this.type === 'date' || this.tagName === 'TEXTAREA' || this.tagName === 'SELECT') {
+                              isAnswered = this.value.trim() !== '';
+                          } else if (this.type === 'radio') {
+                              isAnswered = this.checked;
+                          } else if (this.type === 'checkbox') {
+                              // For checkboxes, we need to check if any checkbox in this group is checked
+                              const checkboxes = document.querySelectorAll(`input[name="${this.name}"]`);
+                              isAnswered = Array.from(checkboxes).some(cb => cb.checked);
+                          }
+                          
+                          sectionData[sectionIndex].questions[globalIndex].answered = isAnswered;
+                          
+                          // Update section answered count if needed
+                          if (!wasAnswered && isAnswered) {
+                              sectionData[sectionIndex].answeredQuestions++;
+                              sectionData[sectionIndex].questions[globalIndex].previouslyAnswered = true;
+                          } else if (wasAnswered && !isAnswered) {
+                              sectionData[sectionIndex].answeredQuestions--;
+                              sectionData[sectionIndex].questions[globalIndex].previouslyAnswered = false;
+                          }
+                          
+                          // Update the summary display
+                          updateSummary();
+                      }
+                  };
+                  
+                  // Attach event listeners based on input type
+                  if (input.type === 'checkbox' || input.type === 'radio') {
+                      input.addEventListener('change', handleInputChange);
+                  } else {
+                      input.addEventListener('input', handleInputChange);
+                      // Also trigger on blur to catch paste events
+                      input.addEventListener('blur', handleInputChange);
+                  }
+              });
+              
+              // Function to update the summary display
+              const updateSummary = () => {
+                  const summaryContainer = document.getElementById('sectionSummaries');
+                  if (!summaryContainer) return;
+                  
+                  summaryContainer.innerHTML = '';
+                  
+                  let totalQuestions = 0;
+                  let totalAnswered = 0;
+                  
+                  // Process each section
+                  Object.values(sectionData).sort((a, b) => a.sectionIndex - b.sectionIndex).forEach(section => {
+                      const sectionDiv = document.createElement('div');
+                      sectionDiv.className = 'mb-2 pb-2 border-bottom';
+                      
+                      const sectionHeader = document.createElement('div');
+                      sectionHeader.className = 'd-flex justify-content-between align-items-center';
+                      
+                      const sectionTitle = document.createElement('span');
+                      sectionTitle.textContent = section.sectionTitle;
+                      sectionTitle.className = 'fw-medium';
+                      
+                      const progressWrapper = document.createElement('div');
+                      progressWrapper.className = 'd-flex align-items-center gap-2';
+                      
+                      const completionText = document.createElement('span');
+                      completionText.className = 'text-nowrap small';
+                      completionText.textContent = `${section.answeredQuestions}/${section.totalQuestions}`;
+                      
+                      const progressPercentage = section.totalQuestions > 0 
+                          ? Math.round((section.answeredQuestions / section.totalQuestions) * 100) 
+                          : 0;
+                      
+                      const progressBar = document.createElement('div');
+                      progressBar.className = 'progress flex-grow-1';
+                      progressBar.style.height = '10px';
+                      progressBar.style.width = '100px';
+                      
+                      const progressBarInner = document.createElement('div');
+                      progressBarInner.className = 'progress-bar';
+                      progressBarInner.style.width = `${progressPercentage}%`;
+                      progressBarInner.setAttribute('role', 'progressbar');
+                      progressBarInner.setAttribute('aria-valuenow', progressPercentage);
+                      progressBarInner.setAttribute('aria-valuemin', '0');
+                      progressBarInner.setAttribute('aria-valuemax', '100');
+                      
+                      // Add color based on completion percentage
+                      if (progressPercentage < 33) {
+                          progressBarInner.classList.add('bg-danger');
+                      } else if (progressPercentage < 67) {
+                          progressBarInner.classList.add('bg-warning');
+                      } else {
+                          progressBarInner.classList.add('bg-success');
+                      }
+                      
+                      progressBar.appendChild(progressBarInner);
+                      progressWrapper.appendChild(progressBar);
+                      progressWrapper.appendChild(completionText);
+                      
+                      sectionHeader.appendChild(sectionTitle);
+                      sectionHeader.appendChild(progressWrapper);
+                      sectionDiv.appendChild(sectionHeader);
+                      
+                      summaryContainer.appendChild(sectionDiv);
+                      
+                      // Update totals
+                      totalQuestions += section.totalQuestions;
+                      totalAnswered += section.answeredQuestions;
+                  });
+                  
+                  // Update total summary
+                  document.getElementById('totalQuestions').textContent = totalQuestions;
+                  document.getElementById('questionsAnswered').textContent = totalAnswered;
+                  
+                  const overallPercentage = totalQuestions > 0 
+                      ? Math.round((totalAnswered / totalQuestions) * 100) 
+                      : 0;
+                  document.getElementById('completionRate').textContent = `${overallPercentage}%`;
+              };
+              
+              // Process deadline to show countdown
+              const deadlineElement = document.querySelector('[data-deadline]');
+              if (deadlineElement) {
+                  const deadline = new Date(deadlineElement.getAttribute('data-deadline'));
+                  const now = new Date();
+                  
+                  const daysLeft = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+                  
+                  if (daysLeft > 0) {
+                      const suffix = daysLeft === 1 ? 'day' : 'days';
+                      deadlineElement.innerHTML += ` <span class="badge bg-warning text-dark">${daysLeft} ${suffix} left</span>`;
+                  } else if (daysLeft === 0) {
+                      deadlineElement.innerHTML += ' <span class="badge bg-danger">Due today!</span>';
+                  } else {
+                      deadlineElement.innerHTML += ' <span class="badge bg-danger">Overdue!</span>';
+                  }
+              }
+              
+              // Initial processing of grid questions and summary update
+              processGridQuestions();
+              updateSummary();
+              
+              // Form submission handler
+              form.addEventListener('submit', function(e) {
+                  e.preventDefault();
+                  
+                  // Re-process grid questions to ensure we have the latest data
+                  processGridQuestions();
+                  
+                  // Check if all required fields are filled
+                  const requiredInputs = form.querySelectorAll('[required]');
+                  let missingRequired = false;
+                  
+                  requiredInputs.forEach(input => {
+                      if ((input.type === 'text' || input.type === 'date' || input.tagName === 'TEXTAREA' || input.tagName === 'SELECT') && !input.value.trim()) {
+                          missingRequired = true;
+                          input.classList.add('is-invalid');
+                      } else if ((input.type === 'radio' || input.type === 'checkbox')) {
+                          // Check if any radio in the group is checked
+                          const inputName = input.name;
+                          const radioGroup = form.querySelectorAll(`[name="${inputName}"]`);
+                          const anyChecked = Array.from(radioGroup).some(radio => radio.checked);
+                          
+                          if (!anyChecked) {
+                              missingRequired = true;
+                              // Only add the error class to one element in the group
+                              if (!document.querySelector(`[name="${inputName}"].is-invalid`)) {
+                                  input.classList.add('is-invalid');
+                              }
+                          }
+                      }
+                  });
+                  
+                  if (missingRequired) {
+                      showToast('Please fill in all required fields.', 'error');
+                      
+                      // Scroll to the first invalid input
+                      const firstInvalid = form.querySelector('.is-invalid');
+                      if (firstInvalid) {
+                          const container = firstInvalid.closest('.question-container');
+                          if (container) {
+                              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }
+                      }
+                      
+                      return;
+                  }
+                  
+                  // All validation passed, submit the form
+                  form.submit();
+              });
+              
+              // Remove invalid state when user starts to correct the input
+              form.querySelectorAll('input, textarea, select').forEach(input => {
+                  if (input.type === 'radio' || input.type === 'checkbox') {
+                      input.addEventListener('change', function() {
+                          const name = this.name;
+                          form.querySelectorAll(`[name="${name}"]`).forEach(el => {
+                              el.classList.remove('is-invalid');
+                          });
+                      });
+                  } else {
+                      input.addEventListener('input', function() {
+                          this.classList.remove('is-invalid');
+                      });
+                  }
+              });
+          }
         });
-        
-        // Remove error highlighting when field is edited (keeping your existing code)
-        form.addEventListener('input', function(event) {
-            const element = event.target;
-            
-            if (element.classList.contains('is-invalid')) {
-                element.classList.remove('is-invalid');
-            }
-            
-            // Find the parent question container and reset its style
-            const questionContainer = element.closest('.question-container');
-            if (questionContainer && (questionContainer.style.borderLeft.includes('#e74c3c') || 
-                                     questionContainer.style.borderColor.includes('#e74c3c'))) {
-                questionContainer.style.borderLeft = '';
-                questionContainer.style.borderColor = '';
-                delete questionContainer.dataset.validated; // Reset validation flag
-            }
-        });
-    }
-    
-    // Deadline countdown (keeping your existing code)
-    const deadlineElement = document.querySelector('.metadata-item:nth-child(2) span:last-child');
-    if (deadlineElement) {
-        const deadlineDate = new Date(deadlineElement.getAttribute('data-deadline') || deadlineElement.textContent);
-        const now = new Date();
-        
-        // If deadline is within 24 hours, show countdown
-        if (deadlineDate - now < 24 * 60 * 60 * 1000 && deadlineDate > now) {
-            const updateCountdown = () => {
-                const currentTime = new Date();
-                const timeLeft = deadlineDate - currentTime;
-                
-                if (timeLeft <= 0) {
-                    deadlineElement.innerHTML += ' <span class="badge bg-danger">Expired</span>';
-                    return;
-                }
-                
-                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                
-                deadlineElement.innerHTML = `${deadlineDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} <span class="badge bg-warning text-dark">${hours}h ${minutes}m ${seconds}s left</span>`;
-            };
-            
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
-        }
-    }
-
-    // Responsive design adjustments (keeping your existing code)
-    const checkScreenSize = () => {
-        const buttonsContainer = document.querySelector('.d-flex.justify-content-end');
-        if (buttonsContainer) {
-            if (window.innerWidth <= 768) {
-                buttonsContainer.classList.remove('justify-content-end');
-                buttonsContainer.classList.add('flex-column');
-            } else {
-                buttonsContainer.classList.add('justify-content-end');
-                buttonsContainer.classList.remove('flex-column');
-            }
-        }
-    };
-    
-    // Check on load and when window resizes
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-});
     </script>
 </body>
+                    
 </html>

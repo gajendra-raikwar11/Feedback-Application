@@ -16,6 +16,8 @@ const path = require('path');
 const fs = require('fs');
 
 const { FeedbackForm, validateFeedbackForm } = require('../models/feedbackForm');
+const { FeedbackResponse } = require("../models/feedbackResponse");
+
 
 // Define lockout parameters
 const MAX_ATTEMPTS = 3; // Maximum login attempts
@@ -237,42 +239,312 @@ const processFeedbackData = (feedbackResponses, questionMap) => {
 };
 
 // Admin Home Page Route - Added auth middleware
+// router.get("/adminHome", validateAdmin, async (req, res) => {
+//     try {
+//         const subjectFilter = req.query.subject; // Get subject from query params
+//         let faculties;
+//         const students = await Student.find(); // Fetch students from DB
+//         const uniqueSections = [...new Set(students.map(student => student.section))];
+
+//         if (subjectFilter && subjectFilter !== "All") {
+//             faculties = await Faculty.find({ subjects: subjectFilter }); // Filter faculties by subject
+//         } else {
+//             faculties = await Faculty.find(); // Get all faculties
+//         }
+
+//         let uniqueSubjects = [...new Set(faculties.flatMap(fac => fac.subjects))];
+
+//         // Fetch forms data from Form model
+//         const forms = await FeedbackForm.find();
+
+//         const adminData = req.session.admin;
+//         // Determine the current path dynamically
+//         const currentPath = req.path;
+
+//         res.render("adminHome", { 
+//             currentPath, 
+//             adminData, 
+//             uniqueSubjects, 
+//             faculties, 
+//             students, 
+//             uniqueSections,
+//             forms // Send forms data to the EJS template
+//         });
+//     } catch (e) {
+//         console.error(e);
+//         res.status(500).send("Server Error");
+//     }
+// });
+
+// router.get("/adminHome", validateAdmin, async (req, res) => {
+//     try {
+//       const subjectFilter = req.query.subject; // Get subject from query params
+//       const formTypeFilter = req.query.formType || "Academic"; // Default to Academic if not specified
+      
+//       let faculties;
+//       const students = await Student.find(); // Fetch students from DB
+//       const uniqueSections = [...new Set(students.map(student => student.section))];
+      
+//       if (subjectFilter && subjectFilter !== "All") {
+//         faculties = await Faculty.find({ subjects: subjectFilter }); // Filter faculties by subject
+//       } else {
+//         faculties = await Faculty.find(); // Get all faculties
+//       }
+      
+//       let uniqueSubjects = [...new Set(faculties.flatMap(fac => fac.subjects))];
+      
+//       // Fetch forms data from Form model
+//       const forms = await FeedbackForm.find();
+      
+//       // Fetch feedback responses based on form type
+//       const feedbackResponses = await FeedbackResponse.find({ formType: formTypeFilter });
+      
+//       // Group responses by section titles
+//       const sectionData = {};
+      
+//       // Process feedback responses
+//       feedbackResponses.forEach(response => {
+//         response.sectionAverages.forEach(section => {
+//           if (!sectionData[section.sectionTitle]) {
+//             sectionData[section.sectionTitle] = {
+//               totalScore: 0,
+//               count: 0,
+//               average: 0,
+//               questions: {}
+//             };
+//           }
+          
+//           sectionData[section.sectionTitle].totalScore += section.averageScore;
+//           sectionData[section.sectionTitle].count++;
+//         });
+        
+//         // Process individual questions
+//         response.answers.forEach(answer => {
+//           if (answer.responseNumericValue !== null) {
+//             if (!sectionData[answer.sectionTitle].questions[answer.questionText]) {
+//               sectionData[answer.sectionTitle].questions[answer.questionText] = {
+//                 totalScore: 0,
+//                 count: 0,
+//                 average: 0
+//               };
+//             }
+            
+//             sectionData[answer.sectionTitle].questions[answer.questionText].totalScore += answer.responseNumericValue;
+//             sectionData[answer.sectionTitle].questions[answer.questionText].count++;
+//           }
+//         });
+//       });
+      
+//       // Calculate averages for sections and questions
+//       Object.keys(sectionData).forEach(sectionTitle => {
+//         const section = sectionData[sectionTitle];
+//         if (section.count > 0) {
+//           section.average = parseFloat((section.totalScore / section.count).toFixed(2));
+//         }
+        
+//         // Calculate question averages
+//         Object.keys(section.questions).forEach(questionText => {
+//           const question = section.questions[questionText];
+//           if (question.count > 0) {
+//             question.average = parseFloat((question.totalScore / question.count).toFixed(2));
+//           }
+//         });
+//       });
+      
+//       // Get faculty-specific data if requested
+//       let facultyData = null;
+//       if (req.query.facultyId) {
+//         const facultyResponses = await FeedbackResponse.find({ 
+//           formType: formTypeFilter,
+//           facultyID: req.query.facultyId
+//         });
+        
+//         // Process faculty-specific data (similar to above)
+//         // ...
+//       }
+      
+//       // Get response metadata
+//       const responseMetadata = {
+//         totalResponses: feedbackResponses.length,
+//         formTypes: ["Academic", "Institutional", "Training"],
+//         currentFormType: formTypeFilter,
+//         lastUpdated: feedbackResponses.length > 0 ? 
+//                     new Date(Math.max(...feedbackResponses.map(r => r.updatedAt))) : 
+//                     new Date()
+//       };
+      
+//       const adminData = req.session.admin;
+//       const currentPath = req.path;
+      
+//       res.render("adminHome", { 
+//         currentPath, 
+//         adminData, 
+//         uniqueSubjects, 
+//         faculties, 
+//         students, 
+//         uniqueSections, 
+//         forms,
+//         feedbackData: {
+//           sectionData,
+//           facultyData,
+//           responseMetadata
+//         }
+//       });
+//     } catch (e) {
+//       console.error(e);
+//       res.status(500).send("Server Error");
+//     }
+//   });
 router.get("/adminHome", validateAdmin, async (req, res) => {
     try {
-        const subjectFilter = req.query.subject; // Get subject from query params
-        let faculties;
-        const students = await Student.find(); // Fetch students from DB
-        const uniqueSections = [...new Set(students.map(student => student.section))];
-
-        if (subjectFilter && subjectFilter !== "All") {
-            faculties = await Faculty.find({ subjects: subjectFilter }); // Filter faculties by subject
-        } else {
-            faculties = await Faculty.find(); // Get all faculties
-        }
-
-        let uniqueSubjects = [...new Set(faculties.flatMap(fac => fac.subjects))];
-
-        // Fetch forms data from Form model
-        const forms = await FeedbackForm.find();
-
-        const adminData = req.session.admin;
-        // Determine the current path dynamically
-        const currentPath = req.path;
-
-        res.render("adminHome", { 
-            currentPath, 
-            adminData, 
-            uniqueSubjects, 
-            faculties, 
-            students, 
-            uniqueSections,
-            forms // Send forms data to the EJS template
-        });
+      const subjectFilter = req.query.subject; // Get subject from query params
+      const formTypeFilter = req.query.formType || "Academic"; // Default to Academic if not specified
+      const facultyFilter = req.query.faculty; // Get faculty filter from query params
+  
+      let faculties;
+      const students = await Student.find(); // Fetch students from DB
+      const uniqueSections = [...new Set(students.map(student => student.section))];
+  
+      if (subjectFilter && subjectFilter !== "All") {
+        faculties = await Faculty.find({ subjects: subjectFilter }); // Filter faculties by subject
+      } else {
+        faculties = await Faculty.find(); // Get all faculties
+      }
+  
+      let uniqueSubjects = [...new Set(faculties.flatMap(fac => fac.subjects))];
+  
+      // Fetch forms data from Form model
+      const forms = await FeedbackForm.find();
+  
+      // Fetch feedback responses based on form type and potentially faculty
+      let feedbackQuery = { formType: formTypeFilter };
+      
+      // Add faculty filter if present
+      if (facultyFilter) {
+        feedbackQuery.facultyID = facultyFilter;
+      }
+      
+      // Add subject filter if present
+      if (subjectFilter && subjectFilter !== "All") {
+        feedbackQuery.subject = subjectFilter;
+      }
+      
+      const feedbackResponses = await FeedbackResponse.find(feedbackQuery);
+  
+      // Process the feedback data for charts
+      const feedbackData = processDataForCharts(feedbackResponses, formTypeFilter);
+  
+      const adminData = req.session.admin;
+      const currentPath = req.path;
+      
+      // Determine if there's a selected faculty
+      const selectedFaculty = facultyFilter || '';
+  
+      // Render the page with all necessary data
+      res.render("adminHome", {
+        currentPath,
+        adminData,
+        uniqueSubjects,
+        faculties,
+        students,
+        uniqueSections,
+        forms,
+        subjectFilter,
+        selectedFaculty,
+        feedbackData
+      });
+  
     } catch (e) {
-        console.error(e);
-        res.status(500).send("Server Error");
+      console.error("Error in adminHome route:", e);
+      res.status(500).send("Server Error");
     }
-});
+  });
+  
+  /**
+   * Process feedback response data into the format needed for charts
+   * @param {Array} feedbackResponses - Array of feedback response documents
+   * @param {String} formType - Type of feedback form
+   * @returns {Object} Formatted data for charts
+   */
+  function processDataForCharts(feedbackResponses, formType) {
+    // Initialize the section data structure
+    const sectionData = {};
+    
+    // Process each feedback response
+    feedbackResponses.forEach(response => {
+      // Process answers from this response
+      response.answers.forEach(answer => {
+        if (answer.responseNumericValue !== null) {
+          // Initialize section if it doesn't exist
+          if (!sectionData[answer.sectionTitle]) {
+            sectionData[answer.sectionTitle] = {
+              questions: {},
+              labels: [],
+              values: []
+            };
+          }
+          
+          // Process question data
+          if (!sectionData[answer.sectionTitle].questions[answer.questionText]) {
+            sectionData[answer.sectionTitle].questions[answer.questionText] = {
+              totalScore: 0,
+              count: 0,
+              average: 0
+            };
+          }
+          
+          sectionData[answer.sectionTitle].questions[answer.questionText].totalScore += answer.responseNumericValue;
+          sectionData[answer.sectionTitle].questions[answer.questionText].count++;
+        }
+      });
+    });
+    
+    // Calculate averages and prepare chart data
+    Object.keys(sectionData).forEach(sectionTitle => {
+      const section = sectionData[sectionTitle];
+      
+      // Calculate averages for each question
+      Object.keys(section.questions).forEach(questionText => {
+        const question = section.questions[questionText];
+        if (question.count > 0) {
+          question.average = parseFloat((question.totalScore / question.count).toFixed(2));
+        }
+        
+        // Add to labels and values arrays for charts
+        section.labels.push(questionText);
+        section.values.push(question.average);
+      });
+    });
+    
+    // Calculate section averages for the summary table
+    const sectionAverages = Object.keys(sectionData).map(sectionTitle => {
+      const section = sectionData[sectionTitle];
+      const questionValues = Object.values(section.questions);
+      const totalAverage = questionValues.reduce((sum, q) => sum + q.average, 0) / questionValues.length;
+      
+      return {
+        sectionTitle,
+        averageScore: parseFloat(totalAverage.toFixed(2))
+      };
+    });
+    
+    // Build response metadata
+    const responseMetadata = {
+      totalResponses: feedbackResponses.length,
+      formTypes: ["Academic", "Institutional", "Training"],
+      currentFormType: formType,
+      lastUpdated: feedbackResponses.length > 0 ?
+        new Date(Math.max(...feedbackResponses.map(r => r.updatedAt))) :
+        new Date()
+    };
+    
+    return {
+      sectionData,
+      sectionAverages,
+      responseMetadata
+    };
+  }
+  
 
 // Admin Student Page Route - Added auth middleware
 router.get("/adminStudentPage", validateAdmin, async (req, res) => {
@@ -1030,4 +1302,68 @@ router.post('/forms/export-excel', async (req, res) => {
         });
     }
 });
+router.get("/download-feedback", validateAdmin, async (req, res) => {
+    try {
+      const formType = req.query.formType || "Academic";
+      const facultyId = req.query.facultyId;
+      
+      // Build query
+      const query = { formType };
+      if (facultyId) {
+        query.facultyID = facultyId;
+      }
+      
+      // Fetch feedback responses
+      const feedbackResponses = await FeedbackResponse.find(query)
+        .populate('studentID', 'name regNumber')
+        .populate('facultyID', 'name');
+      
+      // Create Excel workbook using exceljs
+      const Excel = require('exceljs');
+      const workbook = new Excel.Workbook();
+      const worksheet = workbook.addWorksheet(`${formType} Feedback`);
+      
+      // Add headers
+      worksheet.addRow([
+        'Student ID', 'Student Name', 'Faculty', 'Section',
+        'Semester', 'Overall Average', 'Submitted At'
+      ]);
+      
+      // Add data
+      feedbackResponses.forEach(response => {
+        worksheet.addRow([
+          response.studentID.regNumber,
+          response.studentID.name,
+          response.facultyID ? response.facultyID.name : 'N/A',
+          response.section,
+          response.semester,
+          response.overallAverage,
+          new Date(response.submittedAt).toLocaleString()
+        ]);
+      });
+      
+      // Style the header row
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.getRow(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' }
+      };
+      
+      // Set filename
+      const fileName = `${formType}_Feedback_${new Date().toISOString().split('T')[0]}.xlsx`;
+      
+      // Set headers for download
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
+      
+      // Write to response stream
+      await workbook.xlsx.write(res);
+      res.end();
+      
+    } catch (e) {
+      console.error(e);
+      res.status(500).send("Error generating Excel file");
+    }
+  });
 module.exports = router;
