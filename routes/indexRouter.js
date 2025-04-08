@@ -5,7 +5,7 @@ require("../config/mongoose");
 const mongoose=require("mongoose");
 const session=require("express-session");
 const fs = require("fs");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { Student, validateStudent } = require("../models/studentSchema");
 const MongoStore = require("connect-mongo"); //store the session even after server is restarted

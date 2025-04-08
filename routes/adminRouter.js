@@ -8,7 +8,7 @@ const flash = require("express-flash");
 const { Faculty, validateFaculty, validateFacultyLogin } = require("../models/facultySchema");
 const { Student, validateStudent } = require("../models/studentSchema");
 require("dotenv").config();
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const ExcelJS = require('exceljs');
