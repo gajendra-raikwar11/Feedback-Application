@@ -1,337 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Forms</title>
     <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <!-- Google Fonts - Poppins -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <!-- Include Toastify CSS for better looking toast notifications -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css"
+    />
 
     <style>
-        :root {
-    --primary: #4361ee;
-    --secondary: #3f37c9;
-    --success: #4cc9f0;
-    --info: #4895ef;
-    --warning: #f72585;
-    --danger: #e63946;
-    --light: #f8f9fa;
-    --dark: #212529;
-}
+      :root {
+        --primary: #4361ee;
+        --secondary: #3f37c9;
+        --success: #4cc9f0;
+        --info: #4895ef;
+        --warning: #f72585;
+        --danger: #e63946;
+        --light: #f8f9fa;
+        --dark: #212529;
+      }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-html,
-body {
-    overflow-x: hidden;
-    width: 100%;
-    max-width: 100%;
-    position: relative;
-    font-family: 'Poppins', sans-serif;
-    background-color: #f5f7fa;
-    color: #333;
-    height: 100%;
-}
-
-body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-main {
-    flex: 1 0 auto;
-}
-
-footer {
-    flex-shrink: 0;
-}
-
-.forms-header-card {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    border-radius: 15px;
-    padding: 1.5rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    margin-bottom: 1.5rem;
-    width: 100%;
-}
-
-.forms-header-card h2 {
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    font-size: calc(1.2rem + 0.6vw);
-}
-
-.forms-header-card p {
-    opacity: 0.9;
-    margin-bottom: 0;
-    font-size: 0.9rem;
-}
-
-.filter-card {
-    background: white;
-    border-radius: 15px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    margin-bottom: 1.5rem;
-    width: 100%;
-}
-
-.form-card {
-    background: white;
-    border-radius: 15px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s;
-    margin-bottom: 1.5rem;
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-}
-
-.form-card:hover {
-    transform: translateY(-5px);
-}
-
-.form-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #eee;
-}
-
-.form-card-icon {
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    margin-right: 1rem;
-    color: white;
-    flex-shrink: 0;
-}
-
-.form-card-title {
-    flex-grow: 1;
-}
-
-.form-card-title h3 {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.form-card-body {
-    margin-bottom: 1rem;
-}
-
-.form-card-body p {
-    color: #6c757d;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-}
-
-.form-card-meta {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-}
-
-.form-card-meta-item {
-    font-size: 0.85rem;
-    color: #6c757d;
-    margin-right: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-.form-card-footer {
-    display: flex;
-    justify-content: flex-end;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
-}
-
-.form-status-badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 0.35rem 1rem;
-    border-bottom-left-radius: 15px;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-.badge-pending {
-    background-color: var(--warning);
-    color: white;
-}
-
-.badge-submitted {
-    background-color: var(--info);
-    color: white;
-}
-
-.badge-approved {
-    background-color: var(--success);
-    color: white;
-}
-
-.badge-rejected {
-    background-color: var(--danger);
-    color: white;
-}
-
-.search-input-wrapper {
-    position: relative;
-}
-
-.search-input-wrapper .form-control {
-    padding-left: 2.5rem;
-    border-radius: 10px;
-}
-
-.search-input-wrapper .search-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #6c757d;
-    z-index: 10;
-}
-
-.pagination-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-}
-
-.pagination .page-item .page-link {
-    color: var(--primary);
-    border-radius: 5px;
-    margin: 0 2px;
-}
-
-.pagination .page-item.active .page-link {
-    background-color: var(--primary);
-    border-color: var(--primary);
-}
-
-.no-forms-message {
-    text-align: center;
-    padding: 3rem;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.no-forms-message i {
-    font-size: 3rem;
-    color: #d1d5db;
-    margin-bottom: 1rem;
-}
-
-.no-forms-message h3 {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #4b5563;
-}
-
-.no-forms-message p {
-    color: #6b7280;
-    max-width: 400px;
-    margin: 0 auto;
-}
-
-@media (max-width: 992px) {
-    .forms-container {
-        padding: 1rem;
-    }
-
-    .forms-header-card,
-    .filter-card {
-        padding: 1.25rem;
-    }
-
-    .form-card {
-        padding: 1.25rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .forms-header-card h2 {
-        font-size: 1.4rem;
-    }
-
-    .filter-row {
-        flex-direction: column;
-    }
-
-    .filter-col {
+      html,
+      body {
+        overflow-x: hidden;
         width: 100%;
+        max-width: 100%;
+        position: relative;
+        font-family: "Poppins", sans-serif;
+        background-color: #f5f7fa;
+        color: #333;
+        height: 100%;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      main {
+        flex: 1 0 auto;
+      }
+
+      footer {
+        flex-shrink: 0;
+      }
+
+      .forms-header-card {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        width: 100%;
+      }
+
+      .forms-header-card h2 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: calc(1.2rem + 0.6vw);
+      }
+
+      .forms-header-card p {
+        opacity: 0.9;
+        margin-bottom: 0;
+        font-size: 0.9rem;
+      }
+
+      .filter-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        width: 100%;
+      }
+
+      .form-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+        margin-bottom: 1.5rem;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .form-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .form-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
         margin-bottom: 1rem;
-    }
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+      }
 
-    .form-card-meta {
-        flex-direction: column;
-    }
+      .form-card-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        margin-right: 1rem;
+        color: white;
+        flex-shrink: 0;
+      }
 
-    .form-card-meta-item {
-        margin-right: 0;
-    }
-}
+      .form-card-title {
+        flex-grow: 1;
+      }
 
-@media (max-width: 576px) {
-    .forms-container {
-        padding: 0.75rem;
-    }
-
-    .forms-header-card,
-    .filter-card {
-        padding: 1rem;
-    }
-
-    .form-card {
-        padding: 1rem;
-    }
-
-    .forms-header-card h2 {
+      .form-card-title h3 {
         font-size: 1.2rem;
-    }
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
 
-    .form-card-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 1rem;
-    }
+      .form-card-body {
+        margin-bottom: 1rem;
+      }
 
-    .form-card-header {
-        flex-direction: column;
-    }
+      .form-card-body p {
+        color: #6c757d;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+      }
 
-    .form-card-title {
-        margin-top: 1rem;
-    }
+      .form-card-meta {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+      }
 
-    .status-badge,
-    .form-status-badge {
+      .form-card-meta-item {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-right: 1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-card-footer {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+      }
+
+      .form-status-badge {
         position: absolute;
         top: 0;
         right: 0;
@@ -339,448 +186,632 @@ footer {
         border-bottom-left-radius: 15px;
         font-size: 0.75rem;
         font-weight: 600;
-    }
+      }
 
-    .form-header {
+      .badge-pending {
+        background-color: var(--warning);
+        color: white;
+      }
+
+      .badge-submitted {
+        background-color: var(--info);
+        color: white;
+      }
+
+      .badge-approved {
+        background-color: var(--success);
+        color: white;
+      }
+
+      .badge-rejected {
+        background-color: var(--danger);
+        color: white;
+      }
+
+      .search-input-wrapper {
+        position: relative;
+      }
+
+      .search-input-wrapper .form-control {
+        padding-left: 2.5rem;
+        border-radius: 10px;
+      }
+
+      .search-input-wrapper .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+      }
+
+      .pagination-container {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+        justify-content: center;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+      }
 
-    .deadline-indicator {
-        display: inline-block;
-    }
+      .pagination .page-item .page-link {
+        color: var(--primary);
+        border-radius: 5px;
+        margin: 0 2px;
+      }
 
-    .deadline-near {
-        color: #e63946;
-        font-weight: bold;
-    }
+      .pagination .page-item.active .page-link {
+        background-color: var(--primary);
+        border-color: var(--primary);
+      }
 
-    .deadline-upcoming {
-        color: #fd7e14;
-        font-weight: bold;
-    }
-
-    .form-card {
-        border: none;
+      .no-forms-message {
+        text-align: center;
+        padding: 3rem;
+        background: white;
         border-radius: 15px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s;
-        margin-bottom: 1.5rem;
-        position: relative;
-        overflow: hidden;
-    }
+      }
 
-    .form-card:hover {
-        transform: translateY(-5px);
-    }
-}
-    </style>
-   </head>
-<body>
-    <!-- Navbar -->
-    <%- include('partials/navbar', { activePage:currentPage , student: student }) %>
-        <!-- Forms Content -->
-        <div class="container-fluid p-4 forms-container">
-            <div class="row">
-                <div class="col-12">
-                    <!-- Forms Header Section -->
-                    <div class="forms-header-card">
-                        <h2><i class="fas fa-file-alt me-2"></i> Available Forms</h2>
-                        <p>View and fill out forms assigned to you by faculty and administrators</p>
-                    </div>
-                </div>
-            </div>
+      .no-forms-message i {
+        font-size: 3rem;
+        color: #d1d5db;
+        margin-bottom: 1rem;
+      }
 
-            <!-- Filters Section -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="filter-card">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="search-input-wrapper">
-                                    <i class="fas fa-search search-icon"></i>
-                                    <input type="text" class="form-control" placeholder="Search forms...">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="row g-3">
-                                    <div class="col-sm-4">
-                                        <select class="form-select">
-                                            <option selected>All Sections</option>
-                                            <option>CSE-A</option>
-                                            <option>CSE-B</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <select class="form-select">
-                                            <option selected>All Status</option>
-                                            <option>Pending</option>
-                                            <option>Submitted</option>
-                                            <option>Approved</option>
-                                            <option>Rejected</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <select class="form-select">
-                                            <option selected>All Faculty</option>
-                                            <option>Prof. Johnson</option>
-                                            <option>Prof. Smith</option>
-                                            <option>Administrative Office</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-           <!-- Forms List -->
-<div class="row g-4">
-    <% if (forms && forms.length > 0) { %>
-        <% forms.forEach(form => { %>
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card form-card position-relative">
-                    <!-- Status badge -->
-                    <% if (form.hasSubmitted) { %>
-                        <span class="form-status-badge badge-submitted">Submitted</span>
-                    <% } else if (!form.canSubmit) { %>
-                        <span class="form-status-badge badge-rejected">Expired</span>
-                    <% } else { %>
-                        <span class="form-status-badge badge-pending">Active</span>
-                    <% } %>
+      .no-forms-message h3 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #4b5563;
+      }
 
-                    <div class="card-body">
-                        <div class="form-header mb-3">
-                            <h5 class="card-title">
-                                <%= form.title %>
-                            </h5>
-                            <span class="badge bg-info">
-                                <%= form.formType %>
-                            </span>
-                        </div>
+      .no-forms-message p {
+        color: #6b7280;
+        max-width: 400px;
+        margin: 0 auto;
+      }
 
-                        <!-- Faculty display -->
-                        <% if (form.assignedFacultyForStudent) { %>
-                            <p class="card-text"><strong>Faculty:</strong>
-                                <%= form.assignedFacultyForStudent.name %>
-                            </p>
-                        <% } else { %>
-                            <p class="card-text"><strong>Faculty:</strong> Not Assigned</p>
-                        <% } %>
-
-                        <p class="card-text"><strong>Section:</strong>
-                            <%= form.commonSection %>
-                        </p>
-
-                        <p class="card-text"><strong>Semester:</strong>
-                            <%= form.commonSemester %>
-                        </p>
-
-                        <% const deadlineDate = new Date(form.deadline);
-                           const today = new Date();
-                           const daysLeft = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
-                           let deadlineClass = '';
-                           if (daysLeft <= 3 && daysLeft > 0) {
-                               deadlineClass = 'deadline-near';
-                           } else if (daysLeft <= 7 && daysLeft > 0) {
-                               deadlineClass = 'deadline-upcoming';
-                           } %>
-
-                        <p class="card-text">
-                            <strong>Deadline:</strong>
-                            <span class="deadline-indicator <%= deadlineClass %>">
-                                <%= deadlineDate.toLocaleDateString() %>
-                                <% if (daysLeft > 0) { %>
-                                    (<%= daysLeft %> days left)
-                                <% } else if (daysLeft === 0) { %>
-                                    (Today)
-                                <% } else { %>
-                                    (Expired)
-                                <% } %>
-                            </span>
-                        </p>
-
-                        <p class="card-text">
-                            <strong>Questions:</strong>
-                          
-                        </p>
-
-                        <div class="d-flex justify-content-between mt-4">
-                            <% if (form.hasSubmitted) { %>
-                                <a href="/viewSubmission/<%= form._id %>" class="btn btn-outline-primary">View Response</a>
-                            <% } else if (form.canSubmit) { %>
-                                <a href="/student/submitForm/<%= form._id %>" class="btn btn-primary">Submit Feedback</a>
-                            <% } else { %>
-                                <button class="btn btn-secondary" disabled>Expired</button>
-                            <% } %>
-                            <a href="/student/previewForm/<%= form._id %>?preview=true" class="btn btn-outline-secondary">Preview</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        <% }); %>
-    <% } else { %>
-        <div class="col-12">
-            <div class="no-forms-container">
-                <div class="alert alert-info p-4">
-                    <h4>No forms available!</h4>
-                    <p>There are currently no feedback forms assigned to your section.</p>
-                </div>
-            </div>
-        </div>
-    <% } %>
-</div>
-            <!-- Pagination -->
-            <div class="pagination-container">
-                <nav aria-label="Forms pagination">
-                    <ul class="pagination">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
-
-        <!-- Footer with Bootstrap classes -->
-        <footer class="bg-white py-4 border-top mt-auto">
-            <div class="container-fluid px-4">
-                <div class="row g-2">
-                    <div class="col-md-6">
-                        <p class="mb-0">© 2025 Campus Connect. All rights reserved.</p>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <a href="#" class="text-decoration-none text-muted me-3">Privacy Policy</a>
-                        <a href="#" class="text-decoration-none text-muted me-3">Terms of Service</a>
-                        <a href="#" class="text-decoration-none text-muted">Contact Us</a>
-                    </div>
-                </div>
-            </div>
-        </footer>
-
-        <!-- Bootstrap JS -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-          
-        <!-- Toast notification scripts -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
-  
-  <script>
-    // Initialize tooltips
-var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl)
-});
-
-// Form filter functionality
-document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.querySelector('input[type="text"]');
-    const selectFilters = document.querySelectorAll('.form-select');
-    const formCards = document.querySelectorAll('.form-card');
-
-    // Function to filter the forms
-    function filterForms() {
-        const searchTerm = searchInput.value.toLowerCase();
-        let selectedSection = '';
-        let selectedStatus = '';
-        let selectedFaculty = '';
-
-        // Get selected values from dropdowns
-        selectFilters.forEach(select => {
-            if (select.parentElement.classList.contains('col-sm-4')) {
-                const selectLabel = select.options[0].text.split(' ')[1]; // Get "Sections", "Status", or "Faculty"
-
-                if (selectLabel === 'Sections') {
-                    selectedSection = select.value === 'All Sections' ? '' : select.value.toLowerCase();
-                } else if (selectLabel === 'Status') {
-                    selectedStatus = select.value === 'All Status' ? '' : select.value.toLowerCase();
-                } else if (selectLabel === 'Faculty') {
-                    selectedFaculty = select.value === 'All Faculty' ? '' : select.value.toLowerCase();
-                }
-            }
-        });
-
-        // Filter each form card
-        formCards.forEach(card => {
-            const cardTitle = card.querySelector('.card-title').textContent.toLowerCase();
-            const cardType = card.querySelector('.badge').textContent.toLowerCase();
-            const facultyName = card.querySelector('.card-text:nth-of-type(1)').textContent.toLowerCase();
-            const cardStatus = card.querySelector('.form-status-badge').textContent.toLowerCase();
-
-            // Check if card matches all filter criteria
-            const matchesSearch = cardTitle.includes(searchTerm) || cardType.includes(searchTerm);
-            const matchesSection = !selectedSection || cardType.includes(selectedSection);
-            const matchesStatus = !selectedStatus || cardStatus.includes(selectedStatus);
-            const matchesFaculty = !selectedFaculty || facultyName.includes(selectedFaculty);
-
-            // Show or hide based on filter matches
-            if (matchesSearch && matchesSection && matchesStatus && matchesFaculty) {
-                card.closest('.col-12').style.display = 'block';
-            } else {
-                card.closest('.col-12').style.display = 'none';
-            }
-        });
-
-        // Show "no results" message if all cards are hidden
-        let allHidden = true;
-        formCards.forEach(card => {
-            if (card.closest('.col-12').style.display !== 'none') {
-                allHidden = false;
-            }
-        });
-
-        // Get or create no-results element
-        let noResults = document.querySelector('.no-results-message');
-        if (!noResults) {
-            noResults = document.createElement('div');
-            noResults.className = 'col-12 no-results-message';
-            noResults.innerHTML = `
-        <div class="alert alert-info p-4 text-center">
-            <h4><i class="fas fa-search me-2"></i>No matching forms found</h4>
-            <p>Try adjusting your search criteria or filters.</p>
-        </div>
-    `;
-            document.querySelector('.row.g-4').appendChild(noResults);
+      @media (max-width: 992px) {
+        .forms-container {
+          padding: 1rem;
         }
 
-        noResults.style.display = allHidden ? 'block' : 'none';
-    }
+        .forms-header-card,
+        .filter-card {
+          padding: 1.25rem;
+        }
 
-    // Add event listeners for search input and dropdowns
-    searchInput.addEventListener('keyup', filterForms);
+        .form-card {
+          padding: 1.25rem;
+        }
+      }
 
-    selectFilters.forEach(select => {
-        select.addEventListener('change', filterForms);
-    });
+      @media (max-width: 768px) {
+        .forms-header-card h2 {
+          font-size: 1.4rem;
+        }
 
-    // Initialize clear filters button
-    const filterCard = document.querySelector('.filter-card');
-    let clearButton = document.createElement('button');
-    clearButton.className = 'btn btn-outline-secondary mt-2';
-    clearButton.innerHTML = '<i class="fas fa-times me-1"></i> Clear Filters';
-    clearButton.style.display = 'none';
-    filterCard.appendChild(clearButton);
+        .filter-row {
+          flex-direction: column;
+        }
 
-    clearButton.addEventListener('click', function () {
-        // Reset all filters
-        searchInput.value = '';
-        selectFilters.forEach(select => {
+        .filter-col {
+          width: 100%;
+          margin-bottom: 1rem;
+        }
+
+        .form-card-meta {
+          flex-direction: column;
+        }
+
+        .form-card-meta-item {
+          margin-right: 0;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .forms-container {
+          padding: 0.75rem;
+        }
+
+        .forms-header-card,
+        .filter-card {
+          padding: 1rem;
+        }
+
+        .form-card {
+          padding: 1rem;
+        }
+
+        .forms-header-card h2 {
+          font-size: 1.2rem;
+        }
+
+        .form-card-icon {
+          width: 40px;
+          height: 40px;
+          font-size: 1rem;
+        }
+
+        .form-card-header {
+          flex-direction: column;
+        }
+
+        .form-card-title {
+          margin-top: 1rem;
+        }
+
+        .status-badge,
+        .form-status-badge {
+          position: absolute;
+          top: 0;
+          right: 0;
+          padding: 0.35rem 1rem;
+          border-bottom-left-radius: 15px;
+          font-size: 0.75rem;
+          font-weight: 600;
+        }
+
+        .form-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .deadline-indicator {
+          display: inline-block;
+        }
+
+        .deadline-near {
+          color: #e63946;
+          font-weight: bold;
+        }
+
+        .deadline-upcoming {
+          color: #fd7e14;
+          font-weight: bold;
+        }
+
+        .form-card {
+          border: none;
+          border-radius: 15px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          transition: transform 0.3s;
+          margin-bottom: 1.5rem;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .form-card:hover {
+          transform: translateY(-5px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <%- include('partials/navbar', { activePage:currentPage , student: student
+    }) %>
+    <!-- Forms Content -->
+    <div class="container-fluid p-4 forms-container">
+      <div class="row">
+        <div class="col-12">
+          <!-- Forms Header Section -->
+          <div class="forms-header-card">
+            <h2><i class="fas fa-file-alt me-2"></i> Available Forms</h2>
+            <p>
+              View and fill out forms assigned to you by faculty and
+              administrators
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters Section -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="filter-card">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="search-input-wrapper">
+                  <i class="fas fa-search search-icon"></i>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Search forms..."
+                  />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="row g-3">
+                  <div class="col-sm-4"></div>
+                  <div class="col-sm-4">
+                    <select class="form-select">
+                      <option selected>All Status</option>
+                      <option value="">Pending</option>
+                      <option value="">Submitted</option>
+                    </select>
+                  </div>
+                  <div class="col-sm-4">
+                    <select class="form-select">
+                      <option selected>All Faculty</option>
+                      <% facultyData.forEach((faculty) => { %> <%
+                      if(faculty.sections &&
+                      faculty.sections.includes(student.section)) { %>
+                      <option value="<%= faculty._id %>">
+                        <%= faculty.name %>
+                      </option>
+                      <% } %> <% }); %>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Forms List -->
+      <div class="row g-4">
+        <% if (forms && forms.length > 0) { %> <% forms.forEach(form => { %>
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card form-card position-relative">
+            <!-- Status badge -->
+            <% if (form.hasSubmitted) { %>
+            <span class="form-status-badge badge-submitted">Submitted</span>
+            <% } else if (!form.canSubmit) { %>
+            <span class="form-status-badge badge-rejected">Expired</span>
+            <% } else { %>
+            <span class="form-status-badge badge-pending">Active</span>
+            <% } %>
+
+            <div class="card-body">
+              <div class="form-header mb-3">
+                <h5 class="card-title"><%= form.title %></h5>
+                <span class="badge bg-info"> <%= form.formType %> </span>
+              </div>
+
+              <!-- Faculty display -->
+              <% if (form.assignedFacultyForStudent) { %>
+              <p class="card-text">
+                <strong>Faculty:</strong>
+                <%= form.assignedFacultyForStudent.name %>
+              </p>
+              <% } else { %>
+              <p class="card-text"><strong>Faculty:</strong> Not Assigned</p>
+              <% } %>
+
+              <p class="card-text">
+                <strong>Section:</strong>
+                <%= form.commonSection %>
+              </p>
+
+              <p class="card-text">
+                <strong>Semester:</strong>
+                <%= form.commonSemester %>
+              </p>
+
+              <% const deadlineDate = new Date(form.deadline); const today = new
+              Date(); const daysLeft = Math.ceil((deadlineDate - today) / (1000
+              * 60 * 60 * 24)); let deadlineClass = ''; if (daysLeft <= 3 &&
+              daysLeft > 0) { deadlineClass = 'deadline-near'; } else if
+              (daysLeft <= 7 && daysLeft > 0) { deadlineClass =
+              'deadline-upcoming'; } %>
+
+              <p class="card-text">
+                <strong>Deadline:</strong>
+                <span class="deadline-indicator <%= deadlineClass %>">
+                  <%= deadlineDate.toLocaleDateString() %> <% if (daysLeft > 0)
+                  { %> (<%= daysLeft %> days left) <% } else if (daysLeft === 0)
+                  { %> (Today) <% } else { %> (Expired) <% } %>
+                </span>
+              </p>
+
+              <p class="card-text">
+                <strong>Questions:</strong>
+              </p>
+
+              <div class="d-flex justify-content-between mt-4">
+                <% if (form.hasSubmitted) { %>
+                <a
+                  href="/viewSubmission/<%= form._id %>"
+                  class="btn btn-outline-primary"
+                  >View Response</a
+                >
+                <% } else if (form.canSubmit) { %>
+                <a
+                  href="/student/submitForm/<%= form._id %>"
+                  class="btn btn-primary"
+                  >Submit Feedback</a
+                >
+                <% } else { %>
+                <button class="btn btn-secondary" disabled>Expired</button>
+                <% } %>
+                <a
+                  href="/student/previewForm/<%= form._id %>?preview=true"
+                  class="btn btn-outline-secondary"
+                  >Preview</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <% }); %> <% } else { %>
+        <div class="col-12">
+          <div class="no-forms-container">
+            <div class="alert alert-info p-4">
+              <h4>No forms available!</h4>
+              <p>
+                There are currently no feedback forms assigned to your section.
+              </p>
+            </div>
+          </div>
+        </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Footer with Bootstrap classes -->
+    <footer class="bg-white py-4 border-top mt-auto">
+      <div class="container-fluid px-4">
+        <div class="row g-2">
+          <div class="col-md-6">
+            <p class="mb-0">© 2025 Campus Connect. All rights reserved.</p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <a href="#" class="text-decoration-none text-muted me-3"
+              >Privacy Policy</a
+            >
+            <a href="#" class="text-decoration-none text-muted me-3"
+              >Terms of Service</a
+            >
+            <a href="#" class="text-decoration-none text-muted">Contact Us</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Toast notification scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
+
+    <script>
+      // Initialize tooltips
+      var tooltipTriggerList = [].slice.call(
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      );
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+
+      // Form filter functionality
+      document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.querySelector('input[type="text"]');
+        const selectFilters = document.querySelectorAll(".form-select");
+        const formCards = document.querySelectorAll(".form-card");
+
+        // Function to filter the forms
+        function filterForms() {
+          const searchTerm = searchInput.value.toLowerCase();
+          let selectedStatus = "";
+          let selectedFaculty = "";
+
+          // Get selected values from dropdowns
+          selectFilters.forEach((select) => {
+            if (select.options[0].text.includes("Status")) {
+              selectedStatus =
+                select.value === "All Status" ? "" : select.value.toLowerCase();
+            } else if (select.options[0].text.includes("Faculty")) {
+              selectedFaculty =
+                select.value === "All Faculty"
+                  ? ""
+                  : select.options[select.selectedIndex].text
+                      .trim()
+                      .toLowerCase();
+            }
+          });
+
+          // Filter each form card
+          formCards.forEach((card) => {
+            const cardTitle = card
+              .querySelector(".card-title")
+              .textContent.toLowerCase();
+            const cardType = card
+              .querySelector(".badge")
+              .textContent.toLowerCase();
+            const facultyElement = card.querySelector(
+              ".card-text:nth-of-type(1)"
+            );
+            const facultyName = facultyElement
+              ? facultyElement.textContent.toLowerCase()
+              : "";
+            const cardStatus = card
+              .querySelector(".form-status-badge")
+              .textContent.toLowerCase();
+
+            // Check if card matches all filter criteria
+            const matchesSearch =
+              cardTitle.includes(searchTerm) || cardType.includes(searchTerm);
+            const matchesStatus =
+              !selectedStatus || cardStatus.includes(selectedStatus);
+            const matchesFaculty =
+              !selectedFaculty || facultyName.includes(selectedFaculty);
+
+            // Show or hide based on filter matches
+            if (matchesSearch && matchesStatus && matchesFaculty) {
+              card.closest(".col-12").style.display = "block";
+            } else {
+              card.closest(".col-12").style.display = "none";
+            }
+          });
+
+          // Show "no results" message if all cards are hidden
+          let allHidden = true;
+          formCards.forEach((card) => {
+            if (card.closest(".col-12").style.display !== "none") {
+              allHidden = false;
+            }
+          });
+
+          // Get or create no-results element
+          let noResults = document.querySelector(".no-results-message");
+          if (!noResults) {
+            noResults = document.createElement("div");
+            noResults.className = "col-12 no-results-message";
+            noResults.innerHTML = `
+      <div class="alert alert-info p-4 text-center">
+          <h4><i class="fas fa-search me-2"></i>No matching forms found</h4>
+          <p>Try adjusting your search criteria or filters.</p>
+      </div>
+    `;
+            document.querySelector(".row.g-4").appendChild(noResults);
+          }
+
+          noResults.style.display = allHidden ? "block" : "none";
+        }
+
+        // Add event listeners for search input and dropdowns
+        searchInput.addEventListener("keyup", filterForms);
+
+        selectFilters.forEach((select) => {
+          select.addEventListener("change", filterForms);
+        });
+
+        // Initialize clear filters button
+        const filterCard = document.querySelector(".filter-card");
+        let clearButton = document.createElement("button");
+        clearButton.className = "btn btn-outline-secondary mt-2";
+        clearButton.innerHTML =
+          '<i class="fas fa-times me-1"></i> Clear Filters';
+        clearButton.style.display = "none";
+        filterCard.appendChild(clearButton);
+
+        clearButton.addEventListener("click", function () {
+          // Reset all filters
+          searchInput.value = "";
+          selectFilters.forEach((select) => {
             select.selectedIndex = 0;
+          });
+          formCards.forEach((card) => {
+            card.closest(".col-12").style.display = "block";
+          });
+          document.querySelector(".no-results-message").style.display = "none";
+          clearButton.style.display = "none";
         });
-        formCards.forEach(card => {
-            card.closest('.col-12').style.display = 'block';
+
+        // Show clear button when filters are active
+        function updateClearButton() {
+          const hasFilters =
+            searchInput.value !== "" ||
+            Array.from(selectFilters).some(
+              (select) => select.selectedIndex !== 0
+            );
+
+          clearButton.style.display = hasFilters ? "inline-block" : "none";
+        }
+
+        searchInput.addEventListener("keyup", updateClearButton);
+        selectFilters.forEach((select) => {
+          select.addEventListener("change", updateClearButton);
         });
-        document.querySelector('.no-results-message').style.display = 'none';
-        clearButton.style.display = 'none';
-    });
 
-    // Show clear button when filters are active
-    function updateClearButton() {
-        const hasFilters = searchInput.value !== '' ||
-            Array.from(selectFilters).some(select => select.selectedIndex !== 0);
+        // Function to show toast messages
+        function showToast(message, type) {
+          const backgroundColor =
+            type === "success"
+              ? "#28a745"
+              : type === "error"
+              ? "#dc3545"
+              : type === "warning"
+              ? "#ffc107"
+              : "#17a2b8";
 
-        clearButton.style.display = hasFilters ? 'inline-block' : 'none';
-    }
-
-    searchInput.addEventListener('keyup', updateClearButton);
-    selectFilters.forEach(select => {
-        select.addEventListener('change', updateClearButton);
-    });
-
-    // Function to show toast messages
-    function showToast(message, type) {
-        const backgroundColor = type === 'success' ? '#28a745' : 
-                               type === 'error' ? '#dc3545' : 
-                               type === 'warning' ? '#ffc107' : '#17a2b8';
-        
-        Toastify({
+          Toastify({
             text: message,
             duration: 5000,
             close: true,
             gravity: "top",
             position: "right",
             backgroundColor: backgroundColor,
-            stopOnFocus: true
-        }).showToast();
-    }
-
-    // Handle preview button clicks based on form status
-    const previewButtons = document.querySelectorAll('a[href*="/student/previewForm/"]');
-    previewButtons.forEach(button => {
-        // Check if this form has been submitted already
-        const formCard = button.closest('.form-card');
-        const statusBadge = formCard.querySelector('.form-status-badge');
-        const isSubmitted = statusBadge && statusBadge.textContent.trim() === 'Submitted';
-        
-        // For submitted forms, replace the preview button behavior
-        if (isSubmitted) {
-            // Change the appearance of the preview button for submitted forms
-            button.classList.remove('btn-outline-secondary');
-            button.classList.add('btn-secondary');
-            
-            // Override the default click behavior
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                showToast('Preview unavailable for submitted forms. View your response instead.', 'warning');
-                
-                // Optional: You can redirect to the view response page instead
-                const viewResponseButton = formCard.querySelector('a[href*="/viewSubmission/"]');
-                if (viewResponseButton) {
-                    setTimeout(() => {
-                        window.location.href = viewResponseButton.href;
-                    }, 1000);
-                }
-            });
-        } else {
-            // For non-submitted forms, keep the regular preview functionality
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                showToast('Loading form preview...', 'info');
-                setTimeout(() => {
-                    window.location.href = this.href;
-                }, 800);
-            });
+            stopOnFocus: true,
+          }).showToast();
         }
-    });
 
-    // Check for URL parameters and flash messages
-    const urlParams = new URLSearchParams(window.location.search);
-    const resubmitAttempt = urlParams.get('resubmitAttempt');
-    const formId = urlParams.get('formId');
-    const submitted = urlParams.get('submitted');
-    const preview = urlParams.get('preview');
-    
-    if (resubmitAttempt === 'true' && formId) {
-        showToast('You have already submitted this form.', 'warning');
-    }
-    
-    if (submitted === 'true') {
-        showToast('Form submitted successfully!', 'success');
-    }
-    
-    if (preview === 'true') {
-        showToast('Form preview loaded successfully!', 'success');
-    }
-    
-    // Check for flash messages from server
-    <% if(locals.messages && messages.error) { %>
-        showToast('<%= messages.error %>', 'error');
-    <% } %>
-    
-    <% if(locals.messages && messages.success) { %>
-        showToast('<%= messages.success %>', 'success');
-    <% } %>
-});
-  </script>
-</body>
+        // Handle preview button clicks based on form status
+        const previewButtons = document.querySelectorAll(
+          'a[href*="/student/previewForm/"]'
+        );
+        previewButtons.forEach((button) => {
+          // Check if this form has been submitted already
+          const formCard = button.closest(".form-card");
+          const statusBadge = formCard.querySelector(".form-status-badge");
+          const isSubmitted =
+            statusBadge && statusBadge.textContent.trim() === "Submitted";
+
+          // For submitted forms, replace the preview button behavior
+          if (isSubmitted) {
+            // Change the appearance of the preview button for submitted forms
+            button.classList.remove("btn-outline-secondary");
+            button.classList.add("btn-secondary");
+
+            // Override the default click behavior
+            button.addEventListener("click", function (e) {
+              e.preventDefault();
+              showToast(
+                "Preview unavailable for submitted forms. View your response instead.",
+                "warning"
+              );
+
+              // Optional: You can redirect to the view response page instead
+              const viewResponseButton = formCard.querySelector(
+                'a[href*="/viewSubmission/"]'
+              );
+              if (viewResponseButton) {
+                setTimeout(() => {
+                  window.location.href = viewResponseButton.href;
+                }, 1000);
+              }
+            });
+          } else {
+            // For non-submitted forms, keep the regular preview functionality
+            button.addEventListener("click", function (e) {
+              e.preventDefault();
+              showToast("Loading form preview...", "info");
+              setTimeout(() => {
+                window.location.href = this.href;
+              }, 800);
+            });
+          }
+        });
+
+        // Check for URL parameters and flash messages
+        const urlParams = new URLSearchParams(window.location.search);
+        const resubmitAttempt = urlParams.get("resubmitAttempt");
+        const formId = urlParams.get("formId");
+        const submitted = urlParams.get("submitted");
+        const preview = urlParams.get("preview");
+
+        if (resubmitAttempt === "true" && formId) {
+          showToast("You have already submitted this form.", "warning");
+        }
+
+        if (submitted === "true") {
+          showToast("Form submitted successfully!", "success");
+        }
+
+        if (preview === "true") {
+          showToast("Form preview loaded successfully!", "success");
+        }
+
+        // Check for flash messages from server
+        //     <% if(locals.messages && messages.error) { %>
+        //         showToast('<%= messages.error %>', 'error');
+        //     <% } %>
+
+        //     <% if(locals.messages && messages.success) { %>
+        //         showToast('<%= messages.success %>', 'success');
+        //     <% } %>
+      });
+    </script>
+  </body>
 </html>
