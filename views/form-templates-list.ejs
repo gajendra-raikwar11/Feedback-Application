@@ -216,6 +216,13 @@
                                                 <i class="bi bi-calendar-event me-1"></i>
                                                 <%= new Date(template.createdAt).toLocaleDateString() %>
                                             </small>
+                                            <% if (template.formType === 'Academic' && template.academicType) { %>
+                                            <br>
+                                            <small class="text-muted">
+                                                <i class="bi bi-mortarboard me-1"></i>
+                                                Academic Type: <%= template.academicType %>
+                                            </small>
+                                            <% } %>
                                         </div>
                                         <div class="d-flex justify-content-end mt-3">
                                             <a href="/admin/template/form-templates/<%= template._id %>" class="action-btn btn-view" title="View Template">
