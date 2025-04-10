@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Form Template</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --topbar-height: 60px;
+        }
+        
+        body {
+            min-height: 100vh;
+            background-color: #f5f7fb;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding-top: var(--topbar-height);
+            transition: margin-left 0.3s;
+            min-height: 100vh;
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .section-card {
+            margin-bottom: 1.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: all 0.3s ease;
+        }
+        
+        .section-card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        }
+        
+        .question-card {
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .question-card:hover {
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+        }
+        
+        .options-container {
+            margin-top: 15px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 0.375rem;
+        }
+        
+        .option-item {
+            margin-bottom: 8px;
+        }
+        
+        .grid-options {
+            margin-top: 15px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 0.375rem;
+        }
+        
+        .btn-remove {
+            color: #dc3545;
+            cursor: pointer;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .form-header {
+            background: linear-gradient(to right, #4e73df, #36b9cc);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+        
+        .form-header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+        
+        .form-container {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .btn-add-section {
+            background-color: #4e73df;
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-add-section:hover {
+            background-color: #375cbf;
+            box-shadow: 0 0.25rem 0.5rem rgba(78, 115, 223, 0.1);
+        }
+        
+        .toast-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 1060;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .form-header {
+                padding: 1rem;
+            }
+            
+            .form-container {
+                padding: 1rem;
+            }
+            
+            .section-card, .question-card {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Topbar -->
+   <%- include('partials/adminTopNavbar', { admin: adminData }) %>
+   <!-- Sidebar -->
+   <%- include('./partials/adminSideNavbar', { path: currentPath ,admin: adminData  }) %>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-fluid px-4 py-4">
+            <div class="form-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1><i class="bi bi-pencil-square me-2"></i>Edit Form Template</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="/admin/template/form-templates" class="text-white">Available Templates</a></li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">Edit Template</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+            
+            <div class="form-container">
+                <form id="templateForm" action="/admin/template/form-templates/<%= template._id %>" method="POST" enctype="application/x-www-form-urlencoded">
+                    <input type="hidden" name="_method" value="PUT">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="templateName" class="form-label">Template Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-fonts"></i></span>
+                                <input type="text" class="form-control" id="templateName" name="name" placeholder="Enter template name" value="<%= template.name %>" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="formType" class="form-label">Form Type</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                                <select class="form-select" id="formType" name="formType" required>
+                                    <option value="" disabled>Select a form type</option>
+                                    <option value="Academic" <%= template.formType === 'Academic' ? 'selected' : '' %>>Academic</option>
+                                    <option value="Institutional" <%= template.formType === 'Institutional' ? 'selected' : '' %>>Institutional</option>
+                                    <option value="Training" <%= template.formType === 'Training' ? 'selected' : '' %>>Training</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="createdBy" name="createdBy" value="<%= template.createdBy %>">
+                    
+                    <div id="sections-container">
+                        <!-- Sections will be loaded here from existing template -->
+                    </div>
+                    
+                    <button type="button" class="btn btn-add-section mb-4" id="addSectionBtn">
+                        <i class="bi bi-plus-circle me-1"></i> Add Section
+                    </button>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="button" class="btn btn-secondary me-2" id="cancelBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i> Update Template
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Container for Notifications -->
+    <div class="toast-container">
+        <div id="formToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong class="me-auto" id="toastTitle">Notification</strong>
+                <small id="toastTime">Just now</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                Form template operation completed.
+            </div>
+        </div>
+    </div>
+    
+    <!-- Section Template (hidden) -->
+    <template id="section-template">
+        <div class="section-card">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h4><i class="bi bi-collection me-2"></i>Section</h4>
+                <button type="button" class="btn-close remove-section" aria-label="Remove section"></button>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Section Title</label>
+                <input type="text" class="form-control section-title" name="sections[][title]" placeholder="Enter section title" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Section Description (Optional)</label>
+                <textarea class="form-control section-description" name="sections[][description]" rows="2" placeholder="Enter section description"></textarea>
+            </div>
+            
+            <div class="questions-container">
+                <!-- Questions will be added here -->
+            </div>
+            
+            <button type="button" class="btn btn-outline-primary btn-sm add-question-btn mt-3">
+                <i class="bi bi-plus-circle me-1"></i> Add Question
+            </button>
+        </div>
+    </template>
+    
+    <!-- Question Template (hidden) -->
+    <template id="question-template">
+        <div class="question-card">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h5><i class="bi bi-question-circle me-2"></i>Question</h5>
+                <button type="button" class="btn-close remove-question" aria-label="Remove question"></button>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Question Text</label>
+                <input type="text" class="form-control question-text" name="sections[][questions][][questionText]" placeholder="Enter your question" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Question Type</label>
+                <select class="form-select question-type" name="sections[][questions][][questionType]" required>
+                    <option value="" disabled selected>Select a question type</option>
+                    <option value="text">Text Input</option>
+                    <option value="mcq">Multiple Choice</option>
+                    <option value="yes_no">Yes/No</option>
+                    <option value="rating">Rating</option>
+                    <option value="grid">Grid</option>
+                    <option value="dropdown">Dropdown</option>
+                    <option value="date">Date</option>
+                </select>
+            </div>
+            
+            <div class="options-container hidden">
+                <label class="form-label"><i class="bi bi-list-check me-1"></i>Options</label>
+                <div class="options-list">
+                    <div class="input-group mb-2 option-item">
+                        <span class="input-group-text"><i class="bi bi-circle"></i></span>
+                        <input type="text" class="form-control option-input" name="sections[][questions][][options][]" placeholder="Option text">
+                        <button type="button" class="btn btn-outline-danger remove-option">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm add-option-btn mt-2">
+                    <i class="bi bi-plus-circle me-1"></i> Add Option
+                </button>
+            </div>
+            
+            <div class="grid-options hidden">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-grid-3x3-gap me-1"></i>Rows</label>
+                        <div class="grid-rows-container">
+                            <div class="input-group mb-2">
+                                <span class="input-group-text"><i class="bi bi-arrow-right"></i></span>
+                                <input type="text" class="form-control grid-row-input" name="sections[][questions][][gridOptions][rows][]" placeholder="Row label">
+                                <button type="button" class="btn btn-outline-danger remove-grid-row">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm add-grid-row-btn mt-2">
+                            <i class="bi bi-plus-circle me-1"></i> Add Row
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-grid-3x3-gap me-1"></i>Columns</label>
+                        <div class="grid-cols-container">
+                            <div class="input-group mb-2">
+                                <span class="input-group-text"><i class="bi bi-arrow-down"></i></span>
+                                <input type="text" class="form-control grid-col-input" name="sections[][questions][][gridOptions][columns][]" placeholder="Column label">
+                                <button type="button" class="btn btn-outline-danger remove-grid-col">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm add-grid-col-btn mt-2">
+                            <i class="bi bi-plus-circle me-1"></i> Add Column
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-check mt-3">
+                <input class="form-check-input question-required" type="checkbox" value="true" name="sections[][questions][][required]" checked>
+                <label class="form-check-label">Required</label>
+            </div>
+        </div>
+    </template>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sectionsContainer = document.getElementById('sections-container');
+            const addSectionBtn = document.getElementById('addSectionBtn');
+            const sectionTemplate = document.getElementById('section-template');
+            const questionTemplate = document.getElementById('question-template');
+            const cancelBtn = document.getElementById('cancelBtn');
+            
+            // Toast initialization
+            const formToast = document.getElementById('formToast');
+            const toast = new bootstrap.Toast(formToast, {
+                delay: 3000
+            });
+            
+            // Function to show toast message
+            function showToast(title, message, type = 'success') {
+                const toastElement = document.getElementById('formToast');
+                const toastTitle = document.getElementById('toastTitle');
+                const toastMessage = document.getElementById('toastMessage');
+                const toastTime = document.getElementById('toastTime');
+                
+                // Set toast content
+                toastTitle.textContent = title;
+                toastMessage.textContent = message;
+                toastTime.textContent = new Date().toLocaleTimeString();
+                
+                // Set toast color based on type
+                toastElement.className = 'toast';
+                if (type === 'success') {
+                    toastElement.classList.add('text-bg-success');
+                } else if (type === 'error') {
+                    toastElement.classList.add('text-bg-danger');
+                } else if (type === 'warning') {
+                    toastElement.classList.add('text-bg-warning');
+                } else if (type === 'info') {
+                    toastElement.classList.add('text-bg-info');
+                }
+                
+                // Show toast
+                const bsToast = new bootstrap.Toast(toastElement);
+                bsToast.show();
+            }
+            
+            // Counter to keep track of section indices
+            let sectionCounter = 0;
+            
+            // Add section
+            addSectionBtn.addEventListener('click', function() {
+                addSection();
+                showToast('Section Added', 'New section has been added to the form template', 'info');
+            });
+            
+            // Cancel button functionality
+            cancelBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to cancel? All changes will be lost.')) {
+                    window.location.href = '/admin/template/form-templates';
+                }
+            });
+            
+            // Function to add a new section
+            function addSection(sectionData = null) {
+                const sectionIndex = sectionCounter++;
+                const sectionClone = document.importNode(sectionTemplate.content, true);
+                
+                // Update name attributes with correct indices
+                const inputs = sectionClone.querySelectorAll('input, textarea, select');
+                inputs.forEach(input => {
+                    if (input.name) {
+                        input.name = input.name.replace('sections[]', `sections[${sectionIndex}]`);
+                    }
+                });
+                
+                // Fill in section data if provided
+                if (sectionData) {
+                    sectionClone.querySelector('.section-title').value = sectionData.title || '';
+                    sectionClone.querySelector('.section-description').value = sectionData.description || '';
+                }
+                
+                // Add question button functionality
+                const addQuestionBtn = sectionClone.querySelector('.add-question-btn');
+                addQuestionBtn.addEventListener('click', function() {
+                    addQuestion(this.closest('.section-card').querySelector('.questions-container'), sectionIndex);
+                    showToast('Question Added', 'New question has been added to the section', 'info');
+                });
+                
+                // Remove section functionality
+                const removeBtn = sectionClone.querySelector('.remove-section');
+                removeBtn.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to remove this section?')) {
+                        this.closest('.section-card').remove();
+                        showToast('Section Removed', 'Section has been removed from the form template', 'warning');
+                    }
+                });
+                
+                sectionsContainer.appendChild(sectionClone);
+                
+                // Add questions from section data or an initial question
+                const questionsContainer = sectionsContainer.lastElementChild.querySelector('.questions-container');
+                if (sectionData && sectionData.questions && sectionData.questions.length > 0) {
+                    sectionData.questions.forEach(questionData => {
+                        addQuestion(questionsContainer, sectionIndex, questionData);
+                    });
+                } else {
+                    addQuestion(questionsContainer, sectionIndex);
+                }
+                
+                return sectionsContainer.lastElementChild;
+            }
+            
+            // Function to add a new question to a section
+            function addQuestion(container, sectionIndex, questionData = null) {
+    // Find the number of existing questions in this section to determine the question index
+    const questionIndex = container.children.length;
+    const questionClone = document.importNode(questionTemplate.content, true);
+    
+    // Update name attributes with correct indices
+    const inputs = questionClone.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        if (input.name) {
+            input.name = input.name
+                .replace('sections[]', `sections[${sectionIndex}]`)
+                .replace('questions[]', `questions[${questionIndex}]`);
+        }
+    });
+    
+    // Add the question element to the container first
+    container.appendChild(questionClone);
+    
+    // Get the newly added question element
+    const questionElement = container.lastElementChild;
+    
+    // Fill in question data if provided
+    if (questionData) {
+        const questionTextInput = questionElement.querySelector('.question-text');
+        const questionTypeSelect = questionElement.querySelector('.question-type');
+        const requiredCheckbox = questionElement.querySelector('.question-required');
+        
+        // Set question text
+        if (questionTextInput && questionData.questionText) {
+            questionTextInput.value = questionData.questionText;
+        }
+        
+        // Set question type
+        if (questionTypeSelect && questionData.questionType) {
+            questionTypeSelect.value = questionData.questionType;
+        }
+        
+        // Set required checkbox
+        if (requiredCheckbox) {
+            requiredCheckbox.checked = questionData.required === true || questionData.required === 'true';
+        }
+    }
+    
+    // Question type change handler
+    const questionTypeSelect = questionElement.querySelector('.question-type');
+    questionTypeSelect.addEventListener('change', function() {
+        handleQuestionTypeChange(this, sectionIndex, questionIndex);
+    });
+    
+    // Add option button functionality
+    const addOptionBtn = questionElement.querySelector('.add-option-btn');
+    addOptionBtn.addEventListener('click', function() {
+        addOption(this.closest('.options-container').querySelector('.options-list'), sectionIndex, questionIndex);
+    });
+    
+    // Grid row and column button functionality
+    const addGridRowBtn = questionElement.querySelector('.add-grid-row-btn');
+    addGridRowBtn.addEventListener('click', function() {
+        addGridRow(this.closest('.col-md-6').querySelector('.grid-rows-container'), sectionIndex, questionIndex);
+    });
+    
+    const addGridColBtn = questionElement.querySelector('.add-grid-col-btn');
+    addGridColBtn.addEventListener('click', function() {
+        addGridColumn(this.closest('.col-md-6').querySelector('.grid-cols-container'), sectionIndex, questionIndex);
+    });
+    
+    // Remove question functionality
+    const removeQuestionBtn = questionElement.querySelector('.remove-question');
+    removeQuestionBtn.addEventListener('click', function() {
+        const questionsContainer = this.closest('.questions-container');
+        if (questionsContainer.querySelectorAll('.question-card').length > 1) {
+            if (confirm('Are you sure you want to remove this question?')) {
+                this.closest('.question-card').remove();
+                showToast('Question Removed', 'Question has been removed from the section', 'warning');
+            }
+        } else {
+            showToast('Cannot Remove', 'Each section must contain at least one question', 'warning');
+        }
+    });
+    
+    // Add remove option functionality to initial options
+    const removeOptionBtns = questionElement.querySelectorAll('.remove-option');
+    removeOptionBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const optionsList = this.closest('.options-list');
+            if (optionsList.querySelectorAll('.option-item').length > 1) {
+                this.closest('.option-item').remove();
+            } else {
+                showToast('Cannot Remove', 'At least one option must remain', 'warning');
+            }
+        });
+    });
+    
+    // Add remove grid row/col functionality to initial grid options
+    const removeGridRowBtns = questionElement.querySelectorAll('.remove-grid-row');
+    removeGridRowBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const rowsContainer = this.closest('.grid-rows-container');
+            if (rowsContainer.querySelectorAll('.input-group').length > 1) {
+                this.closest('.input-group').remove();
+            } else {
+                showToast('Cannot Remove', 'At least one row must remain', 'warning');
+            }
+        });
+    });
+    
+    const removeGridColBtns = questionElement.querySelectorAll('.remove-grid-col');
+    removeGridColBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const colsContainer = this.closest('.grid-cols-container');
+            if (colsContainer.querySelectorAll('.input-group').length > 1) {
+                this.closest('.input-group').remove();
+            } else {
+                showToast('Cannot Remove', 'At least one column must remain', 'warning');
+            }
+        });
+    });
+    
+    // If we have question data, now initialize the specific question type UI
+    if (questionData && questionData.questionType) {
+        // Trigger the type change handler to set up the correct UI for this question type
+        setTimeout(() => {
+            handleQuestionTypeChange(questionTypeSelect, sectionIndex, questionIndex, questionData);
+        }, 0);
+    }
+    
+    return questionElement;
+}
+            
+            // Function to handle question type change
+            function handleQuestionTypeChange(selectElement, sectionIndex, questionIndex, questionData = null) {
+    const questionCard = selectElement.closest('.question-card');
+    const optionsContainer = questionCard.querySelector('.options-container');
+    const gridOptions = questionCard.querySelector('.grid-options');
+    
+    // Hide both by default
+    optionsContainer.classList.add('hidden');
+    gridOptions.classList.add('hidden');
+    
+    // Show relevant container based on question type
+    if (['mcq', 'rating', 'dropdown', 'yes_no'].includes(selectElement.value)) {
+        optionsContainer.classList.remove('hidden');
+        const optionsList = optionsContainer.querySelector('.options-list');
+        
+        // For rating, add numeric options (1-5) by default
+        if (selectElement.value === 'rating') {
+            if (!questionData || !questionData.options || optionsList.children.length === 0) {
+                // Clear existing options
+                optionsList.innerHTML = '';
+                
+                // Create default rating options (1-5)
+                for (let i = 1; i <= 5; i++) {
+                    addOption(optionsList, sectionIndex, questionIndex, i.toString());
+                }
+            } else if (questionData && questionData.options) {
+                // Use the provided options
+                optionsList.innerHTML = '';
+                questionData.options.forEach(option => {
+                    addOption(optionsList, sectionIndex, questionIndex, option);
+                });
+            }
+        }
+        
+        // For yes/no, add yes and no options by default
+        else if (selectElement.value === 'yes_no') {
+            if (!questionData || !questionData.options || optionsList.children.length === 0) {
+                // Clear existing options
+                optionsList.innerHTML = '';
+                
+                // Create Yes/No options
+                const options = ['Yes', 'No'];
+                options.forEach(option => {
+                    addOption(optionsList, sectionIndex, questionIndex, option);
+                });
+            } else if (questionData && questionData.options) {
+                // Use the provided options
+                optionsList.innerHTML = '';
+                questionData.options.forEach(option => {
+                    addOption(optionsList, sectionIndex, questionIndex, option);
+                });
+            }
+        }
+        
+        // For MCQ and dropdown, add default options or use provided ones
+        else if (selectElement.value === 'mcq' || selectElement.value === 'dropdown') {
+            if (questionData && questionData.options && questionData.options.length > 0) {
+                // Use the provided options
+                optionsList.innerHTML = '';
+                questionData.options.forEach(option => {
+                    addOption(optionsList, sectionIndex, questionIndex, option);
+                });
+            } else if (optionsList.children.length === 0) {
+                // Add two empty options
+                for (let i = 0; i < 2; i++) {
+                    addOption(optionsList, sectionIndex, questionIndex, '');
+                }
+            }
+        }
+    }
+    
+    // Handle grid question type
+    else if (selectElement.value === 'grid') {
+        gridOptions.classList.remove('hidden');
+        const rowsContainer = gridOptions.querySelector('.grid-rows-container');
+        const colsContainer = gridOptions.querySelector('.grid-cols-container');
+        
+        // If we have grid data, use it
+        if (questionData && questionData.gridOptions) {
+            // Clear existing rows and columns
+            rowsContainer.innerHTML = '';
+            colsContainer.innerHTML = '';
+            
+            // Add rows from data
+            if (questionData.gridOptions.rows && questionData.gridOptions.rows.length > 0) {
+                questionData.gridOptions.rows.forEach(row => {
+                    addGridRow(rowsContainer, sectionIndex, questionIndex, row);
+                });
+            } else {
+                // Add default rows
+                for (let i = 0; i < 2; i++) {
+                    addGridRow(rowsContainer, sectionIndex, questionIndex, '');
+                }
+            }
+            
+            // Add columns from data
+            if (questionData.gridOptions.columns && questionData.gridOptions.columns.length > 0) {
+                questionData.gridOptions.columns.forEach(col => {
+                    addGridColumn(colsContainer, sectionIndex, questionIndex, col);
+                });
+            } else {
+                // Add default columns
+                for (let i = 0; i < 2; i++) {
+                    addGridColumn(colsContainer, sectionIndex, questionIndex, '');
+                }
+            }
+        } 
+        // Otherwise add default rows and columns
+        else if (rowsContainer.children.length === 0 || colsContainer.children.length === 0) {
+            // Clear existing
+            rowsContainer.innerHTML = '';
+            colsContainer.innerHTML = '';
+            
+            // Add two default rows
+            for (let i = 0; i < 2; i++) {
+                addGridRow(rowsContainer, sectionIndex, questionIndex, '');
+            }
+            
+            // Add two default columns
+            for (let i = 0; i < 2; i++) {
+                addGridColumn(colsContainer, sectionIndex, questionIndex, '');
+            }
+        }
+    }
+}
+            // Function to add an option to an options list
+            function addOption(optionsList, sectionIndex, questionIndex, optionValue = '') {
+                const optionItem = document.createElement('div');
+                optionItem.className = 'input-group mb-2 option-item';
+                
+                optionItem.innerHTML = `
+                    <span class="input-group-text"><i class="bi bi-circle"></i></span>
+                    <input type="text" class="form-control option-input" 
+                        name="sections[${sectionIndex}][questions][${questionIndex}][options][]" 
+                        placeholder="Option text" value="${optionValue}">
+                    <button type="button" class="btn btn-outline-danger remove-option">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                `;
+                
+                const removeBtn = optionItem.querySelector('.remove-option');
+                removeBtn.addEventListener('click', function() {
+                    const optionsList = this.closest('.options-list');
+                    if (optionsList.querySelectorAll('.option-item').length > 1) {
+                        this.closest('.option-item').remove();
+                    } else {
+                        showToast('Cannot Remove', 'At least one option must remain', 'warning');
+                    }
+                });
+                
+                optionsList.appendChild(optionItem);
+                return optionItem;
+            }
+
+            // Function to add a grid row
+            function addGridRow(rowsContainer, sectionIndex, questionIndex, rowValue = '') {
+                const rowItem = document.createElement('div');
+                rowItem.className = 'input-group mb-2';
+                
+                rowItem.innerHTML = `
+                    <span class="input-group-text"><i class="bi bi-arrow-right"></i></span>
+                    <input type="text" class="form-control grid-row-input" 
+                        name="sections[${sectionIndex}][questions][${questionIndex}][gridOptions][rows][]" 
+                        placeholder="Row label" value="${rowValue}">
+                    <button type="button" class="btn btn-outline-danger remove-grid-row">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                `;
+                
+                const removeBtn = rowItem.querySelector('.remove-grid-row');
+                removeBtn.addEventListener('click', function() {
+                    const rowsContainer = this.closest('.grid-rows-container');
+                    if (rowsContainer.querySelectorAll('.input-group').length > 1) {
+                        this.closest('.input-group').remove();
+                    } else {
+                        showToast('Cannot Remove', 'At least one row must remain', 'warning');
+                    }
+                });
+                
+                rowsContainer.appendChild(rowItem);
+                return rowItem;
+            }
+
+            // Function to add a grid column
+            function addGridColumn(colsContainer, sectionIndex, questionIndex, colValue = '') {
+                const colItem = document.createElement('div');
+                colItem.className = 'input-group mb-2';
+                
+                colItem.innerHTML = `
+                    <span class="input-group-text"><i class="bi bi-arrow-down"></i></span>
+                    <input type="text" class="form-control grid-col-input" 
+                        name="sections[${sectionIndex}][questions][${questionIndex}][gridOptions][columns][]" 
+                        placeholder="Column label" value="${colValue}">
+                    <button type="button" class="btn btn-outline-danger remove-grid-col">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                `;
+                
+                const removeBtn = colItem.querySelector('.remove-grid-col');
+                removeBtn.addEventListener('click', function() {
+                    const colsContainer = this.closest('.grid-cols-container');
+                    if (colsContainer.querySelectorAll('.input-group').length > 1) {
+                        this.closest('.input-group').remove();
+                    } else {
+                        showToast('Cannot Remove', 'At least one column must remain', 'warning');
+                    }
+                });
+                
+                colsContainer.appendChild(colItem);
+                return colItem;
+            }
+
+            // Form submission handling
+            document.getElementById('templateForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+        showToast('Validation Failed', 'Please check the form for errors', 'error');
+        return false;
+    }
+    
+    // Get form data
+    const formData = new FormData(this);
+    
+    // Create the structure for our JSON data
+    const jsonData = {
+        name: formData.get('name'),
+        formType: formData.get('formType'),
+        createdBy: formData.get('createdBy'),
+        sections: []
+    };
+    
+    // Get all section elements
+    const sectionElements = document.querySelectorAll('.section-card');
+    
+    // Process each section
+    sectionElements.forEach((sectionEl, sectionIndex) => {
+        const section = {
+            title: sectionEl.querySelector('.section-title').value,
+            description: sectionEl.querySelector('.section-description').value,
+            questions: []
+        };
+        
+        // Get all question elements in this section
+        const questionElements = sectionEl.querySelectorAll('.question-card');
+        
+        // Process each question
+        questionElements.forEach((questionEl) => {
+            const questionType = questionEl.querySelector('.question-type').value;
+            const required = questionEl.querySelector('.question-required').checked;
+            
+            const question = {
+                questionText: questionEl.querySelector('.question-text').value,
+                questionType: questionType,
+                required: required
+            };
+            
+            // Add options for multiple choice, dropdown, or rating questions
+            if (['mcq', 'rating', 'dropdown', 'yes_no'].includes(questionType)) {
+                const optionInputs = questionEl.querySelectorAll('.option-input');
+                question.options = Array.from(optionInputs).map(input => input.value);
+            }
+            
+            // Add grid options for grid questions
+            if (questionType === 'grid') {
+                const rowInputs = questionEl.querySelectorAll('.grid-row-input');
+                const colInputs = questionEl.querySelectorAll('.grid-col-input');
+                
+                question.gridOptions = {
+                    rows: Array.from(rowInputs).map(input => input.value),
+                    columns: Array.from(colInputs).map(input => input.value)
+                };
+            }
+            
+            section.questions.push(question);
+        });
+        
+        jsonData.sections.push(section);
+    });
+    
+    // Log the JSON data for debugging
+    console.log('Form data to be submitted:', jsonData);
+    
+    // Send the AJAX request
+    fetch(this.action, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(jsonData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Success', 'Template updated successfully', 'success');
+            // Redirect after success
+            setTimeout(() => {
+                window.location.href = '/admin/template/form-templates';
+            }, 1500);
+        } else {
+            showToast('Error', data.error || 'Failed to update template', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error', 'An error occurred while updating the template', 'error');
+    });
+});
+            // Helper function to convert FormData to JSON
+            function formToJson(formData) {
+    const jsonData = {};
+    
+    for (const [key, value] of formData.entries()) {
+        // Parse array notation in form field names
+        const keys = key.match(/[^\[\]]+/g);
+        if (!keys) continue;
+        
+        let current = jsonData;
+        for (let i = 0; i < keys.length - 1; i++) {
+            const currentKey = keys[i];
+            const nextKey = keys[i + 1];
+            
+            // Create object or array if it doesn't exist
+            if (!current[currentKey]) {
+                current[currentKey] = /^\d+$/.test(nextKey) ? [] : {};
+            }
+            
+            current = current[currentKey];
+        }
+        
+        const lastKey = keys[keys.length - 1];
+        
+        // Handle arrays
+        if (Array.isArray(current)) {
+            if (current[lastKey] === undefined) {
+                current[lastKey] = value;
+            } else if (Array.isArray(current[lastKey])) {
+                current[lastKey].push(value);
+            } else {
+                current[lastKey] = [current[lastKey], value];
+            }
+        } else {
+            // Handle the case where the same field has multiple values
+            if (current[lastKey] === undefined) {
+                current[lastKey] = value;
+            } else if (Array.isArray(current[lastKey])) {
+                current[lastKey].push(value);
+            } else {
+                current[lastKey] = [current[lastKey], value];
+            }
+        }
+    }
+    
+    return jsonData;
+}
+
+            // Form validation
+            function validateForm() {
+    let isValid = true;
+    
+    // Check template name and type
+    const templateName = document.getElementById('templateName').value.trim();
+    const formType = document.getElementById('formType').value;
+    
+    if (!templateName) {
+        showToast('Validation Error', 'Template name is required', 'error');
+        return false;
+    }
+    
+    if (!formType) {
+        showToast('Validation Error', 'Form type is required', 'error');
+        return false;
+    }
+    
+    // Check sections
+    const sections = document.querySelectorAll('.section-card');
+    if (sections.length === 0) {
+        showToast('Validation Error', 'At least one section is required', 'error');
+        return false;
+    }
+    
+    // Validate each section
+    for (const section of sections) {
+        const sectionTitle = section.querySelector('.section-title').value.trim();
+        if (!sectionTitle) {
+            showToast('Validation Error', 'Section title is required', 'error');
+            isValid = false;
+            break;
+        }
+        
+        // Check questions in the section
+        const questions = section.querySelectorAll('.question-card');
+        if (questions.length === 0) {
+            showToast('Validation Error', 'Each section must have at least one question', 'error');
+            isValid = false;
+            break;
+        }
+        
+        // Validate each question
+        for (const question of questions) {
+            const questionText = question.querySelector('.question-text').value.trim();
+            const questionType = question.querySelector('.question-type').value;
+            
+            if (!questionText) {
+                showToast('Validation Error', 'Question text is required', 'error');
+                isValid = false;
+                break;
+            }
+            
+            if (!questionType) {
+                showToast('Validation Error', 'Question type is required', 'error');
+                isValid = false;
+                break;
+            }
+            
+            // Check options for MCQ, rating, or dropdown
+            if (['mcq', 'rating', 'dropdown'].includes(questionType)) {
+                const options = question.querySelectorAll('.option-input');
+                let hasEmptyOption = false;
+                
+                options.forEach(option => {
+                    if (!option.value.trim()) {
+                        hasEmptyOption = true;
+                    }
+                });
+                
+                if (hasEmptyOption) {
+                    showToast('Validation Error', 'All options must have a value', 'error');
+                    isValid = false;
+                    break;
+                }
+            }
+            
+            // Check grid options
+            if (questionType === 'grid') {
+                const rows = question.querySelectorAll('.grid-row-input');
+                const cols = question.querySelectorAll('.grid-col-input');
+                let hasEmptyRow = false;
+                let hasEmptyCol = false;
+                
+                rows.forEach(row => {
+                    if (!row.value.trim()) {
+                        hasEmptyRow = true;
+                    }
+                });
+                
+                cols.forEach(col => {
+                    if (!col.value.trim()) {
+                        hasEmptyCol = true;
+                    }
+                });
+                
+                if (hasEmptyRow) {
+                    showToast('Validation Error', 'All grid rows must have a label', 'error');
+                    isValid = false;
+                    break;
+                }
+                
+                if (hasEmptyCol) {
+                    showToast('Validation Error', 'All grid columns must have a label', 'error');
+                    isValid = false;
+                    break;
+                }
+            }
+        }
+        
+        if (!isValid) break;
+    }
+    
+    return isValid;
+}
+
+            // Load existing template data
+            function loadTemplateData() {
+                try {
+                    // Get template data - safely parse the JSON
+                    let templateData;
+                    try {
+                        const templateDataStr = '<%- JSON.stringify(template) %>';
+                        templateData = JSON.parse(templateDataStr);
+                        console.log("Template data loaded:", templateData);
+                    } catch (parseError) {
+                        console.error('Error parsing template data:', parseError);
+                        showToast('Error', 'Failed to parse template data', 'error');
+                        return;
+                    }
+                    
+                    if (!templateData || !templateData.sections) {
+                        showToast('Warning', 'No template data found or invalid format', 'warning');
+                        addSection(); // Add a default section as fallback
+                        return;
+                    }
+                    
+                    // Clear existing sections first
+                    sectionsContainer.innerHTML = '';
+                    
+                    // Load sections
+                    templateData.sections.forEach((sectionData, index) => {
+                        console.log(`Loading section ${index}:`, sectionData);
+                        const sectionElement = addSection();
+                        
+                        // Set section title and description
+                        const sectionTitle = sectionElement.querySelector('.section-title');
+                        const sectionDesc = sectionElement.querySelector('.section-description');
+                        
+                        if (sectionTitle && sectionData.title) {
+                            sectionTitle.value = sectionData.title;
+                        }
+                        
+                        if (sectionDesc && sectionData.description) {
+                            sectionDesc.value = sectionData.description;
+                        }
+                        
+                        // Clear default questions
+                        const questionsContainer = sectionElement.querySelector('.questions-container');
+                        questionsContainer.innerHTML = '';
+                        
+                        // Add questions
+                        if (sectionData.questions && sectionData.questions.length > 0) {
+                            sectionData.questions.forEach((questionData, qIndex) => {
+                                console.log(`Loading question ${qIndex} in section ${index}:`, questionData);
+                                const questionElement = addQuestion(questionsContainer, index, questionData);
+                                
+                                // Set question text and required status
+                                const questionText = questionElement.querySelector('.question-text');
+                                const requiredCheckbox = questionElement.querySelector('.question-required');
+                                const questionTypeSelect = questionElement.querySelector('.question-type');
+                                
+                                if (questionText && questionData.questionText) {
+                                    questionText.value = questionData.questionText;
+                                }
+                                
+                                if (requiredCheckbox) {
+                                    requiredCheckbox.checked = questionData.required === true || questionData.required === 'true';
+                                }
+                                
+                                if (questionTypeSelect && questionData.questionType) {
+                                    questionTypeSelect.value = questionData.questionType;
+                                    
+                                    // Trigger change event to show proper UI for the question type
+                                    const event = new Event('change');
+                                    questionTypeSelect.dispatchEvent(event);
+                                    
+                                    // Add options for multiple choice, dropdown, etc.
+                                    if (['mcq', 'rating', 'dropdown', 'yes_no'].includes(questionData.questionType) && questionData.options) {
+                                        const optionsList = questionElement.querySelector('.options-list');
+                                        if (optionsList) {
+                                            optionsList.innerHTML = ''; // Clear default options
+                                            
+                                            questionData.options.forEach(optionText => {
+                                                addOption(optionsList, index, qIndex, optionText);
+                                            });
+                                        }
+                                    }
+                                    
+                                    // Add grid options for grid questions
+                                    if (questionData.questionType === 'grid' && questionData.gridOptions) {
+                                        const rowsContainer = questionElement.querySelector('.grid-rows-container');
+                                        const colsContainer = questionElement.querySelector('.grid-cols-container');
+                                        
+                                        if (rowsContainer && questionData.gridOptions.rows) {
+                                            rowsContainer.innerHTML = ''; // Clear default rows
+                                            questionData.gridOptions.rows.forEach(rowText => {
+                                                addGridRow(rowsContainer, index, qIndex, rowText);
+                                            });
+                                        }
+                                        
+                                        if (colsContainer && questionData.gridOptions.columns) {
+                                            colsContainer.innerHTML = ''; // Clear default columns
+                                            questionData.gridOptions.columns.forEach(colText => {
+                                                addGridColumn(colsContainer, index, qIndex, colText);
+                                            });
+                                        }
+                                    }
+                                }
+                            });
+                        } else {
+                            // Add at least one default question if none exist
+                            addQuestion(questionsContainer, index);
+                        }
+                    });
+                    
+                    showToast('Template Loaded', 'Template data loaded successfully', 'success');
+                } catch (error) {
+                    console.error('Error loading template data:', error);
+                    showToast('Error', 'Failed to load template data: ' + error.message, 'error');
+                    
+                    // Add a default section as fallback
+                    addSection();
+                }
+            }
+
+            // Initialize form
+            loadTemplateData();
+});
+</script>
+</body>
+</html>

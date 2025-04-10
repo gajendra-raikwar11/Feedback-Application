@@ -11,17 +11,17 @@
     
     
     <!-- Navigation items -->
-    <div class="nav-item active">
+    <div class="nav-item" id="dashboard-nav">
         <a href="/admin/adminHome" style="text-decoration: none; color: white;"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a>
     </div>
-    <div class="nav-item">
+    <div class="nav-item" id="students-nav">
         <a href="/admin/adminStudentPage" style="text-decoration: none; color: white;"><i class="fas fa-user-graduate me-2"></i> Students</a>
     </div>
-    <div class="nav-item">
+    <div class="nav-item" id="forms-nav">
         <a href="/admin/Total-Forms" style="text-decoration: none; color: white;"><i class="fas fa-clipboard-list me-2"></i> Forms</a>
     </div>
-    <div class="nav-item">
-        <a href="/settings" style="text-decoration: none; color: white;"><i class="fas fa-cog me-2"></i> Settings</a>
+    <div class="nav-item" id="template-nav">
+        <a href="/admin/template/template-builder" style="text-decoration: none; color: white;"><i class="fas fa-cog me-2"></i> Template Builder</a>
     </div>
     <div class="nav-item">
         <a href="/admin/logout" style="text-decoration: none; color: white;"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
@@ -90,6 +90,12 @@
         align-items: center;
     }
 
+    .nav-item a {
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
     .nav-item i {
         margin-right: 12px;
         width: 20px;
@@ -106,6 +112,10 @@
         background-color: rgba(242, 244, 245, 0.1);
         font-weight: bold;
         color:white;
+    }
+
+    .nav-item.active a, .nav-item.active i {
+        color: white !important;
     }
 
     /* Admin Profile Styles */
@@ -265,7 +275,6 @@
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
-    const navItems = document.querySelectorAll('.nav-item');
     
     // Get current path
     const currentPath = window.location.pathname;
@@ -277,26 +286,22 @@
     sidebar.appendChild(whiteCloseToggle);
     
     // Set active class based on current path
-navItems.forEach(item => {
-    const link = item.querySelector('a');
-    if (link) {
-        const href = link.getAttribute('href');
-        
-        // Check if current path is related to forms
-        const isFormsPage = currentPath.includes('/forms') || 
-                           currentPath.startsWith('/admin/forms') || 
-                           currentPath === '/admin/Total-Forms';
-        
-        // If this is the Forms nav item and we're on a forms-related page
-        if ((href === '/admin/Total-Forms' && isFormsPage) || 
-            (href === currentPath)) {
-            // Remove active class from all items first
-            navItems.forEach(navItem => navItem.classList.remove('active'));
-            // Add active class to current item
-            item.classList.add('active');
-        }
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    // First remove active class from all items
+    navItems.forEach(item => item.classList.remove('active'));
+    
+    // Improve active menu detection
+    if (currentPath.includes('/admin/template') || currentPath === '/admin/template/template-builder') {
+        document.getElementById('template-nav').classList.add('active');
+    } else if (currentPath.includes('/admin/Total-Forms') || currentPath.includes('/admin/forms')) {
+        document.getElementById('forms-nav').classList.add('active');
+    } else if (currentPath.includes('/admin/adminStudentPage')) {
+        document.getElementById('students-nav').classList.add('active');
+    } else if (currentPath.includes('/admin/adminHome')) {
+        document.getElementById('dashboard-nav').classList.add('active');
     }
-});
+    
     // Function to toggle sidebar
     function toggleSidebar() {
         sidebar.classList.toggle('active');

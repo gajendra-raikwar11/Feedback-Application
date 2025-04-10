@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Templates</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --topbar-height: 60px;
+        }
+        
+        body {
+            min-height: 100vh;
+            background-color: #f5f7fb;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding-top: var(--topbar-height);
+            transition: margin-left 0.3s;
+            min-height: 100vh;
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .page-header {
+            background: linear-gradient(to right, #4e73df, #36b9cc);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+        
+        .content-container {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .template-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            height: 100%;
+        }
+        
+        .template-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .template-card .card-header {
+            background: linear-gradient(to right, #4e73df, #36b9cc);
+            color: white;
+            border-radius: 0.5rem 0.5rem 0 0;
+            padding: 0.75rem 1rem;
+        }
+        
+        .template-card .badge {
+            font-size: 0.75rem;
+            padding: 0.35rem 0.5rem;
+        }
+        
+        .template-card .badge-academic {
+            background-color: #4e73df;
+        }
+        
+        .template-card .badge-institutional {
+            background-color: #1cc88a;
+        }
+        
+        .template-card .badge-training {
+            background-color: #f6c23e;
+        }
+        
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        
+        .action-btn:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-view {
+            color: #4e73df;
+        }
+        
+        .btn-edit {
+            color: #1cc88a;
+        }
+        
+        .btn-delete {
+            color: #e74a3b;
+        }
+        
+        .toast-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 1060;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .empty-state .bi {
+            font-size: 4rem;
+            color: #d1d3e2;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state h3 {
+            color: #5a5c69;
+            font-weight: 300;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state p {
+            color: #858796;
+            margin-bottom: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 1rem;
+            }
+            
+            .content-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Topbar -->
+   <%- include('partials/adminTopNavbar', { admin: adminData }) %>
+   <!-- Sidebar -->
+   <%- include('./partials/adminSideNavbar', { path: currentPath ,admin: adminData  }) %>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-fluid px-4 py-4">
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1><i class="bi bi-file-earmark-text me-2"></i>Form Templates</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="/admin/adminHome" class="text-white">Dashboard</a></li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">Form Templates</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="text-muted mb-0">All Templates</h5>
+                    <p class="text-muted small mb-0">Showing <%= templates.length %> templates</p>
+                </div>
+                <a href="/admin/template/template-builder" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i> Create New Template
+                </a>
+            </div>
+
+            <div class="content-container">
+                <% if (templates && templates.length > 0) { %>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        <% templates.forEach(template => { %>
+                            <div class="col">
+                                <div class="card template-card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold text-truncate" title="<%= template.name %>">
+                                            <%= template.name %>
+                                        </span>
+                                        <span class="badge badge-<%= template.formType.toLowerCase() %>">
+                                            <%= template.formType %>
+                                        </span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <small class="text-muted">
+                                                <i class="bi bi-layers me-1"></i> <%= template.sections.length %> sections
+                                            </small>
+                                            <br>
+                                            <small class="text-muted">
+                                                <i class="bi bi-question-circle me-1"></i>
+                                                <% 
+                                                    let questionCount = 0;
+                                                    template.sections.forEach(section => {
+                                                        questionCount += section.questions.length;
+                                                    });
+                                                %>
+                                                <%= questionCount %> questions
+                                            </small>
+                                            <br>
+                                            <small class="text-muted">
+                                                <i class="bi bi-calendar-event me-1"></i>
+                                                <%= new Date(template.createdAt).toLocaleDateString() %>
+                                            </small>
+                                        </div>
+                                        <div class="d-flex justify-content-end mt-3">
+                                            <a href="/admin/template/form-templates/<%= template._id %>" class="action-btn btn-view" title="View Template">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="/admin/template/form-templates/<%= template._id %>/edit" class="action-btn btn-edit" title="Edit Template">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" class="action-btn btn-delete border-0 bg-transparent" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#deleteModal" 
+                                                    data-template-id="<%= template._id %>"
+                                                    data-template-name="<%= template.name %>"
+                                                    title="Delete Template">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state">
+                        <i class="bi bi-file-earmark-x"></i>
+                        <h3>No Form Templates Found</h3>
+                        <p>Create your first form template to get started</p>
+                        <a href="/admin/form-templates/create" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i> Create New Template
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the template "<span id="templateNameSpan"></span>"?</p>
+                    <p class="mb-0 text-danger"><strong>Warning:</strong> This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteForm" method="POST" action="">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container for Notifications -->
+    <div class="toast-container">
+        <div id="formToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong class="me-auto" id="toastTitle">Notification</strong>
+                <small id="toastTime">Just now</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                Operation completed.
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle delete modal
+            const deleteModal = document.getElementById('deleteModal');
+            if (deleteModal) {
+                deleteModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const templateId = button.getAttribute('data-template-id');
+                    const templateName = button.getAttribute('data-template-name');
+                    
+                    const templateNameSpan = document.getElementById('templateNameSpan');
+                    const deleteForm = document.getElementById('deleteForm');
+                    
+                    templateNameSpan.textContent = templateName;
+                    deleteForm.action = `/admin/template/form-templates/${templateId}/delete`;
+                });
+            }
+            
+            // Show toast if message exists in URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const message = urlParams.get('message');
+            const status = urlParams.get('status');
+            
+            if (message) {
+                showToast(status === 'error' ? 'Error' : 'Success', message, status);
+            }
+
+            // Function to show toast message
+            function showToast(title, message, type = 'success') {
+                const toastElement = document.getElementById('formToast');
+                const toastTitle = document.getElementById('toastTitle');
+                const toastMessage = document.getElementById('toastMessage');
+                const toastTime = document.getElementById('toastTime');
+                
+                // Set toast content
+                toastTitle.textContent = title;
+                toastMessage.textContent = message;
+                toastTime.textContent = new Date().toLocaleTimeString();
+                
+                // Set toast color based on type
+                toastElement.className = 'toast';
+                if (type === 'success') {
+                    toastElement.classList.add('text-bg-success');
+                } else if (type === 'error') {
+                    toastElement.classList.add('text-bg-danger');
+                } else if (type === 'warning') {
+                    toastElement.classList.add('text-bg-warning');
+                } else if (type === 'info') {
+                    toastElement.classList.add('text-bg-info');
+                }
+                
+                // Show toast
+                const bsToast = new bootstrap.Toast(toastElement);
+                bsToast.show();
+            }
+        });
+    </script>
+</body>
+</html>
