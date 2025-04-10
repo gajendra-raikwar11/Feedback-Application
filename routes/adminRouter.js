@@ -1139,217 +1139,239 @@ router.get("/download-feedback", validateAdmin, async (req, res) => {
   });
 
 
-
-
 //template routes
-// GET route for the form template builder page
+// Template builder page
 router.get('/template/template-builder', (req, res) => {
-    const adminId = req.session.admin.id;
-    const adminData = req.session.admin;
-    console.log("[GET /template-builder] Admin ID:", adminId);
-    res.render('template-builder', {
-      userId: adminId,
-      adminData,
-      currentPath:'/admin/template'
-    });
+  const adminId = req.session?.admin?.id;
+  const adminData = req.session?.admin;
+
+  console.log("[GET /template-builder] Admin ID:", adminId);
+
+  res.render('template-builder', {
+    userId: adminId,
+    adminData,
+    currentPath: '/admin/template'
+  });
 });
-//save template route
+// Create new form template
 router.post('/template/form-templates', async (req, res) => {
-  console.log("[POST /form-templates] Received template data:", JSON.stringify(req.body, null, 2));
   try {
-      // Basic validation first
-      if (!req.body || !req.body.name || !req.body.formType) {
-          console.warn("[POST /form-templates] Missing required fields");
-          return res.status(400).json({ error: "Missing required fields: name and formType are required" });
-      }
-      
-      if (!req.body.sections || !Array.isArray(req.body.sections) || req.body.sections.length === 0) {
-          console.warn("[POST /form-templates] Missing or invalid sections array");
-          return res.status(400).json({ error: "Missing or invalid sections" });
-      }
-      
-      // Now process the data, making sure each section and question is properly formatted
-      const processedData = {
-          name: req.body.name,
-          formType: req.body.formType,
-          createdBy: req.body.createdBy,
-          sections: req.body.sections.map(section => {
-              const processedSection = {
-                  title: section.title || "Untitled Section",
-                  description: section.description || "",
-                  questions: []
-              };
-              
-              // Process questions if they exist
-              if (section.questions && Array.isArray(section.questions)) {
-                  
-                  processedSection.questions = section.questions.map(question => {
-                      const processedQuestion = {
-                          questionText: question.questionText || "Untitled Question",
-                          questionType: question.questionType || "text",
-                          required: question.required === true || question.required === 'true'
-                      };
-                      
-                      // Process options for mcq, rating, dropdown, yes_no
-                      if (['mcq', 'rating', 'dropdown', 'yes_no'].includes(question.questionType)) {
-                          processedQuestion.options = Array.isArray(question.options) ? question.options : [];
-                      }
-                      
-                      // Process grid options
-                      if (question.questionType === 'grid' && question.gridOptions) {
-                          processedQuestion.gridOptions = {
-                              rows: Array.isArray(question.gridOptions.rows) ? question.gridOptions.rows : [],
-                              columns: Array.isArray(question.gridOptions.columns) ? question.gridOptions.columns : []
-                          };
-                      }
-                      
-                      return processedQuestion;
-                  });
-              } else {
-                  console.warn(`[POST /form-templates] Section "${section.title}" has no questions or invalid questions`);
-              }
-              
-              return processedSection;
-          })
-      };
-      
-      // Skip the validation for now to debug
-      // const { error } = validateFormTemplate(processedData);
-      // if (error) {
-      //     console.warn("[POST /form-templates] Validation failed:", error.details[0].message);
-      //     return res.status(400).json({ error: error.details[0].message });
-      // }
-      
-      const formTemplate = new FormTemplate(processedData);
-      await formTemplate.save();
-      console.log("[POST /form-templates] Template created successfully with ID:", formTemplate._id);
-      res.status(201).json({ success: true, templateId: formTemplate._id });
-  } catch (error) {
-      console.error('[POST /form-templates] Error creating template:', error);
-      res.status(500).json({ error: 'Server error', details: error.message });
+    const { name, formType, createdBy, sections, academicType } = req.body;
+    
+    // Validate essential fields
+    if (!name || !formType || !Array.isArray(sections)) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    // Validate academicType only for Academic form type
+    if (formType === 'Academic' && !academicType) {
+      return res.status(400).json({ error: 'Academic type is required for Academic forms' });
+    }
+    
+    const processedSections = sections.map(section => ({
+      title: section.title || 'Untitled Section',
+      description: section.description || '',
+      questions: (section.questions || []).map(q => {
+        const question = {
+          questionText: q.questionText || 'Untitled Question',
+          questionType: q.questionType || 'text',
+          required: q.required === true || q.required === 'true'
+        };
+        
+        if (['mcq', 'rating', 'dropdown', 'yes_no'].includes(q.questionType)) {
+          question.options = Array.isArray(q.options) ? q.options : [];
+        }
+        
+        if (q.questionType === 'grid') {
+          question.gridOptions = {
+            rows: Array.isArray(q.gridOptions?.rows) ? q.gridOptions.rows : [],
+            columns: Array.isArray(q.gridOptions?.columns) ? q.gridOptions.columns : []
+          };
+        }
+        
+        return question;
+      })
+    }));
+    
+    // Create template object with conditional academicType
+    const templateData = {
+      name,
+      formType,
+      createdBy,
+      sections: processedSections
+    };
+    
+    // Only add academicType if formType is Academic
+    if (formType === 'Academic') {
+      templateData.academicType = academicType;
+    }
+    
+    const newTemplate = new FormTemplate(templateData);
+    
+    // Perform validation before saving
+    const { error } = validateFormTemplate(templateData);
+    if (error) {
+      console.error("[POST /form-templates] Validation Error:", error.details);
+      return res.status(400).json({ error: 'Validation Error', details: error.details });
+    }
+    
+    await newTemplate.save();
+    
+    console.log("[POST /form-templates] Template saved:", newTemplate._id);
+    res.status(201).json({ success: true, templateId: newTemplate._id });
+  } catch (err) {
+    console.error("[POST /form-templates] Error:", err);
+    res.status(500).json({ error: 'Internal Server Error', details: err.message });
   }
 });
-// GET all template lists
+// List all templates
 router.get('/template/form-templates', async (req, res) => {
-    console.log("[GET /form-templates] Fetching templates...");
-    try {
-      const templates = await FormTemplate.find().sort({ createdAt: -1 });
-      const adminData = req.session.admin;
-      console.log("[GET /form-templates] Found", templates.length, "templates");
-      res.render('form-templates-list', { templates ,adminData , currentPath:'/admin/template' });
-    } catch (error) {
-      console.error('[GET /form-templates] Error:', error);
-      res.status(500).send('Server error');
-    }
-});
-// View specific template details
-router.get('/template/form-templates/:id', async (req, res) => {
-    try {
-        const template = await FormTemplate.findById(req.params.id);
-        if (!template) {
-            return res.redirect('/admin/template/form-templates?message=Template not found&status=error');
-        }
-        res.render('form-template-view', { 
-            template,
-            adminData: req.session.admin,
-            currentPath: '/admin/template'
-        });
-    } catch (error) {
-        console.error('[GET /form-templates/:id] Error:', error);
-        res.redirect('/admin/form-templates?message=Failed to load template&status=error');
-    }
-});
-// Edit specific template
-router.get('/template/form-templates/:id/edit', async (req, res) => {
-    try {
-        const template = await FormTemplate.findById(req.params.id);
-        if (!template) {
-            return res.redirect('/admin/template/form-templates?message=Template not found&status=error');
-        }
-        res.render('form-template-edit', {
-            template,
-            adminData: req.session.admin,
-            currentPath: '/admin/template'
-        });
-    } catch (error) {
-        console.error('[GET /form-templates/:id/edit] Error:', error);
-        res.redirect('/admin/form-templates?message=Failed to load template for editing&status=error');
-    }
-});
-// Update template route
-router.post('/template/form-templates/:id', async (req, res) => {
-  console.log("[POST /form-templates/:id] Updating template...");
-  console.log("Received data:", req.body); // Log the received data for debugging
-  
   try {
-      const templateId = req.params.id;
-      
-      // Get the JSON data from the request body
-      const formData = req.body;
-      
-      // Check if data is properly received
-      if (!formData || !formData.name) {
-          console.error("[POST /form-templates/:id] Missing required fields");
-          return res.status(400).json({ error: 'Missing required fields' });
-      }
-      
-      // Create the update data structure
-      const updateData = {
-          name: formData.name,
-          formType: formData.formType,
-          createdBy: formData.createdBy,
-          sections: formData.sections || []
-      };
-      
-      console.log("[POST /form-templates/:id] Processed update data:", updateData);
-      
-      // Find and update the template
-      const updatedTemplate = await FormTemplate.findByIdAndUpdate(
-          templateId,
-          updateData,
-          { new: true, runValidators: true }
-      );
-      
-      if (!updatedTemplate) {
-          console.warn("[POST /form-templates/:id] Template not found:", templateId);
-          return res.status(404).json({ error: 'Template not found' });
-      }
-      
-      // Return success response
-      console.log("[POST /form-templates/:id] Template updated successfully:", templateId);
-      
-      // Check if it's an AJAX request
-      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
-          return res.status(200).json({ success: true, templateId });
-      } else {
-          // For non-AJAX requests, redirect with success message
-          return res.redirect('/admin/form-templates?message=Template updated successfully&status=success');
-      }
-  } catch (error) {
-      console.error('[POST /form-templates/:id] Error updating template:', error);
-      
-      // Check if it's an AJAX request
-      if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
-          return res.status(500).json({ error: 'Server error', details: error.message });
-      } else {
-          // For non-AJAX requests, redirect with error message
-          return res.redirect(`/admin/form-templates?message=Error updating template: ${error.message}&status=error`);
-      }
+    const templates = await FormTemplate.find().sort({ createdAt: -1 });
+    res.render('form-templates-list', {
+      templates,
+      adminData: req.session.admin,
+      currentPath: '/admin/template'
+    });
+  } catch (err) {
+    console.error("[GET /form-templates] Error:", err);
+    res.status(500).send("Server Error");
   }
 });
+// View a single template
+router.get('/template/form-templates/:id', async (req, res) => {
+  try {
+    const template = await FormTemplate.findById(req.params.id);
+    if (!template) {
+      return res.redirect('/admin/template/form-templates?message=Template not found&status=error');
+    }
+    res.render('form-template-view', {
+      template,
+      adminData: req.session.admin,
+      currentPath: '/admin/template'
+    });
+  } catch (err) {
+    console.error("[GET /form-templates/:id] Error:", err);
+    res.redirect('/admin/template/form-templates?message=Error loading template&status=error');
+  }
+});
+// Edit a template
+router.get('/template/form-templates/:id/edit', async (req, res) => {
+  try {
+    const template = await FormTemplate.findById(req.params.id);
+    if (!template) {
+      return res.redirect('/admin/template/form-templates?message=Template not found&status=error');
+    }
+    
+    // Safely prepare the template data for serialization
+    const safeTemplate = JSON.parse(JSON.stringify(template));
+    
+    res.render('form-template-edit', {
+      template: safeTemplate,
+      adminData: req.session.admin,
+      currentPath: '/admin/template'
+    });
+  } catch (err) {
+    console.error("[GET /form-templates/:id/edit] Error:", err);
+    res.redirect('/admin/template/form-templates?message=Error loading template&status=error');
+  }
+});
+// Update template
+router.post('/template/form-templates/:id', async (req, res) => {
+  try {
+    const { name, formType, createdBy, sections, academicType } = req.body;
+
+    console.log("Incoming Request Body:", req.body);
+
+    if (!name || !formType || !Array.isArray(sections)) {
+      console.warn("Missing fields - name:", name, "formType:", formType, "sections:", sections);
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    console.log("formType:", formType);
+    console.log("academicType:", academicType); // log academicType separately
+
+    const processedSections = sections.map((section, sectionIndex) => {
+      console.log(`Processing Section ${sectionIndex + 1}:`, section);
+
+      const processedQuestions = (section.questions || []).map((q, qIndex) => {
+        console.log(`--> Processing Question ${qIndex + 1} in Section ${sectionIndex + 1}:`, q);
+
+        const question = {
+          questionText: q.questionText || 'Untitled Question',
+          questionType: q.questionType || 'text',
+          required: q.required === true || q.required === 'true'
+        };
+
+        if (['mcq', 'rating', 'dropdown', 'yes_no'].includes(q.questionType)) {
+          question.options = Array.isArray(q.options) ? q.options : [];
+        }
+
+        if (q.questionType === 'grid') {
+          question.gridOptions = {
+            rows: Array.isArray(q.gridOptions?.rows) ? q.gridOptions.rows : [],
+            columns: Array.isArray(q.gridOptions?.columns) ? q.gridOptions.columns : []
+          };
+        }
+
+        return question;
+      });
+
+      return {
+        title: section.title || 'Untitled Section',
+        description: section.description || '',
+        questions: processedQuestions
+      };
+    });
+
+    console.log("Processed Sections:", processedSections);
+
+    const updateData = {
+      name,
+      formType,
+      createdBy,
+      sections: processedSections
+    };
+
+    // Optional: add academicType only if provided
+    if (academicType) {
+      updateData.academicType = academicType;
+      console.log("Adding academicType to update:", academicType);
+    }
+
+    const updatedTemplate = await FormTemplate.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedTemplate) {
+      console.warn("Template not found with ID:", req.params.id);
+      return res.status(404).json({ error: 'Template not found' });
+    }
+
+    console.log("Updated Template Successfully:", updatedTemplate._id);
+
+    res.status(200).json({ success: true, templateId: updatedTemplate._id });
+
+  } catch (err) {
+    console.error("[POST /form-templates/:id] Error:", err);
+    res.status(500).json({ error: 'Internal Server Error', details: err.message });
+  }
+});
+
 // Delete template
 router.post('/template/form-templates/:id/delete', async (req, res) => {
-    try {
-        const result = await FormTemplate.findByIdAndDelete(req.params.id);
-        if (!result) {
-            return res.redirect('/admin/form-templates?message=Template not found&status=error');
-        }
-        res.redirect('/admin/form-templates?message=Template deleted successfully&status=success');
-    } catch (error) {
-        console.error('[POST /form-templates/:id/delete] Error:', error);
-        res.redirect('/admin/form-templates?message=Failed to delete template&status=error');
+  try {
+    const deleted = await FormTemplate.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.redirect('/admin/template/form-templates?message=Template not found&status=error');
     }
+    res.redirect('/admin/template/form-templates?message=Template deleted successfully&status=success');
+  } catch (err) {
+    console.error("[POST /form-templates/:id/delete] Error:", err);
+    res.redirect('/admin/template/form-templates?message=Failed to delete template&status=error');
+  }
 });
-
  
 module.exports = router;

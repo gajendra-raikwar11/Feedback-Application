@@ -186,6 +186,17 @@
                                 </select>
                             </div>
                         </div>
+                        <!-- Add this right after the form type dropdown in the row mb-4 div -->
+                        <div class="col-md-6 academic-type-container" style="display: none;">
+                            <label for="academicType" class="form-label">Academic Type</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-book"></i></span>
+                                <select class="form-select" id="academicType" name="academicType">
+                                    <option value="Theory" selected>Theory</option>
+                                    <option value="Practical">Practical</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     
                     <input type="hidden" id="createdBy" name="createdBy" value="<%= userId %>">
@@ -397,6 +408,23 @@
                 }
             });
             
+            // Show/hide Academic Type dropdown based on Form Type
+            document.getElementById('formType').addEventListener('change', function() {
+                const academicTypeContainer = document.querySelector('.academic-type-container');
+                if (this.value === 'Academic') {
+                    academicTypeContainer.style.display = 'block';
+                } else {
+                    academicTypeContainer.style.display = 'none';
+                    // Reset to default value when hidden
+                    document.getElementById('academicType').value = 'Theory';
+                }
+            });
+
+            // Initialize the academicType visibility based on initial form type
+            if (document.getElementById('formType').value === 'Academic') {
+                document.querySelector('.academic-type-container').style.display = 'block';
+            }
+
             // Function to add a new section
             function addSection() {
                 const sectionIndex = sectionCounter++;
@@ -746,72 +774,71 @@ removeGridColBtns.forEach(btn => {
 container.appendChild(questionClone);
 }
 
-// Form submission handling
-document.getElementById('templateForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Validate form
-    if (!validateForm()) {
-        return;
-    }
-    
-    // Show loading state
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalBtnText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Saving...';
-    submitBtn.disabled = true;
-    
-    try {
-        // Serialize form data to JSON
-        const formData = new FormData(this);
-        const jsonData = formDataToJson(formData);
+            // Form submission handling
+           document.getElementById('templateForm').addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        // ENHANCED LOGGING - log the exact structure being sent
-        console.log('Submitting form data (stringified):', JSON.stringify(jsonData, null, 2));
+        // Validate form
+        if (!validateForm()) {
+            return;
+        }
         
-        // Send AJAX request
-        fetch('/admin/template/form-templates', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(jsonData)
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(`Server error: ${response.status} - ${text}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Success response from server:', data);
-            showToast('Success', 'Form template saved successfully!', 'success');
-            setTimeout(() => {
-                window.location.href = '/admin/template/form-templates';
-            }, 1500);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('Error', `Failed to save form template: ${error.message}`, 'error');
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Saving...';
+        submitBtn.disabled = true;
+        
+        try {
+            // Serialize form data to JSON
+            const formData = new FormData(this);
+            const jsonData = formDataToJson(formData);
+            
+            // ENHANCED LOGGING - log the exact structure being sent
+            console.log('Submitting form data (stringified):', JSON.stringify(jsonData, null, 2));
+            
+            // Send AJAX request
+            fetch('/admin/template/form-templates', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`Server error: ${response.status} - ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success response from server:', data);
+                showToast('Success', 'Form template saved successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/admin/template/form-templates';
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error', `Failed to save form template: ${error.message}`, 'error');
+                
+                // Reset button state
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            });
+        } catch (error) {
+            console.error('Client-side error:', error);
+            showToast('Error', `Form processing error: ${error.message}`, 'error');
             
             // Reset button state
             submitBtn.innerHTML = originalBtnText;
             submitBtn.disabled = false;
-        });
-    } catch (error) {
-        console.error('Client-side error:', error);
-        showToast('Error', `Form processing error: ${error.message}`, 'error');
-        
-        // Reset button state
-        submitBtn.innerHTML = originalBtnText;
-        submitBtn.disabled = false;
-    }
-});
-
-// Function to validate form
-function validateForm() {
+        }
+    });
+            // Function to validate form
+            function validateForm() {
     let valid = true;
     let firstError = null;
     
@@ -936,15 +963,20 @@ function validateForm() {
     
     return valid;
 }
-// Function to convert form data to JSON
-function formDataToJson(formData) {
+            // Function to convert form data to JSON
+            function formDataToJson(formData) {
     // Create template object
     const template = {
         name: formData.get('name'),
         formType: formData.get('formType'),
-        createdBy: formData.get('createdBy'),
+        createdBy: formData.get('createdBy') || '000000000000000000000000', // Provide a fallback value
         sections: []
     };
+    
+    // Add academicType ONLY if form type is Academic
+    if (formData.get('formType') === 'Academic') {
+        template.academicType = formData.get('academicType') || 'Theory'; // Ensure it has a default
+    }
     
     // Get all sections
     const sectionCards = document.querySelectorAll('.section-card');
@@ -1022,8 +1054,8 @@ function formDataToJson(formData) {
     
     return template;
 }
-// Add initial section when page loads
-addSection();
+            // Add initial section when page loads
+            addSection();
 });
 </script>
 </body>
