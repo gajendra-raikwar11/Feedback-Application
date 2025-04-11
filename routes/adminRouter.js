@@ -388,201 +388,452 @@ router.get("/adminFaculty", validateAdmin, (req, res) => {
     res.render("facultyManagement", { currentPath, adminData });
 });
 
-// GET/POST route for form creation page
+// // GET/POST route for form creation page
+// router.get('/adminHome/forms/create/:formType', async (req, res) => {
+//     try {
+//         let { formType } = req.params;
+        
+//         // Convert to Title Case to match database schema
+//         formType = formType.charAt(0).toUpperCase() + formType.slice(1).toLowerCase();
+
+//         // Validate form type
+//         const validFormTypes = ["Academic", "Institutional", "Training"];
+//         if (!validFormTypes.includes(formType)) {
+//             return res.status(400).send("Invalid form type");
+//         }
+
+//         // Fetch faculty list
+//         const faculties = await Faculty.find({}, 'name _id department');
+        
+//         // Get sections, semesters and subjects
+//         const sectionCategories = ["CSE-A", "CSE-B", "IT-A", "IT-B", "ECE-A", "ECE-B"];
+//         const semesterCategories = [1,2,3,4,5,6,7,8];
+        
+//         // For academic forms, fetch subjects (you can replace this with actual subject fetching)
+//         const subjects = ["Data Structures", "Database Management", "Computer Networks", 
+//                          "Operating Systems", "Machine Learning", "Web Development"];
+
+//         res.render('CreateFeedbackForms', {
+//             formType,
+//             faculties,
+//             sectionCategories,
+//             semesterCategories,
+//             subjects,
+//             currentPath: req.path,
+//             adminData: req.session.admin || {} 
+//         });
+
+//     } catch (error) {
+//         console.error('Error loading form creation page:', error);
+//         res.status(500).send("Server error");
+//     }
+// });
+// router.post('/adminHome/forms/create/:formType', async (req, res) => {
+//     try {
+//         let { formType } = req.params;
+//         console.log(`\n🔹 Route hit: /adminHome/forms/create/${formType}`);
+
+//         // Convert formType to Title Case
+//         formType = formType.charAt(0).toUpperCase() + formType.slice(1).toLowerCase();
+//         console.log(`✅ Converted formType: ${formType}`);
+
+//         // Validate form type
+//         const validFormTypes = ["Academic", "Institutional", "Training"];
+//         if (!validFormTypes.includes(formType)) {
+//             console.error("❌ Invalid form type received");
+//             return res.status(400).json({ success: false, message: "Invalid form type" });
+//         }
+
+//         let formData = req.body;
+//         console.log("📥 Raw formData received:", formData);
+
+//         // Process facultyAssigned array
+//         if (Array.isArray(formData.facultyAssigned)) {
+//             formData.facultyAssigned = formData.facultyAssigned.map(String);
+//         } else {
+//             formData.facultyAssigned = [];
+//         }
+//         console.log("✅ Processed facultyAssigned:", formData.facultyAssigned);
+
+//         // Process sectionsAssigned array
+//         if (Array.isArray(formData.sectionsAssigned)) {
+//             formData.sectionsAssigned = formData.sectionsAssigned.map(String);
+//         } else {
+//             formData.sectionsAssigned = [];
+//         }
+//         console.log("✅ Processed sectionsAssigned:", formData.sectionsAssigned);
+
+//         // Process semesters
+//         if (!Array.isArray(formData.semesters) || formData.semesters.length === 0) {
+//             return res.status(400).json({ success: false, message: "Semesters are required" });
+//         }
+//         formData.semesters = formData.semesters.map(String);
+//         console.log("✅ Processed semesters:", formData.semesters);
+
+//         // Ensure createdBy exists
+//         if (!formData.createdBy && req.session.admin) {
+//             formData.createdBy = req.session.admin.id;
+//         }
+//         if (!formData.createdBy) {
+//             return res.status(400).json({ success: false, message: "createdBy is required" });
+//         }
+//         formData.createdBy = String(formData.createdBy);
+//         console.log("✅ Processed createdBy:", formData.createdBy);
+
+//         // Process sections from flattened form data
+//         const processedSections = [];
+        
+//         // First, find all section indexes
+//         const sectionIndexes = new Set();
+//         Object.keys(formData).forEach(key => {
+//             const match = key.match(/^sections\[(\d+)\]/);
+//             if (match) {
+//                 sectionIndexes.add(parseInt(match[1]));
+//             }
+//         });
+        
+//         // Process each section
+//         Array.from(sectionIndexes).sort((a, b) => a - b).forEach(sectionIndex => {
+//             const section = {
+//                 title: formData[`sections[${sectionIndex}][title]`] || '',
+//                 description: formData[`sections[${sectionIndex}][description]`] || '',
+//                 questions: []
+//             };
+            
+//             // Find all question indexes for this section
+//             const questionIndexes = new Set();
+//             Object.keys(formData).forEach(key => {
+//                 const match = key.match(new RegExp(`^sections\\[${sectionIndex}\\]\\[questions\\]\\[(\\d+)\\]`));
+//                 if (match) {
+//                     questionIndexes.add(parseInt(match[1]));
+//                 }
+//             });
+            
+//             // Process each question
+//             Array.from(questionIndexes).sort((a, b) => a - b).forEach(questionIndex => {
+//                 const questionPrefix = `sections[${sectionIndex}][questions][${questionIndex}]`;
+//                 const question = {
+//                     questionText: formData[`${questionPrefix}[questionText]`] || '',
+//                     questionType: formData[`${questionPrefix}[questionType]`] || '',
+//                     required: formData[`${questionPrefix}[required]`] === 'true'
+//                 };
+                
+//                 // Handle different question types and their options
+//                 if (question.questionType === 'mcq' || question.questionType === 'dropdown' || 
+//                     question.questionType === 'rating' || question.questionType === 'yes_no') {
+//                     // Get options array
+//                     const optionsKey = `${questionPrefix}[options]`;
+//                     question.options = Array.isArray(formData[optionsKey]) ? 
+//                         formData[optionsKey] : 
+//                         (formData[optionsKey] ? [formData[optionsKey]] : []);
+//                 } else if (question.questionType === 'grid') {
+//                     // Handle grid questions with rows and columns
+//                     question.gridOptions = {
+//                         rows: [],
+//                         columns: []
+//                     };
+                    
+//                     // Get rows
+//                     const rowsKey = `${questionPrefix}[gridOptions][rows]`;
+//                     if (formData[rowsKey]) {
+//                         question.gridOptions.rows = Array.isArray(formData[rowsKey]) ? 
+//                             formData[rowsKey] : [formData[rowsKey]];
+//                     }
+                    
+//                     // Get columns
+//                     const columnsKey = `${questionPrefix}[gridOptions][columns]`;
+//                     if (formData[columnsKey]) {
+//                         question.gridOptions.columns = Array.isArray(formData[columnsKey]) ? 
+//                             formData[columnsKey] : [formData[columnsKey]];
+//                     }
+//                 }
+                
+//                 section.questions.push(question);
+//             });
+            
+//             processedSections.push(section);
+//         });
+        
+//         console.log("✅ Processed sections:", processedSections);
+
+//         // Create and save feedback form
+//         const newForm = new FeedbackForm({
+//             title: formData.title,
+//             formType,
+//             facultyAssigned: formData.facultyAssigned,
+//             subjects: formData.subjects || [],
+//             sectionsAssigned: formData.sectionsAssigned,
+//             semesters: formData.semesters,
+//             deadline: formData.deadline,
+//             createdBy: formData.createdBy,
+//             sections: processedSections,  // Use our processed sections
+//             status: formData.status || 'active'
+//         });
+        
+//         console.log("📋 Form data ready to save:", newForm);
+//         await newForm.save();
+//         console.log("✅ Feedback form saved successfully");
+
+//         return res.status(201).json({ 
+//             success: true, 
+//             message: `${formType} feedback form created successfully`,
+//             redirect: '/admin/Total-Forms'
+//         });
+//     } catch (error) {
+//         console.error('❌ Error creating feedback form:', error);
+//         return res.status(500).json({ success: false, message: "Server error: " + error.message });
+//     }
+// });
+
+
+// GET/POST route for form creation page with template support
+// GET Route – Render form creation page
+// router.get('/adminHome/forms/create/:formType', async (req, res) => {
+//   try {
+//     let { formType } = req.params;
+
+//     // Convert to Title Case
+//     formType = formType.charAt(0).toUpperCase() + formType.slice(1).toLowerCase();
+
+//     // Validate form type
+//     const validFormTypes = ["Academic", "Institutional", "Training"];
+//     if (!validFormTypes.includes(formType)) {
+//       return res.status(400).send("Invalid form type");
+//     }
+
+//     // Fetch faculty list
+//     const faculties = await Faculty.find({}, 'name _id department');
+
+//     // Static data
+//     const sectionCategories = ["CSE-A", "CSE-B", "IT-A", "IT-B", "ECE-A", "ECE-B"];
+//     const semesterCategories = [1, 2, 3, 4, 5, 6, 7, 8];
+//     const subjects = ["Data Structures", "Database Management", "Computer Networks",
+//       "Operating Systems", "Machine Learning", "Web Development"];
+
+//     // ✅ Use top-level FormTemplate import
+//     const templates = await FormTemplate.find({ formType });
+//     console.log(`✅ Fetched ${templates.length} templates for form type: ${formType}`);
+
+//     res.render('CreateFeedbackForms', {
+//       formType,
+//       faculties,
+//       sectionCategories,
+//       semesterCategories,
+//       subjects,
+//       templates,
+//       currentPath: req.path,
+//       adminData: req.session.admin || {}
+//     });
+
+//   } catch (error) {
+//     console.error('Error loading form creation page:', error);
+//     res.status(500).send("Server error");
+//   }
+// });
+
 router.get('/adminHome/forms/create/:formType', async (req, res) => {
-    try {
-        let { formType } = req.params;
-        
-        // Convert to Title Case to match database schema
-        formType = formType.charAt(0).toUpperCase() + formType.slice(1).toLowerCase();
+  try {
+    let { formType } = req.params;
 
-        // Validate form type
-        const validFormTypes = ["Academic", "Institutional", "Training"];
-        if (!validFormTypes.includes(formType)) {
-            return res.status(400).send("Invalid form type");
-        }
+    // Convert to Title Case
+    formType = formType.charAt(0).toUpperCase() + formType.slice(1).toLowerCase();
 
-        // Fetch faculty list
-        const faculties = await Faculty.find({}, 'name _id department');
-        
-        // Get sections, semesters and subjects
-        const sectionCategories = ["CSE-A", "CSE-B", "IT-A", "IT-B", "ECE-A", "ECE-B"];
-        const semesterCategories = [1,2,3,4,5,6,7,8];
-        
-        // For academic forms, fetch subjects (you can replace this with actual subject fetching)
-        const subjects = ["Data Structures", "Database Management", "Computer Networks", 
-                         "Operating Systems", "Machine Learning", "Web Development"];
-
-        res.render('CreateFeedbackForms', {
-            formType,
-            faculties,
-            sectionCategories,
-            semesterCategories,
-            subjects,
-            currentPath: req.path,
-            adminData: req.session.admin || {} 
-        });
-
-    } catch (error) {
-        console.error('Error loading form creation page:', error);
-        res.status(500).send("Server error");
+    // Validate form type
+    const validFormTypes = ["Academic", "Institutional", "Training"];
+    if (!validFormTypes.includes(formType)) {
+      return res.status(400).send("Invalid form type");
     }
+
+    // Fetch faculty list
+    const faculties = await Faculty.find({}, 'name _id department');
+
+    // Static data
+    const sectionCategories = ["CSE-A", "CSE-B", "IT-A", "IT-B", "ECE-A", "ECE-B"];
+    const semesterCategories = [1, 2, 3, 4, 5, 6, 7, 8];
+    const subjects = ["Data Structures", "Database Management", "Computer Networks",
+      "Operating Systems", "Machine Learning", "Web Development"];
+
+    // ✅ Use top-level FormTemplate import
+    const templates = await FormTemplate.find({ formType });
+    console.log(`✅ Fetched ${templates.length} templates for form type: ${formType}`);
+    
+    // Convert templates to plain objects to ensure proper serialization
+    const plainTemplates = templates.map(template => template.toObject());
+
+    res.render('CreateFeedbackForms', {
+      formType,
+      faculties,
+      sectionCategories,
+      semesterCategories,
+      subjects,
+      templates: plainTemplates, // Pass plain objects instead of Mongoose documents
+      templatesJSON: JSON.stringify(plainTemplates), // Add this line to provide pre-stringified JSON
+      currentPath: req.path,
+      adminData: req.session.admin || {}
+    });
+
+  } catch (error) {
+    console.error('Error loading form creation page:', error);
+    res.status(500).send("Server error");
+  }
 });
+
+// POST Route – Handle form submission
 router.post('/adminHome/forms/create/:formType', async (req, res) => {
-    try {
-        let { formType } = req.params;
-        console.log(`\n🔹 Route hit: /adminHome/forms/create/${formType}`);
+  try {
+    let { formType } = req.params;
+    console.log(`\n🔹 Route hit: /adminHome/forms/create/${formType}`);
 
-        // Convert formType to Title Case
-        formType = formType.charAt(0).toUpperCase() + formType.slice(1).toLowerCase();
-        console.log(`✅ Converted formType: ${formType}`);
+    // Convert formType to Title Case
+    formType = formType.charAt(0).toUpperCase() + formType.slice(1).toLowerCase();
+    console.log(`✅ Converted formType: ${formType}`);
 
-        // Validate form type
-        const validFormTypes = ["Academic", "Institutional", "Training"];
-        if (!validFormTypes.includes(formType)) {
-            console.error("❌ Invalid form type received");
-            return res.status(400).json({ success: false, message: "Invalid form type" });
-        }
-
-        let formData = req.body;
-        console.log("📥 Raw formData received:", formData);
-
-        // Process facultyAssigned array
-        if (Array.isArray(formData.facultyAssigned)) {
-            formData.facultyAssigned = formData.facultyAssigned.map(String);
-        } else {
-            formData.facultyAssigned = [];
-        }
-        console.log("✅ Processed facultyAssigned:", formData.facultyAssigned);
-
-        // Process sectionsAssigned array
-        if (Array.isArray(formData.sectionsAssigned)) {
-            formData.sectionsAssigned = formData.sectionsAssigned.map(String);
-        } else {
-            formData.sectionsAssigned = [];
-        }
-        console.log("✅ Processed sectionsAssigned:", formData.sectionsAssigned);
-
-        // Process semesters
-        if (!Array.isArray(formData.semesters) || formData.semesters.length === 0) {
-            return res.status(400).json({ success: false, message: "Semesters are required" });
-        }
-        formData.semesters = formData.semesters.map(String);
-        console.log("✅ Processed semesters:", formData.semesters);
-
-        // Ensure createdBy exists
-        if (!formData.createdBy && req.session.admin) {
-            formData.createdBy = req.session.admin.id;
-        }
-        if (!formData.createdBy) {
-            return res.status(400).json({ success: false, message: "createdBy is required" });
-        }
-        formData.createdBy = String(formData.createdBy);
-        console.log("✅ Processed createdBy:", formData.createdBy);
-
-        // Process sections from flattened form data
-        const processedSections = [];
-        
-        // First, find all section indexes
-        const sectionIndexes = new Set();
-        Object.keys(formData).forEach(key => {
-            const match = key.match(/^sections\[(\d+)\]/);
-            if (match) {
-                sectionIndexes.add(parseInt(match[1]));
-            }
-        });
-        
-        // Process each section
-        Array.from(sectionIndexes).sort((a, b) => a - b).forEach(sectionIndex => {
-            const section = {
-                title: formData[`sections[${sectionIndex}][title]`] || '',
-                description: formData[`sections[${sectionIndex}][description]`] || '',
-                questions: []
-            };
-            
-            // Find all question indexes for this section
-            const questionIndexes = new Set();
-            Object.keys(formData).forEach(key => {
-                const match = key.match(new RegExp(`^sections\\[${sectionIndex}\\]\\[questions\\]\\[(\\d+)\\]`));
-                if (match) {
-                    questionIndexes.add(parseInt(match[1]));
-                }
-            });
-            
-            // Process each question
-            Array.from(questionIndexes).sort((a, b) => a - b).forEach(questionIndex => {
-                const questionPrefix = `sections[${sectionIndex}][questions][${questionIndex}]`;
-                const question = {
-                    questionText: formData[`${questionPrefix}[questionText]`] || '',
-                    questionType: formData[`${questionPrefix}[questionType]`] || '',
-                    required: formData[`${questionPrefix}[required]`] === 'true'
-                };
-                
-                // Handle different question types and their options
-                if (question.questionType === 'mcq' || question.questionType === 'dropdown' || 
-                    question.questionType === 'rating' || question.questionType === 'yes_no') {
-                    // Get options array
-                    const optionsKey = `${questionPrefix}[options]`;
-                    question.options = Array.isArray(formData[optionsKey]) ? 
-                        formData[optionsKey] : 
-                        (formData[optionsKey] ? [formData[optionsKey]] : []);
-                } else if (question.questionType === 'grid') {
-                    // Handle grid questions with rows and columns
-                    question.gridOptions = {
-                        rows: [],
-                        columns: []
-                    };
-                    
-                    // Get rows
-                    const rowsKey = `${questionPrefix}[gridOptions][rows]`;
-                    if (formData[rowsKey]) {
-                        question.gridOptions.rows = Array.isArray(formData[rowsKey]) ? 
-                            formData[rowsKey] : [formData[rowsKey]];
-                    }
-                    
-                    // Get columns
-                    const columnsKey = `${questionPrefix}[gridOptions][columns]`;
-                    if (formData[columnsKey]) {
-                        question.gridOptions.columns = Array.isArray(formData[columnsKey]) ? 
-                            formData[columnsKey] : [formData[columnsKey]];
-                    }
-                }
-                
-                section.questions.push(question);
-            });
-            
-            processedSections.push(section);
-        });
-        
-        console.log("✅ Processed sections:", processedSections);
-
-        // Create and save feedback form
-        const newForm = new FeedbackForm({
-            title: formData.title,
-            formType,
-            facultyAssigned: formData.facultyAssigned,
-            subjects: formData.subjects || [],
-            sectionsAssigned: formData.sectionsAssigned,
-            semesters: formData.semesters,
-            deadline: formData.deadline,
-            createdBy: formData.createdBy,
-            sections: processedSections,  // Use our processed sections
-            status: formData.status || 'active'
-        });
-        
-        console.log("📋 Form data ready to save:", newForm);
-        await newForm.save();
-        console.log("✅ Feedback form saved successfully");
-
-        return res.status(201).json({ 
-            success: true, 
-            message: `${formType} feedback form created successfully`,
-            redirect: '/admin/Total-Forms'
-        });
-    } catch (error) {
-        console.error('❌ Error creating feedback form:', error);
-        return res.status(500).json({ success: false, message: "Server error: " + error.message });
+    const validFormTypes = ["Academic", "Institutional", "Training"];
+    if (!validFormTypes.includes(formType)) {
+      return res.status(400).json({ success: false, message: "Invalid form type" });
     }
+
+    let formData = req.body;
+    console.log("📥 Raw formData received:", formData);
+
+    // ✅ Apply template if selected
+    if (formData.templateId) {
+      console.log(`🔍 Template ID provided: ${formData.templateId}. Applying template...`);
+      const template = await FormTemplate.findById(formData.templateId);
+      if (!template) {
+        throw new Error('Template not found');
+      }
+
+      formData.sections = JSON.parse(JSON.stringify(template.sections));
+
+      if (template.formType === "Academic" && template.academicType) {
+        formData.academicType = template.academicType;
+      }
+
+      console.log("✅ Template applied successfully");
+
+    } else {
+      console.log("📋 No template used. Processing form data manually...");
+
+      formData.facultyAssigned = Array.isArray(formData.facultyAssigned)
+        ? formData.facultyAssigned.map(String)
+        : [];
+
+      formData.sectionsAssigned = Array.isArray(formData.sectionsAssigned)
+        ? formData.sectionsAssigned.map(String)
+        : [];
+
+      if (!Array.isArray(formData.semesters) || formData.semesters.length === 0) {
+        return res.status(400).json({ success: false, message: "Semesters are required" });
+      }
+      formData.semesters = formData.semesters.map(Number);
+
+      if (!formData.createdBy && req.session.admin) {
+        formData.createdBy = req.session.admin.id;
+      }
+      if (!formData.createdBy) {
+        return res.status(400).json({ success: false, message: "createdBy is required" });
+      }
+      formData.createdBy = String(formData.createdBy);
+
+      const processedSections = [];
+
+      const sectionIndexes = new Set();
+      Object.keys(formData).forEach(key => {
+        const match = key.match(/^sections\[(\d+)\]/);
+        if (match) {
+          sectionIndexes.add(parseInt(match[1]));
+        }
+      });
+
+      Array.from(sectionIndexes).sort((a, b) => a - b).forEach(sectionIndex => {
+        const section = {
+          title: formData[`sections[${sectionIndex}][title]`] || '',
+          description: formData[`sections[${sectionIndex}][description]`] || '',
+          questions: []
+        };
+
+        const questionIndexes = new Set();
+        Object.keys(formData).forEach(key => {
+          const match = key.match(new RegExp(`^sections\\[${sectionIndex}\\]\\[questions\\]\\[(\\d+)\\]`));
+          if (match) {
+            questionIndexes.add(parseInt(match[1]));
+          }
+        });
+
+        Array.from(questionIndexes).sort((a, b) => a - b).forEach(questionIndex => {
+          const questionPrefix = `sections[${sectionIndex}][questions][${questionIndex}]`;
+          const question = {
+            questionText: formData[`${questionPrefix}[questionText]`] || '',
+            questionType: formData[`${questionPrefix}[questionType]`] || '',
+            required: formData[`${questionPrefix}[required]`] === 'true'
+          };
+
+          if (['mcq', 'dropdown', 'rating', 'yes_no'].includes(question.questionType)) {
+            const optionsKey = `${questionPrefix}[options]`;
+            question.options = Array.isArray(formData[optionsKey])
+              ? formData[optionsKey]
+              : (formData[optionsKey] ? [formData[optionsKey]] : []);
+          } else if (question.questionType === 'grid') {
+            question.gridOptions = {
+              rows: [],
+              columns: []
+            };
+
+            const rowsKey = `${questionPrefix}[gridOptions][rows]`;
+            if (formData[rowsKey]) {
+              question.gridOptions.rows = Array.isArray(formData[rowsKey])
+                ? formData[rowsKey]
+                : [formData[rowsKey]];
+            }
+
+            const columnsKey = `${questionPrefix}[gridOptions][columns]`;
+            if (formData[columnsKey]) {
+              question.gridOptions.columns = Array.isArray(formData[columnsKey])
+                ? formData[columnsKey]
+                : [formData[columnsKey]];
+            }
+          }
+
+          section.questions.push(question);
+        });
+
+        processedSections.push(section);
+      });
+
+      console.log("✅ Processed sections:", processedSections);
+      formData.sections = processedSections;
+    }
+
+    const newForm = new FeedbackForm({
+      title: formData.title,
+      formType,
+      createdFromTemplate: formData.templateId || null,
+      academicType: formData.academicType,
+      facultyAssigned: formData.facultyAssigned,
+      subjects: formData.subjects || [],
+      sectionsAssigned: formData.sectionsAssigned,
+      semesters: formData.semesters,
+      deadline: formData.deadline,
+      createdBy: formData.createdBy,
+      sections: formData.sections,
+      status: formData.status || 'active'
+    });
+
+    console.log("📋 Form data ready to save:", newForm);
+    await newForm.save();
+    console.log("✅ Feedback form saved successfully");
+
+    return res.status(201).json({
+      success: true,
+      message: `${formType} feedback form created successfully`,
+      redirect: '/admin/Total-Forms'
+    });
+
+  } catch (error) {
+    console.error('❌ Error creating feedback form:', error);
+    return res.status(500).json({ success: false, message: "Server error: " + error.message });
+  }
 });
 
 router.get('/Total-Forms', validateAdmin, async (req, res) => {

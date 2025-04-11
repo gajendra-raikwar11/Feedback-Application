@@ -419,7 +419,6 @@
         }
     </style>
 </head>
-
 <body>
     <%- include('partials/adminTopNavbar', { admin: adminData }) %>
     <div class="container main-container flex">
@@ -446,8 +445,21 @@
                                 <input type="text" class="form-control" id="formTitle" name="title" required
                                     placeholder="Enter descriptive title">
                             </div>
+
+                            <% if (formType === 'Academic') { %>
+                                <div class="mb-3">
+                                    <label for="academicType" class="form-label">Academic Type</label>
+                                    <select class="form-control" id="academicType" name="academicType" required>
+                                        <option value="">-- Select Type --</option>
+                                        <option value="Theory">Theory</option>
+                                        <option value="Practical">Practical</option>
+                                    </select>
+                                </div>
+                                <% } %>
                         </div>
     
+                        <input type="hidden" id="templateId" name="templateId" value="">  
+
                         <div class="col-lg-6">
                             <div class="mb-3">
                                 <label for="formDeadline" class="form-label">Submission Deadline</label>
@@ -494,7 +506,7 @@
                             </div>
                         </div>
                     </div>
-    
+
                     <!-- Faculty Assignment Section -->
                     <div class="form-section">
                         <div class="form-section-title">
@@ -597,16 +609,47 @@
                                 <i class="fas fa-book"></i>
                                 <p>No subjects have been assigned to this form yet.</p>
                             </div>
-                            <!-- Assigned subjects will appear here -->
                         </div>
                     </div>
                     <% } %>
     
-                    <!-- Form Sections Builder -->
+                    <!-- Form Sections Builder with template -->
                     <div class="form-section">
                         <div class="form-section-title">
                             <span class="form-section-icon"><i class="fas fa-th-list"></i></span>
                             Form Sections
+                        </div>
+                        
+                        <!-- Template Selection moved here from above -->
+                        <div class="template-selection mb-4">
+                            <div class="form-section-subtitle">
+                                <span class="form-section-icon"><i class="fas fa-file-alt"></i></span>
+                                Template Selection
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="templateSelect" class="form-label">Choose a template (optional)</label>
+                                <select class="form-select" id="templateSelect">
+                                    <option value="">-- No template --</option>
+                                    <% templates.forEach(function(template) { %>
+                                        <option value="<%= template._id %>">
+                                            <%= template.title %> 
+                                            <% if (template.formType === 'Academic' && template.academicType) { %>
+                                                (<%= template.academicType %>)
+                                            <% } else { %>
+                                                (<%= template.formType %>)
+                                            <% } %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                                <small class="text-muted">Selecting a template will pre-fill form sections and questions</small>   
+                            </div>
+                            
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-outline-primary" id="applyTemplateBtn">
+                                    <i class="fas fa-check me-2"></i> Apply Template
+                                </button>
+                            </div>
                         </div>
                         
                         <p class="text-muted mb-3">Create sections to organize your questions (e.g., "Teaching Quality", "Course Content", etc.)</p>
@@ -771,29 +814,29 @@
             });
     
             // Add faculty member
-                $('#addFacultyBtn').click(function () {
-    const facultySelect = $('#facultySelect');
-    const facultyId = facultySelect.val();
+            $('#addFacultyBtn').click(function () {
+                 const facultySelect = $('#facultySelect');
+                 const facultyId = facultySelect.val();
 
-    if (facultyId) {
-        const facultyName = facultySelect.find('option:selected').text();
-        const facultyHtml = `
-        <div class="assigned-item" data-id="${facultyId}">
-            <i class="fas fa-user-tie me-1"></i>
-            ${facultyName}
-            <button type="button" class="btn btn-sm text-danger remove-assigned-item">
-                <i class="fas fa-times"></i>
-            </button>
-            <input type="hidden" name="facultyAssigned[]" value="${facultyId.toString()}">
-        </div>
-        `;
-        
-        // Hide empty message if it's visible
-        $('#emptyFacultiesMessage').hide();
-        $('#assignedFaculties').append(facultyHtml);
-        facultySelect.val('');
-    }
-});
+                if (facultyId) {
+                    const facultyName = facultySelect.find('option:selected').text();
+                    const facultyHtml = `
+                    <div class="assigned-item" data-id="${facultyId}">
+                        <i class="fas fa-user-tie me-1"></i>
+                        ${facultyName}
+                        <button type="button" class="btn btn-sm text-danger remove-assigned-item">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <input type="hidden" name="facultyAssigned[]" value="${facultyId.toString()}">
+                    </div>
+                    `;
+                    
+                    // Hide empty message if it's visible
+                    $('#emptyFacultiesMessage').hide();
+                    $('#assignedFaculties').append(facultyHtml);
+                    facultySelect.val('');
+                }
+              });
           
             // Remove assigned item (faculty, section, semester) when the X is clicked
             $(document).on('click', '.remove-assigned-item', function () {
@@ -1018,9 +1061,9 @@
                     addQuestionModal.hide();
                 }
             });
-    
-           // Update the createQuestionHtml function to properly handle options
-function createQuestionHtml(sectionIndex, questionIndex, questionText, questionType, isRequired) {
+            // Update the createQuestionHtml function to handle pre-populated options
+            function createQuestionHtml(sectionIndex, questionIndex, questionText, questionType, isRequired, 
+                           existingOptions, existingGridOptions) {
     let optionsHtml = '';
     let hiddenInputs = `
         <input type="hidden" name="sections[${sectionIndex}][questions][${questionIndex}][questionText]" value="${questionText}">
@@ -1030,8 +1073,15 @@ function createQuestionHtml(sectionIndex, questionIndex, questionText, questionT
     
     // Handle different question types
     if (questionType === 'mcq' || questionType === 'dropdown' || questionType === 'rating') {
-        const optionsText = $('#optionsText').val();
-        const options = optionsText.split(',').map(opt => opt.trim()).filter(opt => opt);
+        let options = [];
+        
+        // Use existing options if available, otherwise use values from the form
+        if (existingOptions && existingOptions.length > 0) {
+            options = existingOptions;
+        } else {
+            const optionsText = $('#optionsText').val();
+            options = optionsText.split(',').map(opt => opt.trim()).filter(opt => opt);
+        }
         
         // Add options preview
         if (options.length > 0) {
@@ -1040,13 +1090,21 @@ function createQuestionHtml(sectionIndex, questionIndex, questionText, questionT
             </div>`;
             
             // Add hidden inputs for options
-            options.forEach((opt, idx) => {
+            options.forEach((opt) => {
                 hiddenInputs += `<input type="hidden" name="sections[${sectionIndex}][questions][${questionIndex}][options][]" value="${opt}">`;
             });
         }
     } else if (questionType === 'grid') {
-        const rows = $('#gridRows').val().split(',').map(r => r.trim()).filter(r => r);
-        const cols = $('#gridColumns').val().split(',').map(c => c.trim()).filter(c => c);
+        let rows = [], cols = [];
+        
+        // Use existing grid options if available
+        if (existingGridOptions && existingGridOptions.rows && existingGridOptions.columns) {
+            rows = existingGridOptions.rows;
+            cols = existingGridOptions.columns;
+        } else {
+            rows = $('#gridRows').val().split(',').map(r => r.trim()).filter(r => r);
+            cols = $('#gridColumns').val().split(',').map(c => c.trim()).filter(c => c);
+        }
         
         if (rows.length > 0 && cols.length > 0) {
             optionsHtml = `<div class="question-options mt-2 mb-2">
@@ -1092,8 +1150,8 @@ function createQuestionHtml(sectionIndex, questionIndex, questionText, questionT
     </div>
     `;
 }
-        // Remove Question
-        $(document).on('click', '.remove-question-btn', function() {
+            // Remove Question
+            $(document).on('click', '.remove-question-btn', function() {
             const questionItem = $(this).closest('.question-item');
             const sectionContainer = questionItem.closest('.form-section-container');
             const sectionIndex = sectionContainer.data('section-index');
@@ -1128,9 +1186,9 @@ function createQuestionHtml(sectionIndex, questionIndex, questionText, questionT
             }
         });
 
-        // Form submission
-        $('#createFormForm').submit(function(e) {
-    e.preventDefault();
+            // Form submission
+            $('#createFormForm').submit(function(e) {
+            e.preventDefault();
     
     // Validate required fields
     if (!$('#formTitle').val().trim()) {
@@ -1193,15 +1251,19 @@ function createQuestionHtml(sectionIndex, questionIndex, questionText, questionT
             if (!formObject[key]) {
                 formObject[key] = [];
             }
-            // Ensure value is a string
             formObject[key].push(String(field.value));
         } else {
             formObject[field.name] = field.value;
         }
     });
+    // Add template ID if selected
+    const templateId = $('#templateId').val();
+    if (templateId) {
+        formObject.templateId = templateId;
+    }
     
     // Submit the form
-    $.ajax({
+            $.ajax({
         url: `/admin/adminHome/forms/create/${$('#formType').val()}`,
         type: 'POST',
         data: JSON.stringify(formObject),
@@ -1225,13 +1287,118 @@ function createQuestionHtml(sectionIndex, questionIndex, questionText, questionT
         }
     });
 });
-        // Preview form functionality
-        $('#previewBtn').click(function() {
+       
+            // Template application
+            $('#applyTemplateBtn').click(function() {
+                const templateId = $('#templateSelect').val();
+                
+                if (!templateId) {
+                    alert('Please select a template first');
+                    return;
+                }
+                
+                // Confirm with user
+                if (!confirm('Applying a template will replace any sections and questions you have already added. Continue?')) {
+                    return;
+                }
+                
+                // Set the template ID in the hidden field
+                $('#templateId').val(templateId);
+                
+                // Get the template data - Use the pre-stringified JSON from server
+                let templates;
+                try {
+                    // Use the templatesJSON variable that's properly stringified from the server
+                    templates = <%- templatesJSON %>;
+                } catch (e) {
+                    alert('Error loading templates. Please refresh the page and try again.');
+                    console.error('Template parsing error:', e);
+                    return;
+                }
+                
+                // Find the selected template
+                const selectedTemplate = templates.find(t => t._id === templateId);
+                
+                if (!selectedTemplate) {
+                    alert('Template not found');
+                    return;
+                }
+                
+                // For Academic forms, set academic type if present in template
+                if (selectedTemplate.formType === 'Academic' && selectedTemplate.academicType) {
+                    $('#academicType').val(selectedTemplate.academicType);
+                }
+                
+                // Clear existing sections
+                $('#formSectionsContainer').empty();
+                sectionCounter = 0;
+                questionCounter = 0;
+                
+                // Apply template sections and questions
+                if (selectedTemplate.sections && selectedTemplate.sections.length > 0) {
+                    $('#emptySectionsContainerMessage').hide();
+                    
+                    selectedTemplate.sections.forEach(function(section) {
+                        sectionCounter++;
+                        const sectionId = `section-${sectionCounter}`;
+                        const sectionIndex = sectionCounter - 1;
+                        
+                        // Create section HTML
+                        let sectionHtml = `
+                        <div class="form-section-container" id="${sectionId}" data-section-index="${sectionIndex}">
+                            <div class="section-header">
+                                <h5>${section.title}</h5>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary add-question-btn" data-section="${sectionId}">
+                                        <i class="fas fa-plus"></i> Add Question
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-section-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="section-description mb-3">
+                                ${section.description ? `<p class="text-muted">${section.description}</p>` : ''}
+                            </div>
+                            <input type="hidden" name="sections[${sectionIndex}][title]" value="${section.title}">
+                            <input type="hidden" name="sections[${sectionIndex}][description]" value="${section.description || ''}">
+                            <div class="questions-container">`;
+                        
+                        // Only add empty message if no questions
+                        if (!section.questions || section.questions.length === 0) {
+                            sectionHtml += `
+                            <div class="empty-container section-empty-message">
+                                <i class="fas fa-question-circle"></i>
+                                <p>No questions have been added to this section yet.</p>
+                            </div>`;
+                        }
+                        
+                        // Add questions if they exist
+                        if (section.questions && section.questions.length > 0) {
+                            section.questions.forEach((question, qIndex) => {
+                                questionCounter++;
+                                sectionHtml += createQuestionHtml(sectionIndex, qIndex, question.questionText, 
+                                    question.questionType, question.required, question.options, question.gridOptions);
+                            });
+                        }
+                        
+                        sectionHtml += `
+                            </div>
+                        </div>`;
+                        
+                        $('#formSectionsContainer').append(sectionHtml);
+                    });
+                    
+                    alert('Template applied successfully. You can now modify the form as needed.');
+                }
+            }); 
+            
+             // Preview form functionality
+             $('#previewBtn').click(function() {
             // Show preview in a modal or new tab
             alert('Preview functionality will be implemented in the next phase');
         });
-    });
+  });
 </script>
-
 </body>
 </html>
