@@ -386,7 +386,7 @@
   <!-- Topbar -->
   <%- include('partials/adminTopNavbar', { admin: adminData }) %>
 
-  <div class="container-fluid">
+  <div class="container-fluid ">
     <div class="row">
       <!-- Sidebar -->
       <%- include('./partials/adminSideNavbar', { path: currentPath ,admin: adminData  }) %>
@@ -394,9 +394,6 @@
       <!-- Main Content -->
       <div class="col-lg-10 col-md-12 ms-auto">
         <div class="main-content">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-3 mb-md-0"><i class="fas fa-user-graduate me-2"></i>Student Management</h2>
-          </div>
 
           <!-- Stats Cards -->
           <div class="row mb-4 g-3">
@@ -700,7 +697,6 @@
       // Add row to export data
       exportData.push(row);
     });
-    
     // Create workbook and worksheet
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(exportData);
@@ -1007,7 +1003,7 @@
   // Reset filters
   $('#resetFilters').on('click', function() {
     // Reset all select inputs
-    $('#branchFilter, #sectionFilter, #semesterFilter, #statusFilter').val('');
+    $('#Filter StudentsanchFilter, #sectionFilter, #semesterFilter, #statusFilter').val('');
     
     // Clear DataTable search
     studentsTable.search('').columns().search('').draw();
@@ -1053,8 +1049,6 @@
         // Hide loading indicator
         $('#loadingOverlay').css('display', 'none');
         
-        // Update stats
-        // Note: In a production environment, you would ideally update the stats dynamically
         // or refresh the page to get updated stats from the server
         const totalStudentsElement = $('.stats-card .number').first();
         let totalStudents = parseInt(totalStudentsElement.text()) - 1;

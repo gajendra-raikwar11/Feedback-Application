@@ -644,21 +644,9 @@ body {
     </div>
     <div class="col-md-3">
         <div class="form-stats">
-            <% 
-                // Calculate total submissions by summing from all forms
-                let totalSubmissions = 0;
-                forms.forEach(form => {
-                    if (form.submissionCount) {
-                        totalSubmissions += form.submissionCount;
-                    }
-                });
-                
-                // Format the number (add K for thousands)
-                const formattedSubmissions = totalSubmissions > 999 ? 
-                    (totalSubmissions/1000).toFixed(1) + 'K' : totalSubmissions;
-            %>
+           
             <div class="stat-number">
-                <%= formattedSubmissions %>
+                <h1>00</h1>
             </div>
             <div class="stat-label">Submissions</div>
         </div>
