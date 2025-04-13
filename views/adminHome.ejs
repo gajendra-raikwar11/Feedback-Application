@@ -16,6 +16,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <style>
         :root {
             --primary-color: #4e73df;
@@ -354,7 +356,7 @@
                                 <!-- Fixed height table container -->
                                 <div class="table-responsive" style="height: 240px; overflow-y: auto;">
                                     <table class="table table-hover">
-                                        <thead style="position: sticky; top: 0; background: white; z-index: 10;">
+                                        <thead style="position: sticky; top: 0;">
                                             <tr>
                                                 <th>Form Title</th>
                                                 <th>Type</th>
@@ -415,6 +417,238 @@
                 </div>
             </div>
         </div>
+
+        <div class="card shadow mb-4 m-10">
+            <div class="card-header py-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <h6 class="m-0 font-weight-bold text-primary mb-2 mb-md-0">Manage Faculty Members</h6>
+                <div class="input-group" style="width: 200px;">
+                    <select class="form-select form-select-sm" id="facultyBranchFilter">
+                        <option value="all">All Branches</option>
+                        <option value="IT">IT</option>
+                        <option value="CSE">CSE</option>
+                        <option value="ECE">ECE</option>
+                        <option value="ME">ME</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Fixed height table container -->
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                    <table class="table table-hover">
+                        <thead style="position: sticky; top: 0; background: white; z-index: 10;">
+                            <tr>
+                                <th>Name</th>
+                                <th>ID</th>
+                                <th>Branch</th>
+                                <th>Sections</th>
+                                <th>Assigned Forms</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if(faculties && faculties.length > 0) { %>
+                                <% faculties.forEach(faculty => { %>
+                                    <tr>
+                                        <td><%= faculty.name %></td>
+                                        <td><%= faculty.idNumber %></td>
+                                        <td><%= faculty.branch %></td>
+                                        <td><%= faculty.sections.join(", ") %></td>
+                                        <td>
+                                            <% if(faculty.feedbackForms && faculty.feedbackForms.length > 0) { %>
+                                                <span class="badge bg-info"><%= faculty.feedbackForms.length %> forms</span>
+                                            <% } else { %>
+                                                <span class="badge bg-secondary">No forms</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                
+                                                <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#assignFormModal" onclick="prepareFormAssignment('<%= faculty._id %>')">
+                                                    <i class="fas fa-clipboard-list"></i>
+                                                </button>
+                        
+                                                <% if(faculty.feedbackForms && faculty.feedbackForms.length > 0) { %>
+                                                    <button class="btn btn-sm btn-info" onclick="viewAssignedForms('<%= faculty._id %>')">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                <% } else { %>
+                                                    <button class="btn btn-sm btn-secondary" disabled>
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="6" class="text-center">No faculty members available</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex flex-column flex-md-row justify-content-between mt-3 gap-2">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bulkAssignModal">
+                        <i class="fas fa-clipboard-check me-1"></i> Bulk Assign Forms
+                    </button>
+                    <button id="downloadExcelBtn" class="btn btn-success">
+                        <i class="fas fa-file-excel me-1"></i> Download Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Faculty Details Modal -->
+        <div class="modal fade" id="facultyDetailsModal" tabindex="-1" aria-labelledby="facultyDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="facultyDetailsModalLabel">Faculty Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="facultyDetailsContent">
+                            <!-- Faculty details will be loaded here dynamically -->
+                        </div>
+                        
+                        <div class="mt-4" id="assignedFormsSection" style="display: none;">
+                            <h6 class="font-weight-bold">Assigned Feedback Forms</h6>
+                            <div class="table-responsive mt-2">
+                                <table class="table table-sm table-bordered" id="assignedFormsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Form Title</th>
+                                            <th>Type</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="assignedFormsTableBody">
+                                        <!-- Assigned forms will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="editFacultyBtn">Edit Details</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Assign Form Modal -->
+        <div class="modal fade" id="assignFormModal" tabindex="-1" aria-labelledby="assignFormModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="assignFormModalLabel">Assign Feedback Form</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="assignFormForm">
+                            <input type="hidden" id="selectedFacultyId" name="facultyId">
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Faculty</label>
+                                <input type="text" class="form-control" id="selectedFacultyName" readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="formSelect" class="form-label">Select Feedback Form</label>
+                                <select class="form-select" id="formSelect" name="formId" required>
+                                    <option value="">Choose a form...</option>
+                                    <% if(forms && forms.length > 0) { %>
+                                        <% forms.forEach(form => { %>
+                                            <% if(form.status === 'active') { %>
+                                                <option value="<%= form._id %>"><%= form.title %> (<%= form.formType %>)</option>
+                                            <% } %>
+                                        <% }); %>
+                                    <% } %>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="assignFormBtn">Assign</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bulk Assign Modal -->
+        <div class="modal fade" id="bulkAssignModal" tabindex="-1" aria-labelledby="bulkAssignModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="bulkAssignModalLabel">Bulk Assign Forms</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="bulkAssignForm">
+                            <div class="mb-3">
+                                <label for="bulkFormSelect" class="form-label">Select Feedback Form</label>
+                                <select class="form-select" id="bulkFormSelect" name="formId" required>
+                                    <option value="">Choose a form...</option>
+                                    <% if(forms && forms.length > 0) { %>
+                                        <% forms.forEach(form => { %>
+                                            <% if(form.status === 'active') { %>
+                                                <option value="<%= form._id %>"><%= form.title %> (<%= form.formType %>)</option>
+                                            <% } %>
+                                        <% }); %>
+                                    <% } %>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Select Faculty Members</label>
+                                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="selectAllFaculty">
+                                                        <label class="form-check-label" for="selectAllFaculty">All</label>
+                                                    </div>
+                                                </th>
+                                                <th>Name</th>
+                                                <th>ID</th>
+                                                <th>Branch</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% if(faculties && faculties.length > 0) { %>
+                                                <% faculties.forEach(faculty => { %>
+                                                    <tr>
+                                                        <td>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input faculty-checkbox" type="checkbox" value="<%= faculty._id %>" name="selectedFaculties">
+                                                            </div>
+                                                        </td>
+                                                        <td><%= faculty.name %></td>
+                                                        <td><%= faculty.idNumber %></td>
+                                                        <td><%= faculty.branch %></td>
+                                                    </tr>
+                                                <% }); %>
+                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="bulkAssignBtn">Assign to Selected</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Data Visualization -->
        <div class="mt-4 mb-6 px-10">
            <div class="flex space-x-1 bg-gray-100 p-1 rounded-xl">
@@ -700,6 +934,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Custom scripts -->
 <script>
+   
      // Form status filter functionality
      document.getElementById('formStatusFilter').addEventListener('change', function() {
         const status = this.value;
@@ -766,432 +1001,798 @@
         });
     });
 
-
-
-     // Gender Preferences Chart
-//     // Initialize feedback charts with data from the server
-//     document.addEventListener('DOMContentLoaded', function () {
-//   const chartInstances = {}; // 🔁 Track chart instances to prevent duplicates
-
-//   const chartConfig = {
-//     type: 'bar',
-//     options: {
-//       responsive: true,
-//       maintainAspectRatio: false,
-//       scales: {
-//         y: {
-//           beginAtZero: true,
-//           max: 5,
-//           ticks: {
-//             stepSize: 1
-//           }
-//         }
-//       },
-//       plugins: {
-//         legend: { display: false },
-//         tooltip: {
-//           callbacks: {
-//             label: function (context) {
-//               return `Average: ${context.raw.toFixed(2)}/5`;
-//             }
-//           }
-//         }
-//       }
-//     }
-//   };
-
-//   function createSectionChart(sectionId, sectionData) {
-//     const ctx = document.getElementById(sectionId);
-//     if (!ctx) return;
-
-//     // 🔁 Destroy existing chart if present
-//     if (chartInstances[sectionId]) {
-//       chartInstances[sectionId].destroy();
-//     }
-
-//     const questions = Object.keys(sectionData.questions);
-//     const averages = questions.map(q => sectionData.questions[q].average);
-//     const labels = questions.map(q => (q.length > 30 ? q.substring(0, 27) + '...' : q));
-
-//     const config = {
-//       ...chartConfig,
-//       data: {
-//         labels: labels,
-//         datasets: [{
-//           data: averages,
-//           backgroundColor: 'rgba(54, 162, 235, 0.7)',
-//           borderColor: 'rgba(54, 162, 235, 1)',
-//           borderWidth: 1
-//         }]
-//       }
-//     };
-
-//     chartInstances[sectionId] = new Chart(ctx, config); // 🆕 Track chart
-//   }
-
-//   // 👇 Ensure data is available before attempting charts
-//   const formType = document.getElementById('formType')?.textContent;
-//   const feedbackData = <%- JSON.stringify(feedbackData?.sectionData || {}) %>;
-
-//   if (feedbackData && Object.keys(feedbackData).length > 0) {
-//     const sectionMap = {
-//       Academic: {
-//         'Course Organization': 'courseOrganizationChart',
-//         'Teacher Effectiveness': 'teacherEffectivenessChart',
-//         'Student Learning Experience': 'studentExperienceChart',
-//         'Exams and Evaluation': 'examsEvaluationChart',
-//         'General Course Questions': 'generalQuestionsChart',
-//         'Tutorial & Lab Components': 'tutorialLabChart'
-//       },
-//       Institutional: {
-//         'Campus Infrastructure': 'infrastructureChart',
-//         'Administrative Services': 'adminServicesChart',
-//         'Student Support': 'studentSupportChart',
-//         'Technology Resources': 'techResourcesChart',
-//         'Campus Life': 'campusLifeChart',
-//         'Overall Experience': 'overallExpChart'
-//       },
-//       Training: {
-//         'Training Content': 'trainingContentChart',
-//         'Trainer Effectiveness': 'trainerEffectivenessChart',
-//         'Training Materials': 'trainingMaterialsChart',
-//         'Workshop Facilities': 'workshopFacilitiesChart',
-//         'Practical Application': 'practicalApplicationChart',
-//         'Overall Value': 'overallValueChart'
-//       }
-//     };
-
-//     const currentSections = sectionMap[formType] || {};
-//     Object.keys(currentSections).forEach(sectionTitle => {
-//       if (feedbackData[sectionTitle]) {
-//         createSectionChart(currentSections[sectionTitle], feedbackData[sectionTitle]);
-//       }
-//     });
-//   }
-
-//   // Faculty selector filter
-//   const facultySelect = document.getElementById('facultySelect');
-//   if (facultySelect) {
-//     facultySelect.addEventListener('change', function () {
-//       const facultyId = this.value;
-//       const currentUrl = new URL(window.location);
-
-//       if (facultyId) {
-//         currentUrl.searchParams.set('facultyId', facultyId);
-//       } else {
-//         currentUrl.searchParams.delete('facultyId');
-//       }
-
-//       window.location = currentUrl.toString();
-//     });
-//   }
-
-//   // Excel download handler
-//   const downloadBtn = document.getElementById('downloadExcel');
-//   if (downloadBtn) {
-//     downloadBtn.addEventListener('click', function () {
-//       const formType = document.getElementById('formType').textContent;
-//       const facultyId = facultySelect ? facultySelect.value : '';
-//       window.location = `/admin/download-feedback?formType=${formType}${facultyId ? '&facultyId=' + facultyId : ''}`;
-//     });
-//   }
-// });
-
-document.addEventListener('DOMContentLoaded', function() {
-    const formType = document.getElementById('formType').textContent.trim();
-    
-    // Set common chart options with improved animation settings
-    const chartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                beginAtZero: true,
-                max: 5
+        document.addEventListener('DOMContentLoaded', function() {
+            const formType = document.getElementById('formType').textContent.trim();
+            
+            // Set common chart options with improved animation settings
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                animation: {
+                    duration: 800,  // Shorter animation duration
+                    easing: 'easeOutQuad',  // Smoother easing function
+                    mode: 'fade'  // Fade in instead of growing from bottom
+                }
+            };
+            
+            // Create charts based on form type
+            if (formType === 'Academic') {
+                createAcademicCharts();
+            } else if (formType === 'Institutional') {
+                createInstitutionalCharts();
+            } else if (formType === 'Training') {
+                createTrainingCharts();
             }
-        },
-        plugins: {
-            legend: {
-                position: 'bottom'
+            
+            // Faculty selector for Academic feedback
+            if (formType === 'Academic') {
+                const facultySelect = document.getElementById('facultySelect');
+                if (facultySelect) {
+                    facultySelect.addEventListener('change', function() {
+                        // Add AJAX call to filter data by faculty
+                        const facultyId = this.value;
+                        window.location.href = `/admin/adminHome?formType=Academic&faculty=${facultyId}`;
+                    });
+                }
             }
-        },
-        animation: {
-            duration: 800,  // Shorter animation duration
-            easing: 'easeOutQuad',  // Smoother easing function
-            mode: 'fade'  // Fade in instead of growing from bottom
-        }
-    };
+            
+            // Download Excel button
+            const downloadBtn = document.getElementById('downloadExcel');
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', function() {
+                    window.location.href = `/feedback/download/${formType.toLowerCase()}`;
+                });
+            }
+            
+            // Function to get data from canvas attributes
+            function getChartData(chartId) {
+                const canvas = document.getElementById(chartId);
+                if (!canvas) return null;
+                
+                try {
+                    const labels = JSON.parse(canvas.getAttribute('data-labels') || '[]');
+                    const values = JSON.parse(canvas.getAttribute('data-values') || '[]');
+                    
+                    return { labels, values };
+                } catch (e) {
+                    console.error(`Error parsing data for ${chartId}:`, e);
+                    return { labels: [], values: [] };
+                }
+            }
+            
+            // Function to create Academic charts
+            function createAcademicCharts() {
+                // Teacher Effectiveness Chart
+                if (document.getElementById('teacherEffectivenessChart')) {
+                    const chartData = getChartData('teacherEffectivenessChart');
+                    if (chartData) {
+                        new Chart(document.getElementById('teacherEffectivenessChart'), {
+                            type: 'bar',
+                            data: {
+                                labels: chartData.labels,
+                                datasets: [{
+                                    label: 'Average Rating (1-5)',
+                                    data: chartData.values,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: chartOptions
+                        });
+                    }
+                }
+                
+                // Student Learning Experience Chart
+                if (document.getElementById('studentExperienceChart')) {
+                    const chartData = getChartData('studentExperienceChart');
+                    if (chartData) {
+                        new Chart(document.getElementById('studentExperienceChart'), {
+                            type: 'radar',
+                            data: {
+                                labels: chartData.labels,
+                                datasets: [{
+                                    label: 'Average Rating (1-5)',
+                                    data: chartData.values,
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    borderWidth: 1,
+                                    pointBackgroundColor: 'rgba(255, 99, 132, 1)'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    r: {
+                                        min: 0,
+                                        max: 5,
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    }
+                                },
+                                animation: {
+                                    duration: 500,
+                                    easing: 'linear'
+                                }
+                            }
+                        });
+                    }
+                }
+                
+                // Exams and Evaluation Chart
+                if (document.getElementById('examsEvaluationChart')) {
+                    const chartData = getChartData('examsEvaluationChart');
+                    if (chartData) {
+                        new Chart(document.getElementById('examsEvaluationChart'), {
+                            type: 'bar',
+                            data: {
+                                labels: chartData.labels,
+                                datasets: [{
+                                    label: 'Average Rating (1-5)',
+                                    data: chartData.values,
+                                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                                    borderColor: 'rgba(75, 192, 192, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: chartOptions
+                        });
+                    }
+                }
+                
+                // Overall Satisfaction Chart
+                if (document.getElementById('overallSatisfactionChart')) {
+                    const chartData = getChartData('overallSatisfactionChart');
+                    if (chartData) {
+                        // For pie/doughnut charts, we need labels and count data
+                        // If values are average scores, we format appropriately
+                        
+                        let displayData = chartData.values;
+                        // If we have a response distribution for satisfaction levels
+                        if (chartData.labels.some(label => ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied', 'Very Dissatisfied'].includes(label))) {
+                            displayData = chartData.values; // Keep as is - these are counts
+                        } else {
+                            // If we just have question averages, adapt the display
+                            displayData = chartData.values;
+                        }
+                        
+                        new Chart(document.getElementById('overallSatisfactionChart'), {
+                            type: 'doughnut',
+                            data: {
+                                labels: chartData.labels,
+                                datasets: [{
+                                    data: displayData,
+                                    backgroundColor: [
+                                        'rgba(75, 192, 192, 0.6)',
+                                        'rgba(54, 162, 235, 0.6)',
+                                        'rgba(255, 206, 86, 0.6)',
+                                        'rgba(255, 159, 64, 0.6)',
+                                        'rgba(255, 99, 132, 0.6)'
+                                    ],
+                                    borderColor: [
+                                        'rgba(75, 192, 192, 1)',
+                                        'rgba(54, 162, 235, 1)',
+                                        'rgba(255, 206, 86, 1)',
+                                        'rgba(255, 159, 64, 1)',
+                                        'rgba(255, 99, 132, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom'
+                                    }
+                                },
+                                animation: {
+                                    animateRotate: true,
+                                    animateScale: false,
+                                    duration: 500,
+                                    easing: 'easeOutCirc'
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            
+            // Function to create Institutional charts
+            function createInstitutionalCharts() {
+                // Resources and Administration Chart
+                renderDynamicChart('resourcesAdminChart', 'bar', 'rgba(153, 102, 255, 0.6)', 'rgba(153, 102, 255, 1)');
+                
+                // Curriculum Aspects Chart
+                if (document.getElementById('curriculumAspectsChart')) {
+                    const chartData = getChartData('curriculumAspectsChart');
+                    if (chartData) {
+                        new Chart(document.getElementById('curriculumAspectsChart'), {
+                            type: 'radar',
+                            data: {
+                                labels: chartData.labels,
+                                datasets: [{
+                                    label: 'Average Rating (1-5)',
+                                    data: chartData.values,
+                                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                                    borderColor: 'rgba(255, 159, 64, 1)',
+                                    borderWidth: 1,
+                                    pointBackgroundColor: 'rgba(255, 159, 64, 1)'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    r: {
+                                        min: 0,
+                                        max: 5,
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    }
+                                },
+                                animation: {
+                                    duration: 500,
+                                    easing: 'linear'
+                                }
+                            }
+                        });
+                    }
+                }
+                
+                // Render other charts
+                renderDynamicChart('adminServicesChart', 'bar', 'rgba(54, 162, 235, 0.6)', 'rgba(54, 162, 235, 1)');
+                renderDynamicChart('studentSupportChart', 'bar', 'rgba(75, 192, 192, 0.6)', 'rgba(75, 192, 192, 1)');
+                renderDynamicChart('techResourcesChart', 'bar', 'rgba(153, 102, 255, 0.6)', 'rgba(153, 102, 255, 1)');
+                renderDynamicChart('campusLifeChart', 'bar', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 159, 64, 1)');
+            }
+            
+            // Function to create Training charts
+            function createTrainingCharts() {
+                renderDynamicChart('trainingContentChart', 'bar', 'rgba(54, 162, 235, 0.6)', 'rgba(54, 162, 235, 1)');
+                renderDynamicChart('trainerEffectivenessChart', 'bar', 'rgba(75, 192, 192, 0.6)', 'rgba(75, 192, 192, 1)');
+                renderDynamicChart('trainingMaterialsChart', 'bar', 'rgba(153, 102, 255, 0.6)', 'rgba(153, 102, 255, 1)');
+                renderDynamicChart('workshopFacilitiesChart', 'bar', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 159, 64, 1)');
+                renderDynamicChart('practicalApplicationChart', 'bar', 'rgba(255, 99, 132, 0.6)', 'rgba(255, 99, 132, 1)');
+                renderDynamicChart('overallValueChart', 'bar', 'rgba(0, 128, 128, 0.6)', 'rgba(0, 128, 128, 1)');
+            }
+            
+            // Helper function to render dynamic charts
+            function renderDynamicChart(chartId, chartType, bgColor, borderColor) {
+                const chartElement = document.getElementById(chartId);
+                if (chartElement) {
+                    const chartData = getChartData(chartId);
+                    if (chartData) {
+                        new Chart(chartElement, {
+                            type: chartType,
+                            data: {
+                                labels: chartData.labels,
+                                datasets: [{
+                                    label: 'Average Rating (1-5)',
+                                    data: chartData.values,
+                                    backgroundColor: bgColor,
+                                    borderColor: borderColor,
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: chartOptions
+                        });
+                    }
+                }
+            }
+        });
+    // faculty management script
+    // View faculty details with their assigned forms
+    function viewFacultyDetails(facultyId) {
+    const facultyData = getFacultyById(facultyId);
+    if (!facultyData) return;
     
-    // Create charts based on form type
-    if (formType === 'Academic') {
-        createAcademicCharts();
-    } else if (formType === 'Institutional') {
-        createInstitutionalCharts();
-    } else if (formType === 'Training') {
-        createTrainingCharts();
+    // Populate faculty details
+    const detailsContent = document.getElementById('facultyDetailsContent');
+    detailsContent.innerHTML = `
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <p><strong>Name:</strong> ${facultyData.name}</p>
+                <p><strong>ID Number:</strong> ${facultyData.idNumber}</p>
+                <p><strong>Email:</strong> ${facultyData.email}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Branch:</strong> ${facultyData.branch}</p>
+                <p><strong>Sections:</strong> ${facultyData.sections.join(', ')}</p>
+                <p><strong>Subjects:</strong> ${facultyData.subjects.join(', ')}</p>
+            </div>
+        </div>
+    `;
+    
+    // Show assigned forms if any
+    const assignedFormsSection = document.getElementById('assignedFormsSection');
+    const assignedFormsTableBody = document.getElementById('assignedFormsTableBody');
+    
+    if (facultyData.feedbackForms && facultyData.feedbackForms.length > 0) {
+        assignedFormsTableBody.innerHTML = '';
+        
+        facultyData.feedbackForms.forEach(formId => {
+            const formData = getFormById(formId);
+            if (!formData) return;
+            
+            const row = document.createElement('tr');
+            
+            row.innerHTML = `
+                <td>${formData.title}</td>
+                <td>${formData.formType}</td>
+                <td>
+                    <span class="badge ${formData.status === 'active' ? 'bg-success' : 'bg-danger'}">
+                        ${formData.status === 'active' ? 'Active' : 'Inactive'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="removeFormFromFaculty('${facultyId}', '${formId}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </td>
+            `;
+            
+            assignedFormsTableBody.appendChild(row);
+        });
+        
+        assignedFormsSection.style.display = 'block';
+    } else {
+        assignedFormsSection.style.display = 'none';
     }
     
-    // Faculty selector for Academic feedback
-    if (formType === 'Academic') {
-        const facultySelect = document.getElementById('facultySelect');
-        if (facultySelect) {
-            facultySelect.addEventListener('change', function() {
-                // Add AJAX call to filter data by faculty
-                const facultyId = this.value;
-                window.location.href = `/admin/adminHome?formType=Academic&faculty=${facultyId}`;
+    // Set faculty ID for edit button
+    document.getElementById('editFacultyBtn').setAttribute('data-faculty-id', facultyId);
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('facultyDetailsModal'));
+    modal.show();
+}
+    // Helper function to get faculty by ID from the rendered data
+    function getFacultyById(facultyId) {
+    const faculties = <%- JSON.stringify(faculties || []) %>;
+    return faculties.find(faculty => faculty._id === facultyId);
+    }
+
+    // Helper function to get form by ID from the rendered data
+    function getFormById(formId) {
+    const forms = <%- JSON.stringify(forms || []) %>;
+    return forms.find(form => form._id === formId);
+    }
+
+    // Prepare form assignment modal
+    function prepareFormAssignment(facultyId) {
+    const faculty = getFacultyById(facultyId);
+    if (!faculty) return;
+    
+    document.getElementById('selectedFacultyId').value = facultyId;
+    document.getElementById('selectedFacultyName').value = faculty.name;
+    
+    // Clear previous disabled states
+    const formSelect = document.getElementById('formSelect');
+    Array.from(formSelect.options).forEach(option => {
+        option.disabled = false;
+        option.text = option.text.replace(' (Already assigned)', '');
+    });
+    
+    // Filter out already assigned forms
+    if (faculty.feedbackForms && Array.isArray(faculty.feedbackForms)) {
+        Array.from(formSelect.options).forEach(option => {
+            if (option.value && faculty.feedbackForms.includes(option.value)) {
+                option.disabled = true;
+                option.text += ' (Already assigned)';
+            }
+        });
+     }
+    }
+
+    // View all assigned forms for a faculty
+    function viewAssignedForms(facultyId) {
+        viewFacultyDetails(facultyId);
+    }
+
+    // Remove a form from a faculty
+    function removeFormFromFaculty(facultyId, formId) {
+        if (confirm('Are you sure you want to remove this form from the faculty?')) {
+            console.log('Removing form', formId, 'from faculty', facultyId);
+            
+            // Create data to send in proper format
+            const formData = new URLSearchParams();
+            formData.append('facultyId', facultyId);
+            formData.append('formId', formId);
+            
+            // Send AJAX request to remove form
+            fetch('/admin/remove-form-from-faculty', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    alert('Form removed successfully');
+                    // Refresh the page to show updated data
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while removing the form');
             });
         }
     }
-    
-    // Download Excel button
-    const downloadBtn = document.getElementById('downloadExcel');
-    if (downloadBtn) {
-        downloadBtn.addEventListener('click', function() {
-            window.location.href = `/feedback/download/${formType.toLowerCase()}`;
+
+    // Handle form assignment
+    document.getElementById('assignFormBtn').addEventListener('click', function() {
+        const facultyId = document.getElementById('selectedFacultyId').value;
+        const formId = document.getElementById('formSelect').value;
+        
+        if (!formId) {
+            alert('Please select a form');
+            return;
+        }
+        
+        console.log('Assigning form', formId, 'to faculty', facultyId);
+        
+        // Create data to send in proper format
+        const formData = new URLSearchParams();
+        formData.append('facultyId', facultyId);
+        formData.append('formId', formId);
+        
+        // Send AJAX request to assign form
+        fetch('/admin/assign-form-to-faculty', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                alert('Form assigned successfully');
+                // Close modal and refresh page
+                const modal = bootstrap.Modal.getInstance(document.getElementById('assignFormModal'));
+                modal.hide();
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while assigning the form');
         });
-    }
-    
-    // Function to get data from canvas attributes
-    function getChartData(chartId) {
-        const canvas = document.getElementById(chartId);
-        if (!canvas) return null;
+    });
+
+    // Handle bulk form assignment
+    document.getElementById('bulkAssignBtn').addEventListener('click', function() {
+        const formId = document.getElementById('bulkFormSelect').value;
+        const selectedFaculties = Array.from(document.querySelectorAll('.faculty-checkbox:checked')).map(cb => cb.value);
         
-        try {
-            const labels = JSON.parse(canvas.getAttribute('data-labels') || '[]');
-            const values = JSON.parse(canvas.getAttribute('data-values') || '[]');
+        if (!formId) {
+            alert('Please select a form');
+            return;
+        }
+        
+        if (selectedFaculties.length === 0) {
+            alert('Please select at least one faculty member');
+            return;
+        }
+        
+        console.log('Bulk assigning form', formId, 'to faculties', selectedFaculties);
+        
+        // Create data to send in proper format
+        const formData = new URLSearchParams();
+        formData.append('formId', formId);
+        
+        // Append each faculty ID
+        selectedFaculties.forEach(facultyId => {
+            formData.append('facultyIds[]', facultyId);
+        });
+        
+        // Send AJAX request to bulk assign forms
+        fetch('/admin/bulk-assign-forms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                alert('Forms assigned successfully to selected faculty members');
+                // Close modal and refresh page
+                const modal = bootstrap.Modal.getInstance(document.getElementById('bulkAssignModal'));
+                modal.hide();
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while assigning forms');
+        });
+    });
+
+    // Handle "Select All" checkbox
+    document.getElementById('selectAllFaculty').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.faculty-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+
+    // Handle branch filter
+    document.getElementById('facultyBranchFilter').addEventListener('change', function() {
+        const branch = this.value;
+        const rows = document.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+            const branchCell = row.querySelector('td:nth-child(3)');
+            if (!branchCell) return;
             
-            return { labels, values };
-        } catch (e) {
-            console.error(`Error parsing data for ${chartId}:`, e);
-            return { labels: [], values: [] };
-        }
-    }
-    
-    // Function to create Academic charts
-    function createAcademicCharts() {
-        // Teacher Effectiveness Chart
-        if (document.getElementById('teacherEffectivenessChart')) {
-            const chartData = getChartData('teacherEffectivenessChart');
-            if (chartData) {
-                new Chart(document.getElementById('teacherEffectivenessChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: chartData.labels,
-                        datasets: [{
-                            label: 'Average Rating (1-5)',
-                            data: chartData.values,
-                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: chartOptions
-                });
+            if (branch === 'all' || branchCell.textContent.trim() === branch) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
             }
-        }
+        });
+    });
+
+    // Edit faculty button handler
+    document.getElementById('editFacultyBtn').addEventListener('click', function() {
+        const facultyId = this.getAttribute('data-faculty-id');
+        window.location.href = `/admin/edit-faculty/${facultyId}`;
+    });
+
+
+    // Form submission enhancement for edit form
+    document.addEventListener('DOMContentLoaded', function() {
+        const editFormElement = document.getElementById('editFormForm');
         
-        // Student Learning Experience Chart
-        if (document.getElementById('studentExperienceChart')) {
-            const chartData = getChartData('studentExperienceChart');
-            if (chartData) {
-                new Chart(document.getElementById('studentExperienceChart'), {
-                    type: 'radar',
-                    data: {
-                        labels: chartData.labels,
-                        datasets: [{
-                            label: 'Average Rating (1-5)',
-                            data: chartData.values,
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            borderWidth: 1,
-                            pointBackgroundColor: 'rgba(255, 99, 132, 1)'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            r: {
-                                min: 0,
-                                max: 5,
-                                ticks: {
-                                    stepSize: 1
-                                }
+        if (editFormElement) {
+            editFormElement.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Create FormData object from the form
+                const formData = new FormData(this);
+                const formId = this.getAttribute('data-form-id');
+                
+                // Process sections data to structure it properly
+                const sections = [];
+                
+                // Find all section divs
+                const sectionDivs = document.querySelectorAll('.form-section');
+                sectionDivs.forEach((sectionDiv, sectionIndex) => {
+                    const section = {
+                        title: sectionDiv.querySelector('.section-title').value || '',
+                        description: sectionDiv.querySelector('.section-description').value || '',
+                        questions: []
+                    };
+                    
+                    // Find all question divs in this section
+                    const questionDivs = sectionDiv.querySelectorAll('.question-item');
+                    questionDivs.forEach((questionDiv, questionIndex) => {
+                        const questionType = questionDiv.querySelector('.question-type').value;
+                        const question = {
+                            questionText: questionDiv.querySelector('.question-text').value || '',
+                            questionType: questionType,
+                            required: questionDiv.querySelector('.question-required').checked
+                        };
+                        
+                        // Handle question options based on type
+                        if (['mcq', 'dropdown', 'rating', 'yes_no'].includes(questionType)) {
+                            const optionsContainer = questionDiv.querySelector('.options-container');
+                            if (optionsContainer) {
+                                const optionInputs = optionsContainer.querySelectorAll('.option-input');
+                                question.options = Array.from(optionInputs).map(input => input.value).filter(Boolean);
+                            } else {
+                                question.options = [];
                             }
-                        },
-                        animation: {
-                            duration: 500,
-                            easing: 'linear'
+                        } else if (questionType === 'grid') {
+                            const rowsContainer = questionDiv.querySelector('.rows-container');
+                            const columnsContainer = questionDiv.querySelector('.columns-container');
+                            
+                            question.gridOptions = {
+                                rows: rowsContainer ? 
+                                    Array.from(rowsContainer.querySelectorAll('.grid-row-input')).map(input => input.value).filter(Boolean) : [],
+                                columns: columnsContainer ? 
+                                    Array.from(columnsContainer.querySelectorAll('.grid-col-input')).map(input => input.value).filter(Boolean) : []
+                            };
                         }
+                        
+                        section.questions.push(question);
+                    });
+                    
+                    sections.push(section);
+                });
+                
+                // Add sections to formData as a JSON string
+                formData.append('sections', JSON.stringify(sections));
+                
+                // Get other form fields that might be arrays
+                ['facultyAssigned', 'sectionsAssigned', 'semesters', 'subjects'].forEach(fieldName => {
+                    // Remove the original field values that might be flattened
+                    const originalValues = formData.getAll(fieldName);
+                    if (originalValues.length > 0) {
+                        // Clear existing values
+                        for (let i = 0; i < originalValues.length; i++) {
+                            formData.delete(fieldName);
+                        }
+                        
+                        // Add each value with array notation for proper server processing
+                        originalValues.forEach(value => {
+                            if (value) {
+                                formData.append(`${fieldName}[]`, value);
+                            }
+                        });
                     }
                 });
-            }
-        }
-        
-        // Exams and Evaluation Chart
-        if (document.getElementById('examsEvaluationChart')) {
-            const chartData = getChartData('examsEvaluationChart');
-            if (chartData) {
-                new Chart(document.getElementById('examsEvaluationChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: chartData.labels,
-                        datasets: [{
-                            label: 'Average Rating (1-5)',
-                            data: chartData.values,
-                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: chartOptions
-                });
-            }
-        }
-        
-        // Overall Satisfaction Chart
-        if (document.getElementById('overallSatisfactionChart')) {
-            const chartData = getChartData('overallSatisfactionChart');
-            if (chartData) {
-                // For pie/doughnut charts, we need labels and count data
-                // If values are average scores, we format appropriately
                 
-                let displayData = chartData.values;
-                // If we have a response distribution for satisfaction levels
-                if (chartData.labels.some(label => ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied', 'Very Dissatisfied'].includes(label))) {
-                    displayData = chartData.values; // Keep as is - these are counts
+                // Send the form data
+                fetch(`/forms/${formId}/update`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                        return;
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    if (data) {
+                        try {
+                            const result = JSON.parse(data);
+                            if (result.success) {
+                                alert('Form updated successfully');
+                                window.location.href = '/admin/Total-Forms';
+                            } else {
+                                alert('Error: ' + (result.message || 'Unknown error'));
+                            }
+                        } catch (e) {
+                            // If not JSON, it might be HTML from redirect
+                            console.log('Form submitted, redirecting...');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating the form');
+                });
+            });
+        }
+    });
+    // faculty data excell download
+    document.addEventListener('DOMContentLoaded', function () {
+        const downloadBtn = document.getElementById('downloadExcelBtn');
+        let isDownloading = false;
+
+        downloadBtn.addEventListener('click', async function (event) {
+            if (isDownloading) {
+                event.preventDefault();
+                return;
+            }
+
+            isDownloading = true;
+            downloadBtn.disabled = true;
+            downloadBtn.classList.add('disabled');
+
+            const originalText = downloadBtn.textContent;
+            downloadBtn.textContent = 'Downloading...';
+
+            const branchFilter = document.getElementById('facultyBranchFilter').value;
+            const url = `/admin/export-faculty-data?branch=${branchFilter}&t=${new Date().getTime()}`;
+
+            try {
+                const response = await fetch(url);
+
+                if (!response.ok) throw new Error('Download failed');
+
+                const blob = await response.blob();
+                const contentDisposition = response.headers.get('Content-Disposition');
+                const fileName = contentDisposition
+                    ? contentDisposition.split('filename=')[1].replace(/["']/g, '')
+                    : 'Faculty-Data.xlsx';
+
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+
+                showToast('success', 'Faculty data exported successfully!');
+            } catch (err) {
+                console.error(err);
+                showToast('error', 'Failed to export faculty data. Please try again.');
+            } finally {
+                setTimeout(() => {
+                    isDownloading = false;
+                    downloadBtn.disabled = false;
+                    downloadBtn.classList.remove('disabled');
+                    downloadBtn.textContent = originalText;
+                }, 1000);
+            }
+        });
+
+        function showToast(type, message) {
+            if (typeof Toastify === 'function') {
+                Toastify({
+                    text: message,
+                    duration: 3000,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: type === 'success' ? "#4CAF50" : "#F44336",
+                }).showToast();
+            } else {
+                alert(message);
+            }
+        }
+
+        // Filter faculty table rows by branch
+        const branchFilter = document.getElementById('facultyBranchFilter');
+        branchFilter.addEventListener('change', function () {
+            const branch = this.value;
+            filterFacultyTable(branch);
+        });
+
+        function filterFacultyTable(branch) {
+            const rows = document.querySelectorAll('.table tbody tr');
+
+            rows.forEach(row => {
+                const branchCell = row.querySelector('td:nth-child(3)');
+
+                if (branch === 'all' || branchCell.textContent.trim() === branch) {
+                    row.style.display = '';
                 } else {
-                    // If we just have question averages, adapt the display
-                    displayData = chartData.values;
+                    row.style.display = 'none';
                 }
-                
-                new Chart(document.getElementById('overallSatisfactionChart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: chartData.labels,
-                        datasets: [{
-                            data: displayData,
-                            backgroundColor: [
-                                'rgba(75, 192, 192, 0.6)',
-                                'rgba(54, 162, 235, 0.6)',
-                                'rgba(255, 206, 86, 0.6)',
-                                'rgba(255, 159, 64, 0.6)',
-                                'rgba(255, 99, 132, 0.6)'
-                            ],
-                            borderColor: [
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(54, 162, 235, 1)',
-                                'rgba(255, 206, 86, 1)',
-                                'rgba(255, 159, 64, 1)',
-                                'rgba(255, 99, 132, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
-                        },
-                        animation: {
-                            animateRotate: true,
-                            animateScale: false,
-                            duration: 500,
-                            easing: 'easeOutCirc'
-                        }
-                    }
-                });
-            }
+            });
         }
-    }
-    
-    // Function to create Institutional charts
-    function createInstitutionalCharts() {
-        // Resources and Administration Chart
-        renderDynamicChart('resourcesAdminChart', 'bar', 'rgba(153, 102, 255, 0.6)', 'rgba(153, 102, 255, 1)');
-        
-        // Curriculum Aspects Chart
-        if (document.getElementById('curriculumAspectsChart')) {
-            const chartData = getChartData('curriculumAspectsChart');
-            if (chartData) {
-                new Chart(document.getElementById('curriculumAspectsChart'), {
-                    type: 'radar',
-                    data: {
-                        labels: chartData.labels,
-                        datasets: [{
-                            label: 'Average Rating (1-5)',
-                            data: chartData.values,
-                            backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                            borderColor: 'rgba(255, 159, 64, 1)',
-                            borderWidth: 1,
-                            pointBackgroundColor: 'rgba(255, 159, 64, 1)'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            r: {
-                                min: 0,
-                                max: 5,
-                                ticks: {
-                                    stepSize: 1
-                                }
-                            }
-                        },
-                        animation: {
-                            duration: 500,
-                            easing: 'linear'
-                        }
-                    }
-                });
-            }
-        }
-        
-        // Render other charts
-        renderDynamicChart('adminServicesChart', 'bar', 'rgba(54, 162, 235, 0.6)', 'rgba(54, 162, 235, 1)');
-        renderDynamicChart('studentSupportChart', 'bar', 'rgba(75, 192, 192, 0.6)', 'rgba(75, 192, 192, 1)');
-        renderDynamicChart('techResourcesChart', 'bar', 'rgba(153, 102, 255, 0.6)', 'rgba(153, 102, 255, 1)');
-        renderDynamicChart('campusLifeChart', 'bar', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 159, 64, 1)');
-    }
-    
-    // Function to create Training charts
-    function createTrainingCharts() {
-        renderDynamicChart('trainingContentChart', 'bar', 'rgba(54, 162, 235, 0.6)', 'rgba(54, 162, 235, 1)');
-        renderDynamicChart('trainerEffectivenessChart', 'bar', 'rgba(75, 192, 192, 0.6)', 'rgba(75, 192, 192, 1)');
-        renderDynamicChart('trainingMaterialsChart', 'bar', 'rgba(153, 102, 255, 0.6)', 'rgba(153, 102, 255, 1)');
-        renderDynamicChart('workshopFacilitiesChart', 'bar', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 159, 64, 1)');
-        renderDynamicChart('practicalApplicationChart', 'bar', 'rgba(255, 99, 132, 0.6)', 'rgba(255, 99, 132, 1)');
-        renderDynamicChart('overallValueChart', 'bar', 'rgba(0, 128, 128, 0.6)', 'rgba(0, 128, 128, 1)');
-    }
-    
-    // Helper function to render dynamic charts
-    function renderDynamicChart(chartId, chartType, bgColor, borderColor) {
-        const chartElement = document.getElementById(chartId);
-        if (chartElement) {
-            const chartData = getChartData(chartId);
-            if (chartData) {
-                new Chart(chartElement, {
-                    type: chartType,
-                    data: {
-                        labels: chartData.labels,
-                        datasets: [{
-                            label: 'Average Rating (1-5)',
-                            data: chartData.values,
-                            backgroundColor: bgColor,
-                            borderColor: borderColor,
-                            borderWidth: 1
-                        }]
-                    },
-                    options: chartOptions
-                });
-            }
-        }
-    }
-});
+    });
+
 </script>
 </body>
 </html>
