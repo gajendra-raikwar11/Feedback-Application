@@ -19,7 +19,7 @@
     "sections": ["IT-A"],
     "feedbackForms": [],
     "role": "faculty",
-    "password": "hashed_password_2"
+    "password": "111111"
   },
   {
     "name": "Dr. Vikram Patel",
@@ -30,7 +30,7 @@
     "sections": ["ECE-B"],
     "feedbackForms": [],
     "role": "faculty",
-    "password": "hashed_password_3"
+    "password": "111111"
   },
   {
     "name": "Prof. Neha Gupta",
@@ -41,7 +41,7 @@
     "sections": ["CSE-C"],
     "feedbackForms": [],
     "role": "faculty",
-    "password": "hashed_password_4"
+    "password": "111111"
   },
   {
     "name": "Dr. Pankaj Verma",
@@ -52,7 +52,7 @@
     "sections": ["ME-A"],
     "feedbackForms": [],
     "role": "faculty",
-    "password": "hashed_password_5"
+    "password": "111111"
   },
   {
     "name": "Prof. Swati Mishra",
@@ -63,7 +63,7 @@
     "sections": ["CSE-A"],
     "feedbackForms": [],
     "role": "faculty",
-    "password": "hashed_password_6"
+    "password": "111111"
   },
   {
     "name": "Dr. Ramesh Kumar",
@@ -74,7 +74,7 @@
     "sections": ["EEE-A", "EEE-B"],
     "feedbackForms": [],
     "role": "faculty",
-    "password": "hashed_password_7"
+    "password": "111111"
   },
   {
     "name": "Prof. Sneha Das",
@@ -85,7 +85,7 @@
     "sections": ["IT-B"],
     "feedbackForms": [],
     "role": "faculty",
-    "password": "hashed_password_8"
+    "password": "111111"
   },
   {
     "name": "Dr. Manoj Singh",
@@ -96,7 +96,7 @@
     "sections": ["CIVIL-A"],
     "feedbackForms": [],
     "role": "faculty",
-    "password": "hashed_password_9"
+    "password": "111111"
   },
   {
     "name": "Prof. Kavita Reddy",
@@ -107,6 +107,6 @@
     "sections": ["CSE-D"],
     "feedbackForms": [],
     "role": "faculty",
-    "password": "hashed_password_10"
+    "password": "111111"
   }
 ]

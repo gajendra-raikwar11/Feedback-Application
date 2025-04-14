@@ -340,6 +340,10 @@
     </template>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Template data holder for more reliable parsing -->
+<script id="templateDataHolder" type="application/json">
+    <%- JSON.stringify(template) %>
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sectionsContainer = document.getElementById('sections-container');
@@ -1054,124 +1058,70 @@
 }
 
             // Load existing template data
-            function loadTemplateData() {
-                try {
-                    // Get template data - safely parse the JSON
-                    let templateData;
-                    try {
-                        const templateDataStr = '<%- JSON.stringify(template) %>';
-                        templateData = JSON.parse(templateDataStr);
-                        console.log("Template data loaded:", templateData);
-                    } catch (parseError) {
-                        console.error('Error parsing template data:', parseError);
-                        showToast('Error', 'Failed to parse template data', 'error');
-                        return;
-                    }
-                    
-                    if (!templateData || !templateData.sections) {
-                        showToast('Warning', 'No template data found or invalid format', 'warning');
-                        addSection(); // Add a default section as fallback
-                        return;
-                    }
-                    
-                    // Clear existing sections first
-                    sectionsContainer.innerHTML = '';
-                    
-                    // Load sections
-                    templateData.sections.forEach((sectionData, index) => {
-                        console.log(`Loading section ${index}:`, sectionData);
-                        const sectionElement = addSection();
-                        
-                        // Set section title and description
-                        const sectionTitle = sectionElement.querySelector('.section-title');
-                        const sectionDesc = sectionElement.querySelector('.section-description');
-                        
-                        if (sectionTitle && sectionData.title) {
-                            sectionTitle.value = sectionData.title;
-                        }
-                        
-                        if (sectionDesc && sectionData.description) {
-                            sectionDesc.value = sectionData.description;
-                        }
-                        
-                        // Clear default questions
-                        const questionsContainer = sectionElement.querySelector('.questions-container');
-                        questionsContainer.innerHTML = '';
-                        
-                        // Add questions
-                        if (sectionData.questions && sectionData.questions.length > 0) {
-                            sectionData.questions.forEach((questionData, qIndex) => {
-                                console.log(`Loading question ${qIndex} in section ${index}:`, questionData);
-                                const questionElement = addQuestion(questionsContainer, index, questionData);
-                                
-                                // Set question text and required status
-                                const questionText = questionElement.querySelector('.question-text');
-                                const requiredCheckbox = questionElement.querySelector('.question-required');
-                                const questionTypeSelect = questionElement.querySelector('.question-type');
-                                
-                                if (questionText && questionData.questionText) {
-                                    questionText.value = questionData.questionText;
-                                }
-                                
-                                if (requiredCheckbox) {
-                                    requiredCheckbox.checked = questionData.required === true || questionData.required === 'true';
-                                }
-                                
-                                if (questionTypeSelect && questionData.questionType) {
-                                    questionTypeSelect.value = questionData.questionType;
-                                    
-                                    // Trigger change event to show proper UI for the question type
-                                    const event = new Event('change');
-                                    questionTypeSelect.dispatchEvent(event);
-                                    
-                                    // Add options for multiple choice, dropdown, etc.
-                                    if (['mcq', 'rating', 'dropdown', 'yes_no'].includes(questionData.questionType) && questionData.options) {
-                                        const optionsList = questionElement.querySelector('.options-list');
-                                        if (optionsList) {
-                                            optionsList.innerHTML = ''; // Clear default options
-                                            
-                                            questionData.options.forEach(optionText => {
-                                                addOption(optionsList, index, qIndex, optionText);
-                                            });
-                                        }
-                                    }
-                                    
-                                    // Add grid options for grid questions
-                                    if (questionData.questionType === 'grid' && questionData.gridOptions) {
-                                        const rowsContainer = questionElement.querySelector('.grid-rows-container');
-                                        const colsContainer = questionElement.querySelector('.grid-cols-container');
-                                        
-                                        if (rowsContainer && questionData.gridOptions.rows) {
-                                            rowsContainer.innerHTML = ''; // Clear default rows
-                                            questionData.gridOptions.rows.forEach(rowText => {
-                                                addGridRow(rowsContainer, index, qIndex, rowText);
-                                            });
-                                        }
-                                        
-                                        if (colsContainer && questionData.gridOptions.columns) {
-                                            colsContainer.innerHTML = ''; // Clear default columns
-                                            questionData.gridOptions.columns.forEach(colText => {
-                                                addGridColumn(colsContainer, index, qIndex, colText);
-                                            });
-                                        }
-                                    }
-                                }
-                            });
-                        } else {
-                            // Add at least one default question if none exist
-                            addQuestion(questionsContainer, index);
-                        }
-                    });
-                    
-                    showToast('Template Loaded', 'Template data loaded successfully', 'success');
-                } catch (error) {
-                    console.error('Error loading template data:', error);
-                    showToast('Error', 'Failed to load template data: ' + error.message, 'error');
-                    
-                    // Add a default section as fallback
-                    addSection();
-                }
+           // Load existing template data
+function loadTemplateData() {
+    try {
+        // Get template data using a safer approach
+        let templateData;
+        try {
+            // Attempt to get the pre-rendered template data from a script tag
+            const dataElement = document.getElementById('templateDataHolder');
+            if (dataElement) {
+                templateData = JSON.parse(dataElement.textContent);
+            } else {
+                // Fallback to the original approach if the element doesn't exist
+                const templateDataStr = '<%= JSON.stringify(template) %>';
+                // Remove any escaped quotes or characters that might cause JSON parsing issues
+                const cleanStr = templateDataStr
+                    .replace(/\\"/g, '"') // Replace escaped quotes
+                    .replace(/\\\\/g, '\\') // Replace escaped backslashes
+                    .replace(/\\n/g, '\n') // Replace escaped newlines
+                    .replace(/\\r/g, '\r') // Replace escaped carriage returns
+                    .replace(/\\t/g, '\t'); // Replace escaped tabs
+                
+                templateData = JSON.parse(cleanStr);
             }
+            console.log("Template data loaded:", templateData);
+        } catch (parseError) {
+            console.error('Error parsing template data:', parseError);
+            console.error('Raw template data:', document.getElementById('templateDataHolder')?.textContent || '<%- JSON.stringify(template) %>');
+            showToast('Error', 'Failed to parse template data', 'error');
+            addSection(); // Add a default section as fallback
+            return;
+        }
+        
+        if (!templateData || !templateData.sections) {
+            console.warn('No template data found or invalid format:', templateData);
+            showToast('Warning', 'No template data found or invalid format', 'warning');
+            addSection(); // Add a default section as fallback
+            return;
+        }
+        
+        // Clear existing sections first
+        sectionsContainer.innerHTML = '';
+        sectionCounter = 0; // Reset section counter
+        
+        // Load sections
+        templateData.sections.forEach((sectionData, index) => {
+            console.log(`Loading section ${index}:`, sectionData);
+            addSection(sectionData);
+        });
+        
+        // If no sections were loaded, add a default one
+        if (sectionsContainer.children.length === 0) {
+            console.log("No sections were loaded, adding default section");
+            addSection();
+        }
+        
+        showToast('Template Loaded', 'Template data loaded successfully', 'success');
+    } catch (error) {
+        console.error('Error loading template data:', error);
+        showToast('Error', 'Failed to load template data: ' + error.message, 'error');
+        
+        // Add a default section as fallback
+        addSection();
+    }
+}
             // Initialize form
             loadTemplateData();
 });

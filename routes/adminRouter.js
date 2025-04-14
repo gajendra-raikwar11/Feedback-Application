@@ -589,14 +589,179 @@ router.get('/adminHome/forms/create/:formType',validateAdmin, async (req, res) =
 //     return res.status(500).json({ success: false, message: "Server error: " + error.message });
 //   }
 // });
-router.post('/adminHome/forms/create/:formType',validateAdmin, async (req, res) => {
+// router.post('/adminHome/forms/create/:formType',validateAdmin, async (req, res) => {
+//   try {
+//     let { formType } = req.params;
+//     console.log(`\n🔹 Route hit: /adminHome/forms/create/${formType}`);
+
+//     // Convert formType to Title Case
+//     formType = formType.charAt(0).toUpperCase() + formType.slice(1).toLowerCase();
+//     console.log(`✅ Converted formType: ${formType}`);
+
+//     const validFormTypes = ["Academic", "Institutional", "Training"];
+//     if (!validFormTypes.includes(formType)) {
+//       return res.status(400).json({ success: false, message: "Invalid form type" });
+//     }
+
+//     let formData = req.body;
+//     console.log("📥 Raw formData received:", formData);
+
+//     // ✅ Apply template if selected
+//     if (formData.templateId) {
+//       console.log(`🔍 Template ID provided: ${formData.templateId}. Applying template...`);
+//       const template = await FormTemplate.findById(formData.templateId);
+//       if (!template) throw new Error('Template not found');
+
+//       formData.sections = JSON.parse(JSON.stringify(template.sections));
+
+//       if (template.formType === "Academic" && template.academicType) {
+//         formData.academicType = template.academicType;
+//       }
+
+//       console.log("✅ Template applied successfully");
+
+//     } else {
+//       console.log("📋 No template used. Processing form data manually...");
+
+//       formData.facultyAssigned = Array.isArray(formData.facultyAssigned)
+//         ? formData.facultyAssigned.map(String)
+//         : [];
+
+//       formData.sectionsAssigned = Array.isArray(formData.sectionsAssigned)
+//         ? formData.sectionsAssigned.map(String)
+//         : [];
+
+//       if (!Array.isArray(formData.semesters) || formData.semesters.length === 0) {
+//         return res.status(400).json({ success: false, message: "Semesters are required" });
+//       }
+
+//       formData.semesters = formData.semesters.map(Number);
+
+//       if (!formData.createdBy && req.session.admin) {
+//         formData.createdBy = req.session.admin.id;
+//       }
+//       if (!formData.createdBy) {
+//         return res.status(400).json({ success: false, message: "createdBy is required" });
+//       }
+//       formData.createdBy = String(formData.createdBy);
+
+//       const processedSections = [];
+
+//       const sectionIndexes = new Set();
+//       Object.keys(formData).forEach(key => {
+//         const match = key.match(/^sections\[(\d+)\]/);
+//         if (match) sectionIndexes.add(parseInt(match[1]));
+//       });
+
+//       Array.from(sectionIndexes).sort((a, b) => a - b).forEach(sectionIndex => {
+//         const section = {
+//           title: formData[`sections[${sectionIndex}][title]`] || '',
+//           description: formData[`sections[${sectionIndex}][description]`] || '',
+//           questions: []
+//         };
+
+//         const questionIndexes = new Set();
+//         Object.keys(formData).forEach(key => {
+//           const match = key.match(new RegExp(`^sections\\[${sectionIndex}\\]\\[questions\\]\\[(\\d+)\\]`));
+//           if (match) questionIndexes.add(parseInt(match[1]));
+//         });
+
+//         Array.from(questionIndexes).sort((a, b) => a - b).forEach(questionIndex => {
+//           const questionPrefix = `sections[${sectionIndex}][questions][${questionIndex}]`;
+//           const question = {
+//             questionText: formData[`${questionPrefix}[questionText]`] || '',
+//             questionType: formData[`${questionPrefix}[questionType]`] || '',
+//             required: formData[`${questionPrefix}[required]`] === 'true'
+//           };
+
+//           if (['mcq', 'dropdown', 'rating', 'yes_no'].includes(question.questionType)) {
+//             const optionsKey = `${questionPrefix}[options]`;
+//             question.options = Array.isArray(formData[optionsKey])
+//               ? formData[optionsKey]
+//               : (formData[optionsKey] ? [formData[optionsKey]] : []);
+//           } else if (question.questionType === 'grid') {
+//             question.gridOptions = {
+//               rows: [],
+//               columns: []
+//             };
+
+//             const rowsKey = `${questionPrefix}[gridOptions][rows]`;
+//             if (formData[rowsKey]) {
+//               question.gridOptions.rows = Array.isArray(formData[rowsKey])
+//                 ? formData[rowsKey]
+//                 : [formData[rowsKey]];
+//             }
+
+//             const columnsKey = `${questionPrefix}[gridOptions][columns]`;
+//             if (formData[columnsKey]) {
+//               question.gridOptions.columns = Array.isArray(formData[columnsKey])
+//                 ? formData[columnsKey]
+//                 : [formData[columnsKey]];
+//             }
+//           }
+
+//           section.questions.push(question);
+//         });
+
+//         processedSections.push(section);
+//       });
+
+//       console.log("✅ Processed sections:", processedSections);
+//       formData.sections = processedSections;
+//     }
+
+//     // Create new feedback form
+//     const newForm = new FeedbackForm({
+//       title: formData.title,
+//       formType,
+//       createdFromTemplate: formData.templateId || null,
+//       academicType: formData.academicType,
+//       facultyAssigned: formData.facultyAssigned,
+//       subjects: formData.subjects || [],
+//       sectionsAssigned: formData.sectionsAssigned,
+//       semesters: formData.semesters,
+//       deadline: formData.deadline,
+//       createdBy: formData.createdBy,
+//       sections: formData.sections,
+//       status: formData.status || 'active'
+//     });
+
+//     console.log("📋 Form data ready to save:", newForm);
+//     await newForm.save();
+//     console.log("✅ Feedback form saved successfully");
+
+//     // ✅ Update Faculty models with this form ID
+//     if (Array.isArray(newForm.facultyAssigned) && newForm.facultyAssigned.length > 0) {
+//       await Promise.all(newForm.facultyAssigned.map(async (facultyId) => {
+//         try {
+//           const faculty = await Faculty.findById(facultyId);
+//           if (faculty && !faculty.feedbackForms.includes(newForm._id)) {
+//             faculty.feedbackForms.push(newForm._id);
+//             await faculty.save();
+//             console.log(`📌 Added form ${newForm._id} to faculty ${faculty.name}`);
+//           }
+//         } catch (err) {
+//           console.error(`❌ Error updating faculty ${facultyId}:`, err.message);
+//         }
+//       }));
+//     }
+
+//     return res.status(201).json({
+//       success: true,
+//       message: `${formType} feedback form created successfully`,
+//       redirect: '/admin/Total-Forms'
+//     });
+
+//   } catch (error) {
+//     console.error('❌ Error creating feedback form:', error);
+//     return res.status(500).json({ success: false, message: "Server error: " + error.message });
+//   }
+// });
+
+router.post('/adminHome/forms/create/:formType', validateAdmin, async (req, res) => {
   try {
     let { formType } = req.params;
-    console.log(`\n🔹 Route hit: /adminHome/forms/create/${formType}`);
-
-    // Convert formType to Title Case
     formType = formType.charAt(0).toUpperCase() + formType.slice(1).toLowerCase();
-    console.log(`✅ Converted formType: ${formType}`);
 
     const validFormTypes = ["Academic", "Institutional", "Training"];
     if (!validFormTypes.includes(formType)) {
@@ -604,25 +769,15 @@ router.post('/adminHome/forms/create/:formType',validateAdmin, async (req, res) 
     }
 
     let formData = req.body;
-    console.log("📥 Raw formData received:", formData);
 
-    // ✅ Apply template if selected
     if (formData.templateId) {
-      console.log(`🔍 Template ID provided: ${formData.templateId}. Applying template...`);
       const template = await FormTemplate.findById(formData.templateId);
       if (!template) throw new Error('Template not found');
-
       formData.sections = JSON.parse(JSON.stringify(template.sections));
-
       if (template.formType === "Academic" && template.academicType) {
         formData.academicType = template.academicType;
       }
-
-      console.log("✅ Template applied successfully");
-
     } else {
-      console.log("📋 No template used. Processing form data manually...");
-
       formData.facultyAssigned = Array.isArray(formData.facultyAssigned)
         ? formData.facultyAssigned.map(String)
         : [];
@@ -636,17 +791,12 @@ router.post('/adminHome/forms/create/:formType',validateAdmin, async (req, res) 
       }
 
       formData.semesters = formData.semesters.map(Number);
-
-      if (!formData.createdBy && req.session.admin) {
-        formData.createdBy = req.session.admin.id;
-      }
+      formData.createdBy = req.session.admin?.id || formData.createdBy;
       if (!formData.createdBy) {
         return res.status(400).json({ success: false, message: "createdBy is required" });
       }
-      formData.createdBy = String(formData.createdBy);
 
       const processedSections = [];
-
       const sectionIndexes = new Set();
       Object.keys(formData).forEach(key => {
         const match = key.match(/^sections\[(\d+)\]/);
@@ -684,14 +834,12 @@ router.post('/adminHome/forms/create/:formType',validateAdmin, async (req, res) 
               rows: [],
               columns: []
             };
-
             const rowsKey = `${questionPrefix}[gridOptions][rows]`;
             if (formData[rowsKey]) {
               question.gridOptions.rows = Array.isArray(formData[rowsKey])
                 ? formData[rowsKey]
                 : [formData[rowsKey]];
             }
-
             const columnsKey = `${questionPrefix}[gridOptions][columns]`;
             if (formData[columnsKey]) {
               question.gridOptions.columns = Array.isArray(formData[columnsKey])
@@ -706,11 +854,9 @@ router.post('/adminHome/forms/create/:formType',validateAdmin, async (req, res) 
         processedSections.push(section);
       });
 
-      console.log("✅ Processed sections:", processedSections);
       formData.sections = processedSections;
     }
 
-    // Create new feedback form
     const newForm = new FeedbackForm({
       title: formData.title,
       formType,
@@ -726,11 +872,9 @@ router.post('/adminHome/forms/create/:formType',validateAdmin, async (req, res) 
       status: formData.status || 'active'
     });
 
-    console.log("📋 Form data ready to save:", newForm);
     await newForm.save();
-    console.log("✅ Feedback form saved successfully");
 
-    // ✅ Update Faculty models with this form ID
+    // Update faculty with this form
     if (Array.isArray(newForm.facultyAssigned) && newForm.facultyAssigned.length > 0) {
       await Promise.all(newForm.facultyAssigned.map(async (facultyId) => {
         try {
@@ -738,10 +882,9 @@ router.post('/adminHome/forms/create/:formType',validateAdmin, async (req, res) 
           if (faculty && !faculty.feedbackForms.includes(newForm._id)) {
             faculty.feedbackForms.push(newForm._id);
             await faculty.save();
-            console.log(`📌 Added form ${newForm._id} to faculty ${faculty.name}`);
           }
         } catch (err) {
-          console.error(`❌ Error updating faculty ${facultyId}:`, err.message);
+          console.error(`Error updating faculty ${facultyId}:`, err.message);
         }
       }));
     }
@@ -753,10 +896,12 @@ router.post('/adminHome/forms/create/:formType',validateAdmin, async (req, res) 
     });
 
   } catch (error) {
-    console.error('❌ Error creating feedback form:', error);
+    console.error('Error creating feedback form:', error);
     return res.status(500).json({ success: false, message: "Server error: " + error.message });
   }
 });
+
+
 router.get('/Total-Forms', validateAdmin, async (req, res) => {
     try {
         // Fetch forms from database & populate faculty data
@@ -797,28 +942,55 @@ router.get('/Total-Forms', validateAdmin, async (req, res) => {
     }
 });
 // DELETE - Delete a form
-router.delete('/forms/:id',validateAdmin, async (req, res) => {
-    try {
-      const formId = req.params.id;
+// router.delete('/forms/:id',validateAdmin, async (req, res) => {
+//     try {
+//       const formId = req.params.id;
       
-      // Check if form exists
-      const form = await FeedbackForm.findById(formId);
-      if (!form) {
-        return res.status(404).json({ success: false, message: 'Form not found' });
-      }
+//       // Check if form exists
+//       const form = await FeedbackForm.findById(formId);
+//       if (!form) {
+//         return res.status(404).json({ success: false, message: 'Form not found' });
+//       }
       
-      // Delete the form from the database
-      await FeedbackForm.findByIdAndDelete(formId);
+//       // Delete the form from the database
+//       await FeedbackForm.findByIdAndDelete(formId);
       
-      // Also delete any related data (optional)
-      // For example, if you have submissions or other data related to this form:
-      // await Submission.deleteMany({ formId: formId });
+//       // Also delete any related data (optional)
+//       // For example, if you have submissions or other data related to this form:
+//       // await Submission.deleteMany({ formId: formId });
       
-      return res.json({ success: true, message: 'Form deleted successfully' });
-    } catch (error) {
-      console.error('Error deleting form:', error);
-      return res.status(500).json({ success: false, message: 'Error deleting form' });
+//       return res.json({ success: true, message: 'Form deleted successfully' });
+//     } catch (error) {
+//       console.error('Error deleting form:', error);
+//       return res.status(500).json({ success: false, message: 'Error deleting form' });
+//     }
+// });
+router.delete('/forms/:id', validateAdmin, async (req, res) => {
+  try {
+    const formId = req.params.id;
+    const objectId = new mongoose.Types.ObjectId(formId);
+
+    // Check if form exists
+    const form = await FeedbackForm.findById(formId);
+    if (!form) {
+      return res.status(404).json({ success: false, message: 'Form not found' });
     }
+
+    // Delete the form
+    await FeedbackForm.findByIdAndDelete(formId);
+
+    // Remove it from all faculties
+    const result = await Faculty.updateMany(
+      { feedbackForms: objectId },
+      { $pull: { feedbackForms: objectId } }
+    );
+    console.log('Form removed from faculties:', result.modifiedCount);
+
+    return res.json({ success: true, message: 'Form deleted and unassigned from all faculties' });
+  } catch (error) {
+    console.error('Error deleting form:', error);
+    return res.status(500).json({ success: false, message: 'Error deleting form' });
+  }
 });
 // POST - Process bulk actions on forms
 router.post('/forms/bulk-action',validateAdmin, async (req, res) => {
@@ -1426,6 +1598,7 @@ router.get('/template/form-templates/:id/edit',validateAdmin, async (req, res) =
     if (!template) {
       return res.redirect('/admin/template/form-templates?message=Template not found&status=error');
     }
+    console.log("huaaaaaaaaaaa");
     
     // Safely prepare the template data for serialization
     const safeTemplate = JSON.parse(JSON.stringify(template));
