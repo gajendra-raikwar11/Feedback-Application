@@ -116,50 +116,77 @@ router.post("/studentLogin", async (req, res) => {
       .send("Invalid email or password. You are not an authorized student.");
   }
 });
-
 // Student Homepage (Protected Route)
 router.get("/studentHomepage", studentValidate, async (req, res) => {
   try {
     const student = req.student;
     const studentId = student._id.toString();
+    const studentSection = student.section;
+    const studentSemester = student.semester;
 
-    // Find all active feedback forms assigned to the student's section
+    // STEP 1: Get all active forms assigned to student's section AND semester
     const allForms = await FeedbackForm.find({
       status: "active",
-      sectionsAssigned: { $in: [student.section] },
+      sectionsAssigned: { $in: [studentSection] },
+      semesters: { $in: [studentSemester] }
     }).lean();
 
-    // Count stats
+    // STEP 2: Fetch all faculties that have this section in their assigned sections
+    const allFaculties = await Faculty.find({
+      sections: { $in: [studentSection] },
+    }).lean();
+
+    const facultyMap = {};
+    allFaculties.forEach(faculty => {
+      facultyMap[faculty._id.toString()] = faculty;
+    });
+    const facultyIds = Object.keys(facultyMap);
+
+    // STEP 3: Get all responses submitted by student
+    const feedbackResponses = await FeedbackResponse.find({
+      studentID: studentId,
+    }).lean();
+
+    const submittedSet = new Set(
+      feedbackResponses.map(
+        res => `${res.formID.toString()}-${res.facultyID.toString()}`
+      )
+    );
+
+    // STEP 4: Count forms
     let availableForms = 0;
-    let pendingForms = 0;
     let completedForms = 0;
+    let pendingForms = 0;
 
-    // Process each form to determine its status for this student
-    allForms.forEach((form) => {
-      // Check if the student has already submitted this form
-      const hasSubmitted =
-        form.responses &&
-        form.responses.some(
-          (response) =>
-            response.studentId && response.studentId.toString() === studentId
-        );
+    for (const form of allForms) {
+      const formId = form._id.toString();
 
-      // Check if the form is still active (deadline hasn't passed)
-      const isActive = new Date() <= new Date(form.deadline);
+      // Find faculties who are assigned to both the form and student's section
+      const relevantFaculties = (form.facultyAssigned || []).filter(fid => {
+        const faculty = facultyMap[fid.toString()];
+        return faculty && form.sectionsAssigned.includes(studentSection);
+      });
 
+      if (relevantFaculties.length === 0) continue;
+
+      let allSubmitted = true;
+      for (const fid of relevantFaculties) {
+        const key = `${formId}-${fid.toString()}`;
+        if (!submittedSet.has(key)) {
+          allSubmitted = false;
+          break;
+        }
+      }
+
+      const isActive = !form.deadline || new Date() <= new Date(form.deadline);
       if (isActive) {
         availableForms++;
-
-        if (hasSubmitted) {
-          completedForms++;
-        } else {
-          pendingForms++;
-        }
-      } else if (hasSubmitted) {
-        // Count completed forms even if they're no longer active
+        if (allSubmitted) completedForms++;
+        else pendingForms++;
+      } else if (allSubmitted) {
         completedForms++;
       }
-    });
+    }
 
     res.render("studentHomepage", {
       student: req.student,
@@ -171,7 +198,7 @@ router.get("/studentHomepage", studentValidate, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching student:", error);
+    console.error("❌ Error in /studentHomepage route:", error);
     res.redirect("/studentLogin");
   }
 });
@@ -213,7 +240,6 @@ router.put("/update-profile", studentValidate, async (req, res) => {
       .json({ success: false, message: "Failed to update profile" });
   }
 });
-
 router.get("/studentFormsPage", studentValidate, async (req, res) => {
   try {
     const student = req.student;
@@ -307,7 +333,6 @@ router.get("/studentFormsPage", studentValidate, async (req, res) => {
     res.redirect("/studentLogin");
   }
 });
-
 // --------------------------------feedback response
 // Route to preview a form
 router.get("/previewForm/:id", studentValidate, async (req, res) => {
@@ -1077,7 +1102,6 @@ router.post("/submitFormResponse/:id", studentValidate, async (req, res) => {
     return res.redirect("/student/studentFormsPage");
   }
 });
-
 router.get("/logout", async (req, res) => {
   try {
     if (req.session.studentId) {
@@ -1099,5 +1123,4 @@ router.get("/logout", async (req, res) => {
     res.redirect("/studentLogin");
   }
 });
-
 module.exports = router;
