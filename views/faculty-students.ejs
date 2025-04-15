@@ -205,6 +205,12 @@
         .dt-button:hover {
             background-color: #303f9f !important;
         }
+
+        @media (max-width: 768px) {
+            .toggle-btn {
+                display: block;
+            }
+        }
         
         .sidebar-close-btn {
             position: absolute;
@@ -230,6 +236,11 @@
             right: 20px;
             z-index: 9999;
         }
+        @media (max-width: 576px) {
+            .mobile-left-shift {
+                margin-left: 40px;
+            }
+        }
     </style>
 </head>
 
@@ -246,7 +257,7 @@
     <div class="content" id="content">
         <div class="container-fluid">
             <div class="row mb-4">
-                <div class="col-md-12">
+                <div class="col-md-12 mobile-left-shift">
                     <h2 class="mb-0">Student Management</h2>
                     <small class="text-muted">View and manage assigned students & their form submissions</small>
                 </div>

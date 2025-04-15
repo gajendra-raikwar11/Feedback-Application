@@ -2,10 +2,6 @@ const jwt = require('jsonwebtoken');
 const { adminModel } = require('../models/adminSchema');
 require('dotenv').config();
 
-/**
- * Middleware to validate if the user is an authenticated admin
- * Checks both JWT token in cookies and session data
- */
 const validateAdmin = async (req, res, next) => {
     try {
         // Check if admin session exists

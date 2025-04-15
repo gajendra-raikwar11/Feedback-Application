@@ -233,13 +233,6 @@ router.get("/adminHome", validateAdmin, async (req, res) => {
       res.status(500).send("Server Error");
     }
 });
-  
-  /**
-   * Process feedback response data into the format needed for charts
-   * @param {Array} feedbackResponses - Array of feedback response documents
-   * @param {String} formType - Type of feedback form
-   * @returns {Object} Formatted data for charts
-   */
   function processDataForCharts(feedbackResponses, formType) {
     // Initialize the section data structure
     const sectionData = {};
@@ -318,7 +311,6 @@ router.get("/adminHome", validateAdmin, async (req, res) => {
       responseMetadata
     };
   }
-  
 //---------------------------------------------Admin Home Student Realted all routes--------------------------------------------------------------------
 // Admin Student Page Route - Added auth middleware
 router.get("/adminStudentPage", validateAdmin, async (req, res) => {
@@ -386,7 +378,7 @@ router.delete('/students/:studentIdToDelete',validateAdmin, async (req, res) => 
 });
 //---------------------------------------------Admin Home Form Realted all routes--------------------------------------------------------------------
 //form related all routes
-router.get('/adminHome/forms/create/:formType',validateAdmin, async (req, res) => {
+router.get('/adminHome/forms/create/:formType', validateAdmin, async (req, res) => {
   try {
     let { formType } = req.params;
 
@@ -407,6 +399,10 @@ router.get('/adminHome/forms/create/:formType',validateAdmin, async (req, res) =
     const semesterCategories = [1, 2, 3, 4, 5, 6, 7, 8];
     const subjects = ["Data Structures", "Database Management", "Computer Networks",
       "Operating Systems", "Machine Learning", "Web Development"];
+    
+    // Generate dynamic academic years (current year and next 5 years)
+    const academicYears = generateAcademicYears(5); // Current + next 5 years
+    const semesterTypes = ["Odd", "Even"];
 
     // ✅ Use top-level FormTemplate import
     const templates = await FormTemplate.find({ formType });
@@ -421,6 +417,9 @@ router.get('/adminHome/forms/create/:formType',validateAdmin, async (req, res) =
       sectionCategories,
       semesterCategories,
       subjects,
+      // Add session-related data to the template
+      academicYears,
+      semesterTypes,
       templates: plainTemplates, // Pass plain objects instead of Mongoose documents
       templatesJSON: JSON.stringify(plainTemplates), // Add this line to provide pre-stringified JSON
       currentPath: req.path,
@@ -432,332 +431,28 @@ router.get('/adminHome/forms/create/:formType',validateAdmin, async (req, res) =
     res.status(500).send("Server error");
   }
 });
-// POST Route – Handle form submission
-// router.post('/adminHome/forms/create/:formType', async (req, res) => {
-//   try {
-//     let { formType } = req.params;
-//     console.log(`\n🔹 Route hit: /adminHome/forms/create/${formType}`);
-
-//     // Convert formType to Title Case
-//     formType = formType.charAt(0).toUpperCase() + formType.slice(1).toLowerCase();
-//     console.log(`✅ Converted formType: ${formType}`);
-
-//     const validFormTypes = ["Academic", "Institutional", "Training"];
-//     if (!validFormTypes.includes(formType)) {
-//       return res.status(400).json({ success: false, message: "Invalid form type" });
-//     }
-
-//     let formData = req.body;
-//     console.log("📥 Raw formData received:", formData);
-
-//     // ✅ Apply template if selected
-//     if (formData.templateId) {
-//       console.log(`🔍 Template ID provided: ${formData.templateId}. Applying template...`);
-//       const template = await FormTemplate.findById(formData.templateId);
-//       if (!template) {
-//         throw new Error('Template not found');
-//       }
-
-//       formData.sections = JSON.parse(JSON.stringify(template.sections));
-
-//       if (template.formType === "Academic" && template.academicType) {
-//         formData.academicType = template.academicType;
-//       }
-
-//       console.log("✅ Template applied successfully");
-
-//     } else {
-//       console.log("📋 No template used. Processing form data manually...");
-
-//       formData.facultyAssigned = Array.isArray(formData.facultyAssigned)
-//         ? formData.facultyAssigned.map(String)
-//         : [];
-
-//       formData.sectionsAssigned = Array.isArray(formData.sectionsAssigned)
-//         ? formData.sectionsAssigned.map(String)
-//         : [];
-
-//       if (!Array.isArray(formData.semesters) || formData.semesters.length === 0) {
-//         return res.status(400).json({ success: false, message: "Semesters are required" });
-//       }
-//       formData.semesters = formData.semesters.map(Number);
-
-//       if (!formData.createdBy && req.session.admin) {
-//         formData.createdBy = req.session.admin.id;
-//       }
-//       if (!formData.createdBy) {
-//         return res.status(400).json({ success: false, message: "createdBy is required" });
-//       }
-//       formData.createdBy = String(formData.createdBy);
-
-//       const processedSections = [];
-
-//       const sectionIndexes = new Set();
-//       Object.keys(formData).forEach(key => {
-//         const match = key.match(/^sections\[(\d+)\]/);
-//         if (match) {
-//           sectionIndexes.add(parseInt(match[1]));
-//         }
-//       });
-
-//       Array.from(sectionIndexes).sort((a, b) => a - b).forEach(sectionIndex => {
-//         const section = {
-//           title: formData[`sections[${sectionIndex}][title]`] || '',
-//           description: formData[`sections[${sectionIndex}][description]`] || '',
-//           questions: []
-//         };
-
-//         const questionIndexes = new Set();
-//         Object.keys(formData).forEach(key => {
-//           const match = key.match(new RegExp(`^sections\\[${sectionIndex}\\]\\[questions\\]\\[(\\d+)\\]`));
-//           if (match) {
-//             questionIndexes.add(parseInt(match[1]));
-//           }
-//         });
-
-//         Array.from(questionIndexes).sort((a, b) => a - b).forEach(questionIndex => {
-//           const questionPrefix = `sections[${sectionIndex}][questions][${questionIndex}]`;
-//           const question = {
-//             questionText: formData[`${questionPrefix}[questionText]`] || '',
-//             questionType: formData[`${questionPrefix}[questionType]`] || '',
-//             required: formData[`${questionPrefix}[required]`] === 'true'
-//           };
-
-//           if (['mcq', 'dropdown', 'rating', 'yes_no'].includes(question.questionType)) {
-//             const optionsKey = `${questionPrefix}[options]`;
-//             question.options = Array.isArray(formData[optionsKey])
-//               ? formData[optionsKey]
-//               : (formData[optionsKey] ? [formData[optionsKey]] : []);
-//           } else if (question.questionType === 'grid') {
-//             question.gridOptions = {
-//               rows: [],
-//               columns: []
-//             };
-
-//             const rowsKey = `${questionPrefix}[gridOptions][rows]`;
-//             if (formData[rowsKey]) {
-//               question.gridOptions.rows = Array.isArray(formData[rowsKey])
-//                 ? formData[rowsKey]
-//                 : [formData[rowsKey]];
-//             }
-
-//             const columnsKey = `${questionPrefix}[gridOptions][columns]`;
-//             if (formData[columnsKey]) {
-//               question.gridOptions.columns = Array.isArray(formData[columnsKey])
-//                 ? formData[columnsKey]
-//                 : [formData[columnsKey]];
-//             }
-//           }
-
-//           section.questions.push(question);
-//         });
-
-//         processedSections.push(section);
-//       });
-
-//       console.log("✅ Processed sections:", processedSections);
-//       formData.sections = processedSections;
-//     }
-
-//     const newForm = new FeedbackForm({
-//       title: formData.title,
-//       formType,
-//       createdFromTemplate: formData.templateId || null,
-//       academicType: formData.academicType,
-//       facultyAssigned: formData.facultyAssigned,
-//       subjects: formData.subjects || [],
-//       sectionsAssigned: formData.sectionsAssigned,
-//       semesters: formData.semesters,
-//       deadline: formData.deadline,
-//       createdBy: formData.createdBy,
-//       sections: formData.sections,
-//       status: formData.status || 'active'
-//     });
-
-//     console.log("📋 Form data ready to save:", newForm);
-//     await newForm.save();
-//     console.log("✅ Feedback form saved successfully");
-
-//     return res.status(201).json({
-//       success: true,
-//       message: `${formType} feedback form created successfully`,
-//       redirect: '/admin/Total-Forms'
-//     });
-
-//   } catch (error) {
-//     console.error('❌ Error creating feedback form:', error);
-//     return res.status(500).json({ success: false, message: "Server error: " + error.message });
-//   }
-// });
-// router.post('/adminHome/forms/create/:formType',validateAdmin, async (req, res) => {
-//   try {
-//     let { formType } = req.params;
-//     console.log(`\n🔹 Route hit: /adminHome/forms/create/${formType}`);
-
-//     // Convert formType to Title Case
-//     formType = formType.charAt(0).toUpperCase() + formType.slice(1).toLowerCase();
-//     console.log(`✅ Converted formType: ${formType}`);
-
-//     const validFormTypes = ["Academic", "Institutional", "Training"];
-//     if (!validFormTypes.includes(formType)) {
-//       return res.status(400).json({ success: false, message: "Invalid form type" });
-//     }
-
-//     let formData = req.body;
-//     console.log("📥 Raw formData received:", formData);
-
-//     // ✅ Apply template if selected
-//     if (formData.templateId) {
-//       console.log(`🔍 Template ID provided: ${formData.templateId}. Applying template...`);
-//       const template = await FormTemplate.findById(formData.templateId);
-//       if (!template) throw new Error('Template not found');
-
-//       formData.sections = JSON.parse(JSON.stringify(template.sections));
-
-//       if (template.formType === "Academic" && template.academicType) {
-//         formData.academicType = template.academicType;
-//       }
-
-//       console.log("✅ Template applied successfully");
-
-//     } else {
-//       console.log("📋 No template used. Processing form data manually...");
-
-//       formData.facultyAssigned = Array.isArray(formData.facultyAssigned)
-//         ? formData.facultyAssigned.map(String)
-//         : [];
-
-//       formData.sectionsAssigned = Array.isArray(formData.sectionsAssigned)
-//         ? formData.sectionsAssigned.map(String)
-//         : [];
-
-//       if (!Array.isArray(formData.semesters) || formData.semesters.length === 0) {
-//         return res.status(400).json({ success: false, message: "Semesters are required" });
-//       }
-
-//       formData.semesters = formData.semesters.map(Number);
-
-//       if (!formData.createdBy && req.session.admin) {
-//         formData.createdBy = req.session.admin.id;
-//       }
-//       if (!formData.createdBy) {
-//         return res.status(400).json({ success: false, message: "createdBy is required" });
-//       }
-//       formData.createdBy = String(formData.createdBy);
-
-//       const processedSections = [];
-
-//       const sectionIndexes = new Set();
-//       Object.keys(formData).forEach(key => {
-//         const match = key.match(/^sections\[(\d+)\]/);
-//         if (match) sectionIndexes.add(parseInt(match[1]));
-//       });
-
-//       Array.from(sectionIndexes).sort((a, b) => a - b).forEach(sectionIndex => {
-//         const section = {
-//           title: formData[`sections[${sectionIndex}][title]`] || '',
-//           description: formData[`sections[${sectionIndex}][description]`] || '',
-//           questions: []
-//         };
-
-//         const questionIndexes = new Set();
-//         Object.keys(formData).forEach(key => {
-//           const match = key.match(new RegExp(`^sections\\[${sectionIndex}\\]\\[questions\\]\\[(\\d+)\\]`));
-//           if (match) questionIndexes.add(parseInt(match[1]));
-//         });
-
-//         Array.from(questionIndexes).sort((a, b) => a - b).forEach(questionIndex => {
-//           const questionPrefix = `sections[${sectionIndex}][questions][${questionIndex}]`;
-//           const question = {
-//             questionText: formData[`${questionPrefix}[questionText]`] || '',
-//             questionType: formData[`${questionPrefix}[questionType]`] || '',
-//             required: formData[`${questionPrefix}[required]`] === 'true'
-//           };
-
-//           if (['mcq', 'dropdown', 'rating', 'yes_no'].includes(question.questionType)) {
-//             const optionsKey = `${questionPrefix}[options]`;
-//             question.options = Array.isArray(formData[optionsKey])
-//               ? formData[optionsKey]
-//               : (formData[optionsKey] ? [formData[optionsKey]] : []);
-//           } else if (question.questionType === 'grid') {
-//             question.gridOptions = {
-//               rows: [],
-//               columns: []
-//             };
-
-//             const rowsKey = `${questionPrefix}[gridOptions][rows]`;
-//             if (formData[rowsKey]) {
-//               question.gridOptions.rows = Array.isArray(formData[rowsKey])
-//                 ? formData[rowsKey]
-//                 : [formData[rowsKey]];
-//             }
-
-//             const columnsKey = `${questionPrefix}[gridOptions][columns]`;
-//             if (formData[columnsKey]) {
-//               question.gridOptions.columns = Array.isArray(formData[columnsKey])
-//                 ? formData[columnsKey]
-//                 : [formData[columnsKey]];
-//             }
-//           }
-
-//           section.questions.push(question);
-//         });
-
-//         processedSections.push(section);
-//       });
-
-//       console.log("✅ Processed sections:", processedSections);
-//       formData.sections = processedSections;
-//     }
-
-//     // Create new feedback form
-//     const newForm = new FeedbackForm({
-//       title: formData.title,
-//       formType,
-//       createdFromTemplate: formData.templateId || null,
-//       academicType: formData.academicType,
-//       facultyAssigned: formData.facultyAssigned,
-//       subjects: formData.subjects || [],
-//       sectionsAssigned: formData.sectionsAssigned,
-//       semesters: formData.semesters,
-//       deadline: formData.deadline,
-//       createdBy: formData.createdBy,
-//       sections: formData.sections,
-//       status: formData.status || 'active'
-//     });
-
-//     console.log("📋 Form data ready to save:", newForm);
-//     await newForm.save();
-//     console.log("✅ Feedback form saved successfully");
-
-//     // ✅ Update Faculty models with this form ID
-//     if (Array.isArray(newForm.facultyAssigned) && newForm.facultyAssigned.length > 0) {
-//       await Promise.all(newForm.facultyAssigned.map(async (facultyId) => {
-//         try {
-//           const faculty = await Faculty.findById(facultyId);
-//           if (faculty && !faculty.feedbackForms.includes(newForm._id)) {
-//             faculty.feedbackForms.push(newForm._id);
-//             await faculty.save();
-//             console.log(`📌 Added form ${newForm._id} to faculty ${faculty.name}`);
-//           }
-//         } catch (err) {
-//           console.error(`❌ Error updating faculty ${facultyId}:`, err.message);
-//         }
-//       }));
-//     }
-
-//     return res.status(201).json({
-//       success: true,
-//       message: `${formType} feedback form created successfully`,
-//       redirect: '/admin/Total-Forms'
-//     });
-
-//   } catch (error) {
-//     console.error('❌ Error creating feedback form:', error);
-//     return res.status(500).json({ success: false, message: "Server error: " + error.message });
-//   }
-// });
-
+function generateAcademicYears(futureYears = 5) {
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1; // Jan is 0, so +1 for actual month
+  
+  // In India, academic years typically start in June/July
+  // If we're already past June, start from current year, otherwise from previous year
+  let startYear = currentMonth >= 6 ? currentYear : currentYear - 1;
+  
+  const academicYears = [];
+  
+  // Generate current and future academic years
+  for (let i = 0; i <= futureYears; i++) {
+    const academicYearStart = startYear + i;
+    const academicYearEnd = academicYearStart + 1;
+    // Format as "2024-25" (last two digits of end year)
+    const academicYear = `${academicYearStart}-${academicYearEnd.toString().slice(-2)}`;
+    academicYears.push(academicYear);
+  }
+  
+  return academicYears;
+}
 router.post('/adminHome/forms/create/:formType', validateAdmin, async (req, res) => {
   try {
     let { formType } = req.params;
@@ -769,6 +464,21 @@ router.post('/adminHome/forms/create/:formType', validateAdmin, async (req, res)
     }
 
     let formData = req.body;
+
+    // Validate required session fields
+    if (!formData.session) {
+      return res.status(400).json({ success: false, message: "Academic session is required" });
+    }
+
+    if (!formData.semesterType) {
+      return res.status(400).json({ success: false, message: "Semester type (Odd/Even) is required" });
+    }
+
+    // Optionally generate session label if not provided
+    if (!formData.sessionLabel) {
+      const semesterPeriod = formData.semesterType === "Odd" ? "July-Dec" : "Jan-June";
+      formData.sessionLabel = `${formData.session} ${semesterPeriod}`;
+    }
 
     if (formData.templateId) {
       const template = await FormTemplate.findById(formData.templateId);
@@ -866,6 +576,10 @@ router.post('/adminHome/forms/create/:formType', validateAdmin, async (req, res)
       subjects: formData.subjects || [],
       sectionsAssigned: formData.sectionsAssigned,
       semesters: formData.semesters,
+      // Add session-related fields
+      session: formData.session,
+      semesterType: formData.semesterType,
+      sessionLabel: formData.sessionLabel,
       deadline: formData.deadline,
       createdBy: formData.createdBy,
       sections: formData.sections,
@@ -900,8 +614,38 @@ router.post('/adminHome/forms/create/:formType', validateAdmin, async (req, res)
     return res.status(500).json({ success: false, message: "Server error: " + error.message });
   }
 });
+// New route to filter forms by session and semester type
+router.get('/adminHome/forms/filterBySession', validateAdmin, async (req, res) => {
+  try {
+    const { session, semesterType } = req.query;
+    
+    const query = {};
+    if (session) query.session = session;
+    if (semesterType) query.semesterType = semesterType;
+    
+    const forms = await FeedbackForm.find(query)
+      .populate('facultyAssigned', 'name department')
+      .sort({ createdAt: -1 });
 
-
+    // Get available sessions and semester types for filtering
+    const availableSessions = await FeedbackForm.distinct('session');
+    const availableSemesterTypes = await FeedbackForm.distinct('semesterType');
+    
+    res.json({ 
+      success: true, 
+      forms,
+      filters: {
+        availableSessions,
+        availableSemesterTypes,
+        // Add dynamic future sessions for dropdowns
+        futureSessions: generateAcademicYears(5)
+      }
+    });
+  } catch (error) {
+    console.error('Error filtering forms by session:', error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
 router.get('/Total-Forms', validateAdmin, async (req, res) => {
     try {
         // Fetch forms from database & populate faculty data
@@ -942,29 +686,6 @@ router.get('/Total-Forms', validateAdmin, async (req, res) => {
     }
 });
 // DELETE - Delete a form
-// router.delete('/forms/:id',validateAdmin, async (req, res) => {
-//     try {
-//       const formId = req.params.id;
-      
-//       // Check if form exists
-//       const form = await FeedbackForm.findById(formId);
-//       if (!form) {
-//         return res.status(404).json({ success: false, message: 'Form not found' });
-//       }
-      
-//       // Delete the form from the database
-//       await FeedbackForm.findByIdAndDelete(formId);
-      
-//       // Also delete any related data (optional)
-//       // For example, if you have submissions or other data related to this form:
-//       // await Submission.deleteMany({ formId: formId });
-      
-//       return res.json({ success: true, message: 'Form deleted successfully' });
-//     } catch (error) {
-//       console.error('Error deleting form:', error);
-//       return res.status(500).json({ success: false, message: 'Error deleting form' });
-//     }
-// });
 router.delete('/forms/:id', validateAdmin, async (req, res) => {
   try {
     const formId = req.params.id;
@@ -993,45 +714,53 @@ router.delete('/forms/:id', validateAdmin, async (req, res) => {
   }
 });
 // POST - Process bulk actions on forms
-router.post('/forms/bulk-action',validateAdmin, async (req, res) => {
-    try {
-      const { action, formIds } = req.body;
-      
-      if (!action || !formIds || !Array.isArray(formIds) || formIds.length === 0) {
-        return res.status(400).json({ success: false, message: 'Invalid request' });
-      }
-      
-      switch (action) {
-        case 'delete':
-          // Delete multiple forms
-          await FeedbackForm.deleteMany({ _id: { $in: formIds } });
-          break;
-          
-        case 'activate':
-          // Activate multiple forms (set status to "open")
-          await FeedbackForm.updateMany(
-            { _id: { $in: formIds } },
-            { $set: { status: "active" } }
-          );
-          break;
-          
-        case 'deactivate':
-          // Deactivate multiple forms (set status to "closed")
-          await FeedbackForm.updateMany(
-            { _id: { $in: formIds } },
-            { $set: { status: "closed" } }
-          );
-          break;
-          
-        default:
-          return res.status(400).json({ success: false, message: 'Invalid action' });
-      }
-      
-      return res.json({ success: true, message: `Forms ${action}d successfully` });
-    } catch (error) {
-      console.error(`Error processing bulk action:`, error);
-      return res.status(500).json({ success: false, message: 'Error processing bulk action' });
+router.post('/forms/bulk-action', validateAdmin, async (req, res) => {
+  try {
+    const { action, formIds } = req.body;
+
+    if (!action || !formIds || !Array.isArray(formIds) || formIds.length === 0) {
+      return res.status(400).json({ success: false, message: 'Invalid request' });
     }
+    
+    switch (action) {
+      case 'delete':
+        // Delete multiple forms
+        await FeedbackForm.deleteMany({ _id: { $in: formIds } });
+        
+        // Also remove deleted forms from all faculty schemas
+        const objectIds = formIds.map(id => new mongoose.Types.ObjectId(id));
+        const result = await Faculty.updateMany(
+          { feedbackForms: { $in: objectIds } },
+          { $pullAll: { feedbackForms: objectIds } }
+        );
+        console.log('Forms removed from faculties:', result.modifiedCount);
+        break;
+        
+      case 'activate':
+        // Activate multiple forms (set status to "active")
+        await FeedbackForm.updateMany(
+          { _id: { $in: formIds } },
+          { $set: { status: "active" } }
+        );
+        break;
+        
+      case 'deactivate':
+        // Deactivate multiple forms (set status to "closed")
+        await FeedbackForm.updateMany(
+          { _id: { $in: formIds } },
+          { $set: { status: "closed" } }
+        );
+        break;
+        
+      default:
+        return res.status(400).json({ success: false, message: 'Invalid action' });
+    }
+    
+    return res.json({ success: true, message: `Forms ${action}d successfully` });
+  } catch (error) {
+    console.error(`Error processing bulk action:`, error);
+    return res.status(500).json({ success: false, message: 'Error processing bulk action' });
+  }
 });
 // Admin view form details
 router.get('/forms/view/:formId', validateAdmin, async (req, res) => {

@@ -184,7 +184,7 @@
         }
     </style>
 </head>
-<body> 
+<body>
     <div class="container-fluid py-4">
         <div class="row justify-content-center">
             <div class="col-lg-10 col-md-12 col-sm-12">
@@ -226,12 +226,12 @@
                         <input type="hidden" name="formTitle" value="<%= form.title %>">
                         <input type="hidden" name="formType" value="<%= form.formType %>">
                         <input type="hidden" name="studentID" value="<%= studentID %>">
-                        <% if (form.facultyID) { %>
-                        <input type="hidden" name="facultyID" value="<%= form.facultyID %>">
-                        <% } %>
+                        <% if (facultyID) { %>
+                            <input type="hidden" name="facultyID" value="<%= facultyID %>">
+                          <% } %>                          
                         <input type="hidden" name="section" value="<%= section %>">
                         <input type="hidden" name="semester" value="<%= semester %>">
-                        <input type="hidden" name="commonSemester" value="<%= form.commonSemester %>">
+                        <input type="hidden" name="commonSemester" value="<%= commonSemester %>">
                         <input type="hidden" name="sectionCount" value="<%= form.sections ? form.sections.length : 0 %>">
                         
                         <% let globalQuestionIndex = 0; %>
@@ -251,13 +251,18 @@
                                             <div class="question-container <%= qIndex % 2 === 0 ? 'bg-light' : 'bg-white' %> rounded border p-3 mb-3" 
                                                  data-question-id="<%= question._id %>" 
                                                  data-global-index="<%= globalQuestionIndex %>"
-                                                 data-section-index="<%= sIndex %>">
+                                                 data-section-index="<%= sIndex %>"
+                                                 data-question-type="<%= question.type %>">
                                                 <h4 class="mb-3 fw-semibold fs-5">
                                                     <%= question.text %> 
                                                     <% if (question.required) { %>
                                                         <span class="required-star text-danger">*</span>
                                                     <% } %>
                                                 </h4>
+                                                
+                                                <% if (question.description) { %>
+                                                    <p class="question-description text-muted mb-3"><%= question.description %></p>
+                                                <% } %>
                                                 
                                                 <!-- Store question metadata -->
                                                 <input type="hidden" name="answers[<%= globalQuestionIndex %>][questionID]" value="<%= question._id %>">
@@ -300,6 +305,7 @@
                                                                                data-section-title="<%= section.title %>"
                                                                                data-section-id="<%= section._id %>"
                                                                                data-section-index="<%= sIndex %>"
+                                                                               data-numeric-value="<%= ['Poor', 'Average', 'Good', 'Very Good', 'Excellent'].indexOf(option) + 1 %>"
                                                                                <% if (question.required) { %>required<% } %>>
                                                                         <label class="form-check-label" 
                                                                                for="rating-<%= section._id %>-<%= question._id %>-<%= i %>"><%= option %></label>
@@ -317,6 +323,7 @@
                                                                                data-section-title="<%= section.title %>"
                                                                                data-section-id="<%= section._id %>"
                                                                                data-section-index="<%= sIndex %>"
+                                                                               data-numeric-value="<%= i %>"
                                                                                <% if (question.required) { %>required<% } %>>
                                                                         <label class="form-check-label" 
                                                                                for="rating-<%= section._id %>-<%= question._id %>-<%= i %>"><%= i %></label>
@@ -332,14 +339,15 @@
                                                                        class="form-check-input" 
                                                                        id="yes-<%= section._id %>-<%= question._id %>" 
                                                                        name="answers[<%= globalQuestionIndex %>][responseOptions]" 
-                                                                       value="Yes"
+                                                                       value="<%= question.yesNoLabels?.yes || 'Yes' %>"
                                                                        data-section-title="<%= section.title %>"
                                                                        data-section-id="<%= section._id %>"
                                                                        data-section-index="<%= sIndex %>"
+                                                                       data-numeric-value="1"
                                                                        <% if (question.required) { %>required<% } %>>
                                                                 <label class="form-check-label" 
                                                                        for="yes-<%= section._id %>-<%= question._id %>">
-                                                                    <%= question.yesNoLabels && question.yesNoLabels.yes ? question.yesNoLabels.yes : 'Yes' %>
+                                                                    <%= question.yesNoLabels?.yes || 'Yes' %>
                                                                 </label>
                                                             </div>
                                                             <div class="option form-check">
@@ -347,14 +355,15 @@
                                                                        class="form-check-input" 
                                                                        id="no-<%= section._id %>-<%= question._id %>" 
                                                                        name="answers[<%= globalQuestionIndex %>][responseOptions]" 
-                                                                       value="No"
+                                                                       value="<%= question.yesNoLabels?.no || 'No' %>"
                                                                        data-section-title="<%= section.title %>"
                                                                        data-section-id="<%= section._id %>"
                                                                        data-section-index="<%= sIndex %>"
+                                                                       data-numeric-value="0"
                                                                        <% if (question.required) { %>required<% } %>>
                                                                 <label class="form-check-label" 
                                                                        for="no-<%= section._id %>-<%= question._id %>">
-                                                                    <%= question.yesNoLabels && question.yesNoLabels.no ? question.yesNoLabels.no : 'No' %>
+                                                                    <%= question.yesNoLabels?.no || 'No' %>
                                                                 </label>
                                                             </div>
                                                             <div class="option form-check">
@@ -365,7 +374,8 @@
                                                                        value="No Opinion"
                                                                        data-section-title="<%= section.title %>"
                                                                        data-section-id="<%= section._id %>"
-                                                                       data-section-index="<%= sIndex %>">
+                                                                       data-section-index="<%= sIndex %>"
+                                                                       data-numeric-value="">
                                                                 <label class="form-check-label" 
                                                                        for="no-opinion-<%= section._id %>-<%= question._id %>">No Opinion</label>
                                                             </div>
@@ -442,6 +452,7 @@
                                                                data-section-title="<%= section.title %>"
                                                                data-section-id="<%= section._id %>"
                                                                data-section-index="<%= sIndex %>"
+                                                               <% if (question.dateFormat) { %>data-date-format="<%= question.dateFormat %>"<% } %>
                                                                <% if (question.required) { %>required<% } %>>
                                                                 
                                                     <% } else if (question.type === 'grid') { %>
@@ -521,6 +532,10 @@
                                     <strong>Completion Rate:</strong>
                                     <span id="completionRate">0%</span>
                                 </div>
+                                <div class="d-flex justify-content-between">
+                                    <strong>Estimated Average Rating:</strong>
+                                    <span id="estimatedAverage">N/A</span>
+                                </div>
                             </div>
                         </div>
                         
@@ -589,376 +604,462 @@
               // Create section data tracker
               const sectionData = {};
               
-              // Initialize section data
-              document.querySelectorAll('.section-card').forEach(sectionEl => {
-                  const sectionId = sectionEl.getAttribute('data-section-id');
-                  const sectionIndex = parseInt(sectionEl.getAttribute('data-section-index'));
-                  const sectionTitle = sectionEl.querySelector('.section-title').textContent;
-                  
-                  sectionData[sectionIndex] = {
-                      sectionID: sectionId,
-                      sectionTitle: sectionTitle,
-                      totalQuestions: 0,
-                      answeredQuestions: 0,
-                      questions: {}
-                  };
-                  
-                  // Count questions in this section
-                  const questionContainers = sectionEl.querySelectorAll('.question-container');
-                  sectionData[sectionIndex].totalQuestions = questionContainers.length;
-                  
-                  // Initialize question data
-                  questionContainers.forEach(container => {
-                      const globalIndex = container.getAttribute('data-global-index');
-                      const questionId = container.getAttribute('data-question-id');
-                      
-                      sectionData[sectionIndex].questions[globalIndex] = {
-                          questionID: questionId,
-                          answered: false
-                      };
-                  });
-              });
-              
-              // Process grid questions to collect their data 
-              const processGridQuestions = () => {
-                  document.querySelectorAll('.grid-question-table').forEach(table => {
-                      const questionContainer = table.closest('.question-container');
-                      if (!questionContainer) return;
-                      
-                      const globalIndex = questionContainer.getAttribute('data-global-index');
-                      const sectionIndex = questionContainer.getAttribute('data-section-index');
-                      const questionIdInput = questionContainer.querySelector('[name$="[questionID]"]');
-                      if (!questionIdInput) return;
-                      
-                      const questionId = questionIdInput.value;
-                      const gridData = {};
-                      
-                      // Get all rows with selected values
-                      table.querySelectorAll('tbody tr').forEach(row => {
-                          const rowTitle = row.querySelector('td').textContent.trim();
-                          const checkedRadio = row.querySelector('input[type="radio"]:checked');
-                          
-                          if (checkedRadio) {
-                              gridData[rowTitle] = checkedRadio.value;
-                          }
-                      });
-                      
-                      // Store in formResponses
-                      if (!formResponses[globalIndex]) {
-                          formResponses[globalIndex] = {
-                              questionID: questionId,
-                              questionText: questionContainer.querySelector('[name$="[questionText]"]').value,
-                              sectionTitle: questionContainer.querySelector('[name$="[sectionTitle]"]').value,
-                              sectionID: questionContainer.querySelector('[name$="[sectionID]"]').value,
-                              sectionIndex: parseInt(sectionIndex),
-                              questionType: questionContainer.querySelector('[name$="[questionType]"]').value,
-                              responseText: JSON.stringify(gridData),
-                              responseOptions: [],
-                              gridResponses: gridData
-                          };
-                      } else {
-                          formResponses[globalIndex].responseText = JSON.stringify(gridData);
-                          formResponses[globalIndex].gridResponses = gridData;
+              // Helper function to convert text responses to numeric values
+              // Implementation from provided code
+              function convertResponseToNumeric(responseText, questionType) {
+                // Skip processing if response is empty
+                if (!responseText && responseText !== 0) {
+                  return null;
+                }
+                
+                // If responseText is already a number, return it directly
+                if (!isNaN(responseText) && responseText !== '') {
+                  return Number(responseText);
+                }
+                
+                // For scale: Poor, Average, Good, Very Good, Excellent, No Opinion
+                const ratingMap = {
+                  "Poor": 1,
+                  "Average": 2,
+                  "Good": 3,
+                  "Very Good": 4,
+                  "Excellent": 5,
+                  "No Opinion": null
+                };
+
+                // For Yes/No: No, Yes, No Opinion
+                const yesNoMap = {
+                  "No": 0,
+                  "Yes": 1,
+                  "No Opinion": null
+                };
+
+                // For weight scale: Just right, Too light, Too Heavy, No Opinion
+                const weightMap = {
+                  "Just right": 2,
+                  "Too light": 1,
+                  "Too Heavy": 3,
+                  "No Opinion": null
+                };
+
+                // For satisfaction scale: Very Good, Good, Fair, Satisfactory, Unsatisfied
+                const satisfactionMap = {
+                  "Very Good": 5,
+                  "Good": 4,
+                  "Fair": 3,
+                  "Satisfactory": 2,
+                  "Unsatisfied": 1,
+                  "No Opinion": null
+                };
+                
+                // For agreement scale: Strongly Agree, Agree, Neutral, Disagree, Strongly Disagree
+                const agreementMap = {
+                  "Strongly Agree": 5,
+                  "Agree": 4,
+                  "Neutral": 3,
+                  "Disagree": 2,
+                  "Strongly Disagree": 1,
+                  "No Opinion": null
+                };
+                
+                // For frequency scale: Always, Frequently, Sometimes, Rarely, Never
+                const frequencyMap = {
+                  "Always": 5,
+                  "Frequently": 4,
+                  "Sometimes": 3,
+                  "Rarely": 2,
+                  "Never": 1,
+                  "No Opinion": null
+                };
+
+                // Handle different question types
+                switch (questionType) {
+                  case "rating":
+                    return ratingMap[responseText] !== undefined ? ratingMap[responseText] : Number(responseText) || null;
+                    
+                  case "yes_no":
+                    return yesNoMap[responseText] !== undefined ? yesNoMap[responseText] : null;
+                    
+                  case "mcq":
+                  case "radio":
+                  case "dropdown":
+                    // Try to match with any of the scales
+                    const allMaps = [
+                      ratingMap, 
+                      yesNoMap, 
+                      weightMap, 
+                      satisfactionMap, 
+                      agreementMap, 
+                      frequencyMap
+                    ];
+                    
+                    for (const map of allMaps) {
+                      if (map[responseText] !== undefined) {
+                        return map[responseText];
+                      }
+                    }
+                    break;
+                    
+                  case "grid":
+                    // Try to extract numeric value from grid response
+                    if (typeof responseText === 'string') {
+                      const numMatch = responseText.match(/\d+/);
+                      if (numMatch) {
+                        return Number(numMatch[0]);
                       }
                       
-                      // Set the JSON string in the hidden input
-                      const hiddenInput = document.getElementById(`grid-data-${questionContainer.querySelector('[name$="[sectionID]"]').value}-${questionId}`);
-                      if (hiddenInput) {
-                          hiddenInput.value = JSON.stringify(gridData);
+                      // Try to match with keyword patterns
+                      const lowerText = responseText.toLowerCase();
+                      
+                      if (lowerText.includes('excellent') || lowerText.includes('strongly agree') || 
+                          lowerText.includes('very good') || lowerText.includes('always')) {
+                        return 5;
+                      } else if (lowerText.includes('good') || lowerText.includes('agree') && 
+                                !lowerText.includes('disagree') && !lowerText.includes('strongly')) {
+                        return 4;
+                      } else if (lowerText.includes('neutral') || lowerText.includes('fair') || 
+                                lowerText.includes('sometimes')) {
+                        return 3;
+                      } else if (lowerText.includes('poor') || lowerText.includes('disagree') && 
+                                !lowerText.includes('strongly') || lowerText.includes('rarely')) {
+                        return 2;
+                     // Continuing from where the code was cut off
+                    } else if (lowerText.includes('poor') || lowerText.includes('disagree') && 
+                                !lowerText.includes('strongly') || lowerText.includes('rarely')) {
+                        return 2;
+                      } else if (lowerText.includes('very poor') || lowerText.includes('strongly disagree') || 
+                                lowerText.includes('unsatisfied') || lowerText.includes('never')) {
+                        return 1;
                       }
-                      
-                      // Check if this question is answered
-                      const hasAnswers = Object.keys(gridData).length > 0;
-                      if (hasAnswers && sectionData[sectionIndex] && sectionData[sectionIndex].questions[globalIndex]) {
-                          sectionData[sectionIndex].questions[globalIndex].answered = true;
-                          
-                          // If this is a newly answered question, increment the section's answered count
-                          if (!sectionData[sectionIndex].questions[globalIndex].previouslyAnswered) {
-                              sectionData[sectionIndex].answeredQuestions++;
-                              sectionData[sectionIndex].questions[globalIndex].previouslyAnswered = true;
-                          }
-                      }
-                  });
-              };
-      
-              // Add event listeners to all form inputs to track responses
-              document.querySelectorAll('#feedbackForm input, #feedbackForm textarea, #feedbackForm select').forEach(input => {
-                  // Skip hidden inputs for metadata
-                  if (input.type === 'hidden' && !input.name.includes('responseText')) return;
-                  
-                  // Extract question index from input name
-                  const indexMatch = input.name.match(/answers\[(\d+)\]/);
-                  if (!indexMatch) return;
-                  
-                  const globalIndex = indexMatch[1];
-                  
-                  // Input change handler
-                  const handleInputChange = function() {
-                      const container = this.closest('.question-container');
-                      if (!container) return;
-                      
-                      const sectionIndex = container.getAttribute('data-section-index');
-                      
-                      // Initialize response object if it doesn't exist
-                      if (!formResponses[globalIndex]) {
-                          const questionIdInput = container.querySelector('[name$="[questionID]"]');
-                          const questionTextInput = container.querySelector('[name$="[questionText]"]');
-                          const sectionIdInput = container.querySelector('[name$="[sectionID]"]');
-                          const sectionTitleInput = container.querySelector('[name$="[sectionTitle]"]');
-                          const questionTypeInput = container.querySelector('[name$="[questionType]"]');
-                          
-                          if (!questionIdInput || !questionTextInput || !sectionTitleInput || !questionTypeInput) return;
-                          
-                          formResponses[globalIndex] = {
-                              questionID: questionIdInput.value,
-                              questionText: questionTextInput.value,
-                              sectionID: sectionIdInput.value,
-                              sectionTitle: sectionTitleInput.value,
-                              sectionIndex: parseInt(sectionIndex),
-                              questionType: questionTypeInput.value,
-                              responseText: '',
-                              responseOptions: []
-                          };
-                      }
-                      
-                      // Update the response data based on input type
-                      if (this.type === 'text' || this.type === 'date' || this.tagName === 'TEXTAREA' || this.tagName === 'SELECT') {
-                          formResponses[globalIndex].responseText = this.value.trim();
-                      } else if (this.type === 'radio') {
-                          if (this.checked) {
-                              formResponses[globalIndex].responseOptions = [this.value];
-                          }
-                      } else if (this.type === 'checkbox') {
-                          // For checkboxes, we need to collect all selected values
-                          if (!Array.isArray(formResponses[globalIndex].responseOptions)) {
-                              formResponses[globalIndex].responseOptions = [];
-                          }
-                          
-                          if (this.checked) {
-                              if (!formResponses[globalIndex].responseOptions.includes(this.value)) {
-                                  formResponses[globalIndex].responseOptions.push(this.value);
-                              }
-                          } else {
-                              const index = formResponses[globalIndex].responseOptions.indexOf(this.value);
-                              if (index > -1) {
-                                  formResponses[globalIndex].responseOptions.splice(index, 1);
-                              }
-                          }
-                      }
-                      
-                      // Update section data - mark as answered if there's a value
-                      if (sectionData[sectionIndex] && sectionData[sectionIndex].questions[globalIndex]) {
-                          const wasAnswered = sectionData[sectionIndex].questions[globalIndex].answered;
-                          
-                          // Check if question is now answered
-                          let isAnswered = false;
-                          
-                          if (this.type === 'text' || this.type === 'date' || this.tagName === 'TEXTAREA' || this.tagName === 'SELECT') {
-                              isAnswered = this.value.trim() !== '';
-                          } else if (this.type === 'radio') {
-                              isAnswered = this.checked;
-                          } else if (this.type === 'checkbox') {
-                              // For checkboxes, we need to check if any checkbox in this group is checked
-                              const checkboxes = document.querySelectorAll(`input[name="${this.name}"]`);
-                              isAnswered = Array.from(checkboxes).some(cb => cb.checked);
-                          }
-                          
-                          sectionData[sectionIndex].questions[globalIndex].answered = isAnswered;
-                          
-                          // Update section answered count if needed
-                          if (!wasAnswered && isAnswered) {
-                              sectionData[sectionIndex].answeredQuestions++;
-                              sectionData[sectionIndex].questions[globalIndex].previouslyAnswered = true;
-                          } else if (wasAnswered && !isAnswered) {
-                              sectionData[sectionIndex].answeredQuestions--;
-                              sectionData[sectionIndex].questions[globalIndex].previouslyAnswered = false;
-                          }
-                          
-                          // Update the summary display
-                          updateSummary();
-                      }
-                  };
-                  
-                  // Attach event listeners based on input type
-                  if (input.type === 'checkbox' || input.type === 'radio') {
-                      input.addEventListener('change', handleInputChange);
-                  } else {
-                      input.addEventListener('input', handleInputChange);
-                      // Also trigger on blur to catch paste events
-                      input.addEventListener('blur', handleInputChange);
-                  }
-              });
-              
-              // Function to update the summary display
-              const updateSummary = () => {
-                  const summaryContainer = document.getElementById('sectionSummaries');
-                  if (!summaryContainer) return;
-                  
-                  summaryContainer.innerHTML = '';
-                  
-                  let totalQuestions = 0;
-                  let totalAnswered = 0;
-                  
-                  // Process each section
-                  Object.values(sectionData).sort((a, b) => a.sectionIndex - b.sectionIndex).forEach(section => {
-                      const sectionDiv = document.createElement('div');
-                      sectionDiv.className = 'mb-2 pb-2 border-bottom';
-                      
-                      const sectionHeader = document.createElement('div');
-                      sectionHeader.className = 'd-flex justify-content-between align-items-center';
-                      
-                      const sectionTitle = document.createElement('span');
-                      sectionTitle.textContent = section.sectionTitle;
-                      sectionTitle.className = 'fw-medium';
-                      
-                      const progressWrapper = document.createElement('div');
-                      progressWrapper.className = 'd-flex align-items-center gap-2';
-                      
-                      const completionText = document.createElement('span');
-                      completionText.className = 'text-nowrap small';
-                      completionText.textContent = `${section.answeredQuestions}/${section.totalQuestions}`;
-                      
-                      const progressPercentage = section.totalQuestions > 0 
-                          ? Math.round((section.answeredQuestions / section.totalQuestions) * 100) 
-                          : 0;
-                      
-                      const progressBar = document.createElement('div');
-                      progressBar.className = 'progress flex-grow-1';
-                      progressBar.style.height = '10px';
-                      progressBar.style.width = '100px';
-                      
-                      const progressBarInner = document.createElement('div');
-                      progressBarInner.className = 'progress-bar';
-                      progressBarInner.style.width = `${progressPercentage}%`;
-                      progressBarInner.setAttribute('role', 'progressbar');
-                      progressBarInner.setAttribute('aria-valuenow', progressPercentage);
-                      progressBarInner.setAttribute('aria-valuemin', '0');
-                      progressBarInner.setAttribute('aria-valuemax', '100');
-                      
-                      // Add color based on completion percentage
-                      if (progressPercentage < 33) {
-                          progressBarInner.classList.add('bg-danger');
-                      } else if (progressPercentage < 67) {
-                          progressBarInner.classList.add('bg-warning');
-                      } else {
-                          progressBarInner.classList.add('bg-success');
-                      }
-                      
-                      progressBar.appendChild(progressBarInner);
-                      progressWrapper.appendChild(progressBar);
-                      progressWrapper.appendChild(completionText);
-                      
-                      sectionHeader.appendChild(sectionTitle);
-                      sectionHeader.appendChild(progressWrapper);
-                      sectionDiv.appendChild(sectionHeader);
-                      
-                      summaryContainer.appendChild(sectionDiv);
-                      
-                      // Update totals
-                      totalQuestions += section.totalQuestions;
-                      totalAnswered += section.answeredQuestions;
-                  });
-                  
-                  // Update total summary
-                  document.getElementById('totalQuestions').textContent = totalQuestions;
-                  document.getElementById('questionsAnswered').textContent = totalAnswered;
-                  
-                  const overallPercentage = totalQuestions > 0 
-                      ? Math.round((totalAnswered / totalQuestions) * 100) 
-                      : 0;
-                  document.getElementById('completionRate').textContent = `${overallPercentage}%`;
-              };
-              
-              // Process deadline to show countdown
-              const deadlineElement = document.querySelector('[data-deadline]');
-              if (deadlineElement) {
-                  const deadline = new Date(deadlineElement.getAttribute('data-deadline'));
-                  const now = new Date();
-                  
-                  const daysLeft = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
-                  
-                  if (daysLeft > 0) {
-                      const suffix = daysLeft === 1 ? 'day' : 'days';
-                      deadlineElement.innerHTML += ` <span class="badge bg-warning text-dark">${daysLeft} ${suffix} left</span>`;
-                  } else if (daysLeft === 0) {
-                      deadlineElement.innerHTML += ' <span class="badge bg-danger">Due today!</span>';
-                  } else {
-                      deadlineElement.innerHTML += ' <span class="badge bg-danger">Overdue!</span>';
-                  }
+                    }
+                    break;
+                }
+                
+                // If no match found but looks like a number, try parsing it
+                if (typeof responseText === 'string' && /^\d+(\.\d+)?$/.test(responseText)) {
+                  return Number(responseText);
+                }
+                
+                // Return null if no numeric value could be determined
+                return null;
               }
               
-              // Initial processing of grid questions and summary update
-              processGridQuestions();
-              updateSummary();
-              
-              // Form submission handler
-              form.addEventListener('submit', function(e) {
-                  e.preventDefault();
+              // Function to update summary statistics
+              function updateSummaryStatistics() {
+                // Get all questions and count
+                const totalQuestions = document.querySelectorAll('.question-container').length;
+                
+                // Count answered questions
+                let answeredQuestions = 0;
+                let totalRatingValue = 0;
+                let totalRatedQuestions = 0;
+                
+                // Process each section
+                Object.keys(sectionData).forEach(sectionId => {
+                  const section = sectionData[sectionId];
+                  let sectionAnswered = 0;
+                  let sectionTotal = section.questions.length;
+                  let sectionRatingTotal = 0;
+                  let sectionRatedQuestions = 0;
                   
-                  // Re-process grid questions to ensure we have the latest data
-                  processGridQuestions();
-                  
-                  // Check if all required fields are filled
-                  const requiredInputs = form.querySelectorAll('[required]');
-                  let missingRequired = false;
-                  
-                  requiredInputs.forEach(input => {
-                      if ((input.type === 'text' || input.type === 'date' || input.tagName === 'TEXTAREA' || input.tagName === 'SELECT') && !input.value.trim()) {
-                          missingRequired = true;
-                          input.classList.add('is-invalid');
-                      } else if ((input.type === 'radio' || input.type === 'checkbox')) {
-                          // Check if any radio in the group is checked
-                          const inputName = input.name;
-                          const radioGroup = form.querySelectorAll(`[name="${inputName}"]`);
-                          const anyChecked = Array.from(radioGroup).some(radio => radio.checked);
-                          
-                          if (!anyChecked) {
-                              missingRequired = true;
-                              // Only add the error class to one element in the group
-                              if (!document.querySelector(`[name="${inputName}"].is-invalid`)) {
-                                  input.classList.add('is-invalid');
-                              }
-                          }
+                  // Process each question in the section
+                  section.questions.forEach(question => {
+                    if (question.answered) {
+                      sectionAnswered++;
+                      answeredQuestions++;
+                      
+                      // If the question has a numeric value, add it to the average calculation
+                      if (question.numericValue !== null && question.numericValue !== undefined) {
+                        sectionRatingTotal += question.numericValue;
+                        sectionRatedQuestions++;
+                        
+                        totalRatingValue += question.numericValue;
+                        totalRatedQuestions++;
                       }
+                    }
                   });
                   
-                  if (missingRequired) {
-                      showToast('Please fill in all required fields.', 'error');
-                      
-                      // Scroll to the first invalid input
-                      const firstInvalid = form.querySelector('.is-invalid');
-                      if (firstInvalid) {
-                          const container = firstInvalid.closest('.question-container');
-                          if (container) {
-                              container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                          }
-                      }
-                      
-                      return;
+                  // Calculate section completion percentage
+                  const sectionCompletionPercentage = sectionTotal > 0 ? Math.round((sectionAnswered / sectionTotal) * 100) : 0;
+                  
+                  // Update section summary in the UI
+                  const sectionSummaries = document.getElementById('sectionSummaries');
+                  let sectionSummaryElement = document.getElementById(`section-summary-${sectionId}`);
+                  
+                  if (!sectionSummaryElement) {
+                    sectionSummaryElement = document.createElement('div');
+                    sectionSummaryElement.id = `section-summary-${sectionId}`;
+                    sectionSummaryElement.className = 'section-summary-item mb-2';
+                    sectionSummaries.appendChild(sectionSummaryElement);
                   }
                   
-                  // All validation passed, submit the form
-                  form.submit();
+                  // Calculate section average rating
+                  const sectionAverage = sectionRatedQuestions > 0 ? 
+                    (sectionRatingTotal / sectionRatedQuestions).toFixed(1) : 'N/A';
+                  
+                  sectionSummaryElement.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span>${section.title}</span>
+                      <span class="badge bg-${sectionCompletionPercentage === 100 ? 'success' : 
+                        sectionCompletionPercentage > 50 ? 'primary' : 'warning'}">
+                        ${sectionAnswered}/${sectionTotal} (${sectionCompletionPercentage}%)
+                      </span>
+                    </div>
+                    <div class="progress mb-1" style="height: 8px;">
+                      <div class="progress-bar bg-${sectionCompletionPercentage === 100 ? 'success' : 
+                        sectionCompletionPercentage > 50 ? 'primary' : 'warning'}" 
+                        role="progressbar" style="width: ${sectionCompletionPercentage}%" 
+                        aria-valuenow="${sectionCompletionPercentage}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="small text-muted text-end">Avg. Rating: ${sectionAverage}</div>
+                  `;
+                });
+                
+                // Update total statistics
+                const completionPercentage = totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
+                const averageRating = totalRatedQuestions > 0 ? (totalRatingValue / totalRatedQuestions).toFixed(1) : 'N/A';
+                
+                document.getElementById('totalQuestions').textContent = totalQuestions;
+                document.getElementById('questionsAnswered').textContent = answeredQuestions;
+                document.getElementById('completionRate').textContent = `${completionPercentage}%`;
+                document.getElementById('estimatedAverage').textContent = averageRating;
+              }
+              
+              // Initialize section data from the DOM
+              document.querySelectorAll('.section-card').forEach(sectionElement => {
+                const sectionId = sectionElement.dataset.sectionId;
+                const sectionIndex = sectionElement.dataset.sectionIndex;
+                const sectionTitle = sectionElement.querySelector('.section-title').textContent;
+                
+                sectionData[sectionId] = {
+                  id: sectionId,
+                  index: sectionIndex,
+                  title: sectionTitle,
+                  questions: []
+                };
+                
+                // Initialize questions for this section
+                sectionElement.querySelectorAll('.question-container').forEach(questionElement => {
+                  const questionId = questionElement.dataset.questionId;
+                  const questionType = questionElement.dataset.questionType;
+                  const questionText = questionElement.querySelector('h4').childNodes[0].textContent.trim();
+                  
+                  sectionData[sectionId].questions.push({
+                    id: questionId,
+                    type: questionType,
+                    text: questionText,
+                    answered: false,
+                    value: null,
+                    numericValue: null
+                  });
+                });
               });
               
-              // Remove invalid state when user starts to correct the input
-              form.querySelectorAll('input, textarea, select').forEach(input => {
-                  if (input.type === 'radio' || input.type === 'checkbox') {
-                      input.addEventListener('change', function() {
-                          const name = this.name;
-                          form.querySelectorAll(`[name="${name}"]`).forEach(el => {
-                              el.classList.remove('is-invalid');
-                          });
-                      });
-                  } else {
-                      input.addEventListener('input', function() {
-                          this.classList.remove('is-invalid');
-                      });
+              // Add event listeners to track form inputs
+              document.querySelectorAll('input, textarea, select').forEach(input => {
+                if (input.type === 'hidden') return;
+                
+                const sectionId = input.dataset.sectionId;
+                if (!sectionId) return;
+                
+                const questionContainer = input.closest('.question-container');
+                if (!questionContainer) return;
+                
+                const questionId = questionContainer.dataset.questionId;
+                const questionType = questionContainer.dataset.questionType;
+                const globalIndex = questionContainer.dataset.globalIndex;
+                
+                // Handle different input types
+                const updateQuestionStatus = () => {
+                  // Find the question in section data
+                  const section = sectionData[sectionId];
+                  if (!section) return;
+                  
+                  const question = section.questions.find(q => q.id === questionId);
+                  if (!question) return;
+                  
+                  let value = null;
+                  let answered = false;
+                  
+                  // Get value based on input type
+                  switch (input.type) {
+                    case 'text':
+                    case 'textarea':
+                    case 'date':
+                      value = input.value.trim();
+                      answered = value !== '';
+                      break;
+                      
+                    case 'radio':
+                      if (input.checked) {
+                        value = input.value;
+                        answered = true;
+                      }
+                      break;
+                      
+                    case 'checkbox':
+                      // For checkboxes, we need to collect all checked values in the question
+                      const checkedInputs = questionContainer.querySelectorAll('input[type="checkbox"]:checked');
+                      if (checkedInputs.length > 0) {
+                        value = Array.from(checkedInputs).map(cb => cb.value).join(', ');
+                        answered = true;
+                      }
+                      break;
+                      
+                    case 'select-one':
+                      value = input.value;
+                      answered = value !== '';
+                      break;
                   }
+                  
+                  // Update question status
+                  if (answered) {
+                    question.answered = true;
+                    question.value = value;
+                    
+                    // Try to get numeric value for statistics
+                    if (input.dataset.numericValue) {
+                      question.numericValue = parseFloat(input.dataset.numericValue);
+                    } else {
+                      question.numericValue = convertResponseToNumeric(value, questionType);
+                    }
+                  } else {
+                    // If checking a single input that's not answered, we need to check if any other inputs for this question are answered
+                    const allInputs = questionContainer.querySelectorAll('input:not([type="hidden"]), textarea, select');
+                    const anyAnswered = Array.from(allInputs).some(inp => {
+                      if (inp.type === 'radio' || inp.type === 'checkbox') {
+                        return inp.checked;
+                      } else {
+                        return inp.value.trim() !== '';
+                      }
+                    });
+                    
+                    question.answered = anyAnswered;
+                    if (!anyAnswered) {
+                      question.value = null;
+                      question.numericValue = null;
+                    }
+                  }
+                  
+                  // Update statistics
+                  updateSummaryStatistics();
+                };
+                
+                // Add appropriate event listeners based on input type
+                if (input.type === 'radio' || input.type === 'checkbox') {
+                  input.addEventListener('change', updateQuestionStatus);
+                } else {
+                  input.addEventListener('input', updateQuestionStatus);
+                  input.addEventListener('change', updateQuestionStatus);
+                }
               });
+              
+              // Handle form submission
+              form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Check for required fields that are not filled
+                const requiredInputs = form.querySelectorAll('[required]');
+                let allFilled = true;
+                
+                requiredInputs.forEach(input => {
+                  if (input.type === 'radio') {
+                    // For radio buttons, check if any in the group is selected
+                    const name = input.name;
+                    const radioGroup = form.querySelectorAll(`input[type="radio"][name="${name}"]`);
+                    const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+                    
+                    if (!isChecked) {
+                      allFilled = false;
+                      // Find the question container and highlight it
+                      const questionContainer = input.closest('.question-container');
+                      if (questionContainer) {
+                        questionContainer.classList.add('border-danger');
+                      }
+                    }
+                  } else if (input.type === 'checkbox' && input.required) {
+                    // For checkboxes, simply check if it's checked
+                    if (!input.checked) {
+                      allFilled = false;
+                      const questionContainer = input.closest('.question-container');
+                      if (questionContainer) {
+                        questionContainer.classList.add('border-danger');
+                      }
+                    }
+                  } else {
+                    // For other input types
+                    if (!input.value.trim()) {
+                      allFilled = false;
+                      input.classList.add('border-danger');
+                      const questionContainer = input.closest('.question-container');
+                      if (questionContainer) {
+                        questionContainer.classList.add('border-danger');
+                      }
+                    }
+                  }
+                });
+                
+                if (!allFilled) {
+                  showToast('Please complete all required questions before submitting.', 'error');
+                  // Scroll to the first incomplete required question
+                  const firstIncomplete = form.querySelector('.border-danger');
+                  if (firstIncomplete) {
+                    firstIncomplete.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                  return;
+                }
+                
+                // If all required fields are filled, prepare grid data before submitting
+                document.querySelectorAll('.grid-question-table').forEach(table => {
+                  const gridId = table.dataset.gridId;
+                  const gridData = {};
+                  
+                  // Collect grid responses
+                  table.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+                    const row = input.dataset.row;
+                    const column = input.value;
+                    
+                    if (row) {
+                      gridData[row] = column;
+                    }
+                  });
+                  
+                  // Store grid data in hidden field
+                  const hiddenInput = document.getElementById(`grid-data-${gridId}`);
+                  if (hiddenInput) {
+                    hiddenInput.value = JSON.stringify(gridData);
+                  }
+                });
+                
+                // Show loading state
+                const submitButton = form.querySelector('.btn-submit');
+                const originalButtonText = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Submitting...';
+                
+                // Submit the form
+                form.submit();
+              });
+              
+              // Initialize summary statistics on page load
+              updateSummaryStatistics();
+              
+              // Check deadline
+              const deadlineElement = document.querySelector('[data-deadline]');
+              if (deadlineElement) {
+                const deadline = new Date(deadlineElement.dataset.deadline);
+                const now = new Date();
+                
+                if (now > deadline) {
+                  showToast('Warning: The deadline for this form has passed.', 'warning');
+                } else {
+                  const daysLeft = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+                  if (daysLeft <= 3) {
+                    showToast(`Only ${daysLeft} day${daysLeft !== 1 ? 's' : ''} left until the deadline!`, 'warning');
+                  }
+                }
+              }
           }
-        });
+      });
     </script>
 </body>
-                    
-</html>

@@ -26,6 +26,15 @@
     <div class="nav-item">
         <a href="/admin/logout" style="text-decoration: none; color: white;"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
     </div>
+    
+    <!-- Session Info -->
+    <div class="session-info">
+        <div class="session-label">Current Session</div>
+        <div class="session-value" id="dynamic-session">
+            <%= admin && admin.currentSession ? admin.currentSession : 'Spring 2025' %>
+        </div>
+    </div>
+    
     <!-- Admin Profile Section - Using EJS Template Data -->
     <div class="admin-profile">
         <div class="admin-avatar">
@@ -118,14 +127,31 @@
         color: white !important;
     }
 
+    /* Session Info Styles */
+    .session-info {
+        margin-top: auto;
+        padding: 15px 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .session-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .session-value {
+        color: white;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
     /* Admin Profile Styles */
     .admin-profile {
-        margin-top: auto;
         padding: 15px 20px;
         display: flex;
         align-items: center;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
-        margin-top: 20px;
     }
 
     .admin-avatar {
@@ -275,6 +301,7 @@
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sessionValueElement = document.getElementById('dynamic-session');
     
     // Get current path
     const currentPath = window.location.pathname;
@@ -328,5 +355,30 @@
             }
         });
     });
+    // Dynamic session update
+if (
+    sessionValueElement &&
+    sessionValueElement.textContent.trim() === 'Spring 2025' ||
+    sessionValueElement.textContent.includes('admin.currentSession')
+) {
+    // Get current date
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+    const currentYear = currentDate.getFullYear();
+
+    let sessionText;
+
+    if (currentMonth >= 0 && currentMonth <= 7) {
+        // Jan to July -> Session starts previous year
+        sessionText = `${currentYear - 1}-${currentYear.toString().slice(-2)} (Jan - July)`;
+    } else {
+        // Aug to Dec -> Session starts current year
+        sessionText = `${currentYear}-${(currentYear + 1).toString().slice(-2)} (Aug - Dec)`;
+    }
+
+    // Update the session value
+    sessionValueElement.textContent = sessionText;
+}
+
 });
 </script>
