@@ -201,16 +201,19 @@ body {
 .card-status-badge.active {
     background-color: rgba(45, 206, 137, 0.1);
     color: var(--success-color);
+    z-index: 0;
 }
 
 .card-status-badge.inactive {
     background-color: rgba(163, 163, 163, 0.1);
     color: #7c7c7c;
+    z-index: 0;
 }
 
 .card-status-badge.expired {
     background-color: rgba(245, 54, 92, 0.1);
     color: var(--danger-color);
+    z-index: 0;
 }
 
 .card-title {
@@ -476,7 +479,7 @@ body {
     color: var(--primary-color);
     margin-bottom: 8px;
     position: relative;
-    z-index: 1;
+    z-index: 0;
 }
 
 .stat-label {
@@ -486,7 +489,7 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     position: relative;
-    z-index: 1;
+    z-index: 0;
 }
 
 /* Responsive */
