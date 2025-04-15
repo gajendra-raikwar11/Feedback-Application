@@ -229,7 +229,7 @@ router.get("/studentFormsPage", studentValidate, async (req, res) => {
     }).populate('responses').lean();
     
     if (!forms.length) {
-      return res.render("studentFormsPage", {
+      return res.render("student-form-page", {
         student,
         forms: [],
         currentPage: req.path,
@@ -243,7 +243,7 @@ router.get("/studentFormsPage", studentValidate, async (req, res) => {
     });
     
     if (!filteredForms.length) {
-      return res.render("studentFormsPage", {
+      return res.render("student-form-page", {
         student,
         forms: [],
         currentPage: req.path,
@@ -297,7 +297,7 @@ router.get("/studentFormsPage", studentValidate, async (req, res) => {
       form.canSubmit = new Date() <= new Date(form.deadline);
     });
     
-    res.render("studentFormsPage", {
+    res.render("student-form-page", {
       student,
       forms: enhancedForms,
       currentPage: req.path,
