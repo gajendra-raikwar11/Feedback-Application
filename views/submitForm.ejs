@@ -1040,20 +1040,7 @@
                 // Submit the form
                 form.submit();
               });
-              
-              function handleFormSubmissionResponse(response) {
-  const submitButton = document.querySelector('.btn-submit');
-  const originalButtonText = submitButton.innerHTML;
-  
-  // Change the button text and background color
-  submitButton.innerHTML = 'Submitted';
-  submitButton.style.backgroundColor = 'red-500';
-  submitButton.style.color = 'white';
-  submitButton.disabled = true;
-  
-  // You can add more logic here to handle the response, such as showing a success message
-  showToast('Form submitted successfully!', 'success');
-}
+
               // Initialize summary statistics on page load
               updateSummaryStatistics();
               
