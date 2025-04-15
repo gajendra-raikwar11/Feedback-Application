@@ -28,7 +28,6 @@ const {
   validateFaculty,
   validateFacultyLogin,
 } = require("../models/facultySchema");
-const { isLoggedIn } = require("../middlewares/isLoggedIn");
 const {
   FeedbackResponse,
   validateFeedbackResponse,

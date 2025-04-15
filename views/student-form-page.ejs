@@ -389,8 +389,7 @@
   </head>
   <body>
     <!-- Navbar -->
-    <%- include('partials/navbar', { activePage:currentPage , student: student
-    }) %>
+    <%- include('partials/navbar', { activePage:currentPage , student: student}) %>
     <!-- Forms Content -->
     <div class="container-fluid p-4 forms-container">
       <div class="row">
@@ -519,7 +518,9 @@
                 <% } else if (form.canSubmit) { %>
                 <a
                   href="/student/submitForm/<%= form._id %>"
-                  class="btn btn-primary"
+                  class="btn btn-primary submit-form-btn"
+                  data-form-id="<%= form._id %>"
+                  data-form-title="<%= form.title %>"
                   >Submit Feedback</a
                 >
                 <% } else { %>
@@ -583,6 +584,28 @@
       var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
       });
+
+      // Function to show toast messages
+      function showToast(message, type) {
+        const backgroundColor =
+          type === "success"
+            ? "#28a745"
+            : type === "error"
+            ? "#dc3545"
+            : type === "warning"
+            ? "#ffc107"
+            : "#17a2b8";
+
+        Toastify({
+          text: message,
+          duration: 5000,
+          close: true,
+          gravity: "top",
+          position: "right",
+          backgroundColor: backgroundColor,
+          stopOnFocus: true,
+        }).showToast();
+      }
 
       // Form filter functionality
       document.addEventListener("DOMContentLoaded", function () {
@@ -715,27 +738,22 @@
           select.addEventListener("change", updateClearButton);
         });
 
-        // Function to show toast messages
-        function showToast(message, type) {
-          const backgroundColor =
-            type === "success"
-              ? "#28a745"
-              : type === "error"
-              ? "#dc3545"
-              : type === "warning"
-              ? "#ffc107"
-              : "#17a2b8";
-
-          Toastify({
-            text: message,
-            duration: 5000,
-            close: true,
-            gravity: "top",
-            position: "right",
-            backgroundColor: backgroundColor,
-            stopOnFocus: true,
-          }).showToast();
-        }
+        // Handle submit form button clicks
+        const submitButtons = document.querySelectorAll(".submit-form-btn");
+        submitButtons.forEach((button) => {
+          button.addEventListener("click", function(e) {
+            // Show loading toast immediately on click
+            showToast("Submitting form, please wait...", "info");
+            
+            // Store form info in localStorage to show success message after redirect
+            const formId = this.getAttribute("data-form-id");
+            const formTitle = this.getAttribute("data-form-title");
+            localStorage.setItem("submittingForm", formId);
+            localStorage.setItem("formTitle", formTitle);
+            
+            // Let the normal navigation happen
+          });
+        });
 
         // Handle preview button clicks based on form status
         const previewButtons = document.querySelectorAll(
@@ -784,6 +802,39 @@
           }
         });
 
+        // Check if we just came back from submitting a form
+        const justSubmitted = localStorage.getItem("justSubmitted");
+        const formTitle = localStorage.getItem("formTitle");
+        
+        if (justSubmitted === "true") {
+          showToast(`Form "${formTitle}" submitted successfully!`, "success");
+          localStorage.removeItem("justSubmitted");
+          localStorage.removeItem("formTitle");
+        }
+
+        // Check if the page was loaded after a form submission
+        const submittingFormId = localStorage.getItem("submittingForm");
+        if (submittingFormId) {
+          // Check if the form's status has changed to "Submitted"
+          const formCards = document.querySelectorAll(".form-card");
+          formCards.forEach((card) => {
+            const submitBtn = card.querySelector(`.submit-form-btn[data-form-id="${submittingFormId}"]`);
+            const statusBadge = card.querySelector(".form-status-badge");
+            
+            if (!submitBtn && statusBadge && statusBadge.textContent.trim() === "Submitted") {
+              // Form status changed to submitted, show success toast
+              const formTitle = localStorage.getItem("formTitle") || "Feedback";
+              showToast(`Form "${formTitle}" submitted successfully!`, "success");
+              
+              // Mark as just submitted for potential page refreshes
+              localStorage.setItem("justSubmitted", "true");
+            }
+          });
+          
+          // Clear the submitting form flag
+          localStorage.removeItem("submittingForm");
+        }
+
         // Check for URL parameters and flash messages
         const urlParams = new URLSearchParams(window.location.search);
         const resubmitAttempt = urlParams.get("resubmitAttempt");
@@ -804,14 +855,15 @@
         }
 
         // Check for flash messages from server
-        //     <% if(locals.messages && messages.error) { %>
-        //         showToast('<%= messages.error %>', 'error');
-        //     <% } %>
+        <% if(locals.messages && messages.error) { %>
+          showToast('<%= messages.error %>', 'error');
+        <% } %>
 
-        //     <% if(locals.messages && messages.success) { %>
-        //         showToast('<%= messages.success %>', 'success');
-        //     <% } %>
+        <% if(locals.messages && messages.success) { %>
+          showToast('<%= messages.success %>', 'success');
+        <% } %>
       });
+      
     </script>
   </body>
 </html>

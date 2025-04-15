@@ -112,12 +112,12 @@
     "name": "Pooja Kapoor",
     "enrollmentNumber": "0187ME221027",
     "email": "pooja.kapoor@example.com",
-    "branch": "ME",
-    "section": "ME-A",
+    "branch": "IT",
+    "section": "IT-A",
     "semester": 6,
     "contact":"8319573364",
     "feedbackGiven": [],
     "role": "student",
-    "password": "Pooja@444"
+    "password": "123456"
   }
 ]

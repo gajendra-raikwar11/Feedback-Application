@@ -91,6 +91,74 @@ router.get('/', (req, res) => {
     res.render("adminLogin", { messages: req.flash() });
 });
 // Admin login route
+// router.post('/login', async (req, res) => {
+//   const { email, password } = req.body;
+
+//   try {
+//       // Find admin by email
+//       let validAdmin = await adminModel.findOne({ email: email });
+
+//       if (!validAdmin) {
+//           req.flash('error', 'Admin not found');
+//           return res.redirect('/adminLogin');
+//       }
+
+//       // Check if account is locked
+//       if (validAdmin.lockUntil && validAdmin.lockUntil > Date.now()) {
+//           let remainingTime = Math.ceil((validAdmin.lockUntil - Date.now()) / 60000);
+//           req.flash('error', `Account locked. Try again in ${remainingTime} minute(s).`);
+//           return res.redirect('/adminLogin');
+//       }
+
+//       // Validate password
+//       let valid = await bcrypt.compare(password, validAdmin.password);
+
+//       if (valid) {
+//           // Reset failed attempts and unlock account
+//           validAdmin.failedAttempts = 0;
+//           validAdmin.lockUntil = null;
+//           await validAdmin.save();
+
+//           // Generate JWT token
+//           let token = jwt.sign({ email: email, id: validAdmin._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+//           res.cookie("adminToken", token, { httpOnly: true });
+
+//           // Store admin data in session
+//           req.session.admin = {
+//               id: validAdmin._id,
+//               name: validAdmin.name,
+//               email: validAdmin.email,
+//               department: validAdmin.department,
+//               image: validAdmin.image
+//           };
+
+//           // ⏳ Set session expiry to 24 hours
+//           req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+//           req.flash('success', 'Login successful!');
+//           return res.redirect('/admin/adminHome');
+//       } else {
+//           // Increase failed attempts count
+//           validAdmin.failedAttempts = (validAdmin.failedAttempts || 0) + 1;
+
+//           if (validAdmin.failedAttempts >= MAX_ATTEMPTS) {
+//               validAdmin.lockUntil = Date.now() + LOCK_TIME;
+//               await validAdmin.save();
+//               req.flash('error', 'Account locked. Try again in 5 minutes.');
+//               return res.redirect('/adminLogin');
+//           }
+
+//           await validAdmin.save();
+//           req.flash('error', `Login failed. ${MAX_ATTEMPTS - validAdmin.failedAttempts} attempts left.`);
+//           return res.redirect('/adminLogin');
+//       }
+//   } catch (error) {
+//       console.error("Login error:", error);
+//       req.flash('error', 'Internal Server Error. Please try again.');
+//       return res.redirect('/adminLogin');
+//   }
+// });
+
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -132,11 +200,17 @@ router.post('/login', async (req, res) => {
               image: validAdmin.image
           };
 
-          // ⏳ Set session expiry to 24 hours
-          req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-
-          req.flash('success', 'Login successful!');
-          return res.redirect('/admin/adminHome');
+          // Explicitly save the session to ensure it's stored in MongoDB
+          req.session.save(err => {
+              if (err) {
+                  console.error("Session save error:", err);
+                  req.flash('error', 'Session save error. Please try again.');
+                  return res.redirect('/adminLogin');
+              }
+              
+              req.flash('success', 'Login successful!');
+              return res.redirect('/admin/adminHome');
+          });
       } else {
           // Increase failed attempts count
           validAdmin.failedAttempts = (validAdmin.failedAttempts || 0) + 1;
@@ -158,6 +232,7 @@ router.post('/login', async (req, res) => {
       return res.redirect('/adminLogin');
   }
 });
+
 // Logout Route
 router.get('/logout', validateAdmin, (req, res) => {
     // Clear the session
