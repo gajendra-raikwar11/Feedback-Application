@@ -649,279 +649,297 @@
             </div>
         </div>
 
-        <!-- Data Visualization -->
-       <div class="mt-4 mb-6 px-10">
-           <div class="flex space-x-1 bg-gray-100 p-1 rounded-xl">
-             <a href="/admin/adminHome?formType=Academic<%= subjectFilter ? '&subject=' + subjectFilter : '' %>" 
-               class="flex-1 text-center py-2 px-4 rounded-lg <%= feedbackData.responseMetadata.currentFormType === 'Academic' ? 'bg-white shadow' : 'hover:bg-gray-200' %>">
-               Academic Feedback
-             </a>
-             <a href="/admin/adminHome?formType=Institutional<%= subjectFilter ? '&subject=' + subjectFilter : '' %>" 
-               class="flex-1 text-center py-2 px-4 rounded-lg <%= feedbackData.responseMetadata.currentFormType === 'Institutional' ? 'bg-white shadow' : 'hover:bg-gray-200' %>">
-               Institutional Feedback
-             </a>
-             <a href="/admin/adminHome?formType=Training<%= subjectFilter ? '&subject=' + subjectFilter : '' %>" 
-               class="flex-1 text-center py-2 px-4 rounded-lg <%= feedbackData.responseMetadata.currentFormType === 'Training' ? 'bg-white shadow' : 'hover:bg-gray-200' %>">
-               Training Feedback
-             </a>
-           </div>
-         </div>
-         
-         <main class="flex-1 overflow-y-auto pb-4 px-10">
-           <div class="mb-6 md:mb-8">
-               <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 text-center mt-4 md:mt-6">
-                   <%= feedbackData.responseMetadata.currentFormType.toUpperCase() %> FEEDBACK VISUALIZATION
-               </h1>
-               <p class="text-center text-gray-600 mt-2" id="dataInfo">
-                   <span id="currentFilter"><%= subjectFilter || 'All Subjects' %></span> | 
-                   <span id="responseCount"><%= feedbackData.responseMetadata.totalResponses %> Responses</span>
-               </p>
-           </div>
-           
-           <!-- Faculty Selector (for Academic feedback) -->
-           <% if (feedbackData.responseMetadata.currentFormType === 'Academic') { %>
-           <div class="mb-6">
-               <label for="facultySelect" class="block text-sm font-medium text-gray-700 mb-1">Select Faculty:</label>
-               <select id="facultySelect" class="border border-gray-300 rounded-md p-2 w-full md:w-1/2 lg:w-1/3">
-                   <option value="">All Faculty</option>
-                   <% faculties.forEach(faculty => { %>
-                       <option value="<%= faculty._id %>" <%= selectedFaculty === faculty._id.toString() ? 'selected' : '' %>><%= faculty.name %> (<%= faculty.subjects.join(', ') %>)</option>
-                   <% }); %>
-               </select>
-           </div>
-           <% } %>
-           
-           <!-- Charts Grid -->
-           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
-               <% if (feedbackData.responseMetadata.currentFormType === 'Academic') { %>
-                   <!-- Academic Feedback Charts -->
-                   <% if (Object.keys(feedbackData.sectionData).includes('Teacher Effectiveness')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Teacher Effectiveness</h3>
-                       <canvas id="teacherEffectivenessChart" 
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Teacher Effectiveness'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Teacher Effectiveness'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-                   
-                   <% if (Object.keys(feedbackData.sectionData).includes('Student Learning Experience')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Student Learning Experience</h3>
-                       <canvas id="studentExperienceChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Student Learning Experience'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Student Learning Experience'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-                   
-                   <% if (Object.keys(feedbackData.sectionData).includes('Exams and Evaluation')) { %>
-                   <div class="chart-container chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Exams and Evaluation</h3>
-                       <canvas id="examsEvaluationChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Exams and Evaluation'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Exams and Evaluation'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-                   
-                   <% if (Object.keys(feedbackData.sectionData).includes('Overall Satisfaction')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Overall Satisfaction</h3>
-                       <canvas id="overallSatisfactionChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Overall Satisfaction'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Overall Satisfaction'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-               <% } else if (feedbackData.responseMetadata.currentFormType === 'Institutional') { %>
-                   <!-- Institutional Feedback Charts -->
-                   <% if (Object.keys(feedbackData.sectionData).includes('Resources and Administration')) { %>
-                   <div class="chart-container  bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Resources and Administration</h3>
-                       <canvas id="resourcesAdminChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Resources and Administration'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Resources and Administration'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-                   
-                   <% if (Object.keys(feedbackData.sectionData).includes('Curriculum Aspects')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Curriculum Aspects</h3>
-                       <canvas id="curriculumAspectsChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Curriculum Aspects'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Curriculum Aspects'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-                   
-                   <% if (Object.keys(feedbackData.sectionData).includes('Administrative Services')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Administrative Services</h3>
-                       <canvas id="adminServicesChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Administrative Services'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Administrative Services'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-                   
-                   <% if (Object.keys(feedbackData.sectionData).includes('Student Support')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Student Support</h3>
-                       <canvas id="studentSupportChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Student Support'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Student Support'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-                   
-                   <% if (Object.keys(feedbackData.sectionData).includes('Technology Resources')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Technology Resources</h3>
-                       <canvas id="techResourcesChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Technology Resources'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Technology Resources'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-                   
-                   <% if (Object.keys(feedbackData.sectionData).includes('Campus Life')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Campus Life</h3>
-                       <canvas id="campusLifeChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Campus Life'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Campus Life'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-               <% } else if (feedbackData.responseMetadata.currentFormType === 'Training') { %>
-                   <!-- Training Feedback Charts -->
-                   <% if (Object.keys(feedbackData.sectionData).includes('Training Content')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Training Content</h3>
-                       <canvas id="trainingContentChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Training Content'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Training Content'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-                   
-                   <% if (Object.keys(feedbackData.sectionData).includes('Trainer Effectiveness')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Trainer Effectiveness</h3>
-                       <canvas id="trainerEffectivenessChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Trainer Effectiveness'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Trainer Effectiveness'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-                   
-                   <% if (Object.keys(feedbackData.sectionData).includes('Training Materials')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Training Materials</h3>
-                       <canvas id="trainingMaterialsChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Training Materials'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Training Materials'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-                   
-                   <% if (Object.keys(feedbackData.sectionData).includes('Workshop Facilities')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Workshop Facilities</h3>
-                       <canvas id="workshopFacilitiesChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Workshop Facilities'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Workshop Facilities'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-                   
-                   <% if (Object.keys(feedbackData.sectionData).includes('Practical Application')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Practical Application</h3>
-                       <canvas id="practicalApplicationChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Practical Application'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Practical Application'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-                   
-                   <% if (Object.keys(feedbackData.sectionData).includes('Overall Value')) { %>
-                   <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                       <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Overall Value</h3>
-                       <canvas id="overallValueChart"
-                           data-labels="<%= JSON.stringify(feedbackData.sectionData['Overall Value'].labels) %>"
-                           data-values="<%= JSON.stringify(feedbackData.sectionData['Overall Value'].values) %>">
-                       </canvas>
-                   </div>
-                   <% } %>
-               <% } %>
-           </div>
-           
-           <!-- Summary Section -->
-           <div class="mt-8 bg-white p-4 rounded shadow">
-               <h3 class="text-lg font-semibold mb-3">Overall Averages by Section</h3>
-               <div class="overflow-x-auto">
-                   <table class="min-w-full divide-y divide-gray-200">
-                       <thead class="bg-gray-50">
-                           <tr>
-                               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
-                               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average Score</th>
-                           </tr>
-                       </thead>
-                       <tbody class="bg-white divide-y divide-gray-200">
-                           <% feedbackData.sectionAverages.forEach(section => { %>
-                           <tr>
-                               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= section.sectionTitle %></td>
-                               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                   <div class="flex items-center">
-                                       <span class="mr-2"><%= section.averageScore.toFixed(2) %></span>
-                                       <div class="w-32 bg-gray-200 rounded-full h-2.5">
-                                           <div class="bg-blue-600 h-2.5 rounded-full" style="width: <%= (section.averageScore/5)*100 %>%"></div>
-                                       </div>
-                                   </div>
-                               </td>
-                           </tr>
-                           <% }); %>
-                       </tbody>
-                   </table>
-               </div>
-           </div>
-           
-           <!-- Metadata display -->
-           <div class="mt-8 bg-white p-4 rounded shadow">
-               <h3 class="text-lg font-semibold mb-3">Feedback Information</h3>
-               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                   <div class="bg-gray-50 p-3 rounded">
-                       <p class="text-sm text-gray-500">Form Type</p>
-                       <p class="font-medium" id="formType"><%= feedbackData.responseMetadata.currentFormType %></p>
-                   </div>
-                   <div class="bg-gray-50 p-3 rounded">
-                       <p class="text-sm text-gray-500">Responses</p>
-                       <p class="font-medium" id="responseCount"><%= feedbackData.responseMetadata.totalResponses %></p>
-                   </div>
-                   <div class="bg-gray-50 p-3 rounded">
-                       <p class="text-sm text-gray-500">Last Updated</p>
-                       <p class="font-medium" id="lastUpdated"><%= feedbackData.responseMetadata.lastUpdated.toLocaleString() %></p>
-                   </div>
-               </div>
-           </div>
-           
-           <div class="flex justify-center mt-6 md:mt-8 lg:mt-10">
-               <button id="downloadExcel"
-                   class="bg-green-300 hover:bg-green-200 text-green-800 font-semibold py-2 md:py-3 px-4 md:px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center space-x-2">
-                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                       class="lucide lucide-download">
-                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                       <polyline points="7 10 12 15 17 10"></polyline>
-                       <line x1="12" x2="12" y1="15" y2="3"></line>
-                   </svg>
-                   <span>Download Feedback Data</span>
-               </button>
-           </div>
-       </main>
+        <main class="flex-1 overflow-y-auto pb-4 px-10">
+            <div class="mb-6 md:mb-8">
+                <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 text-center mt-4 md:mt-6">
+                    <%= feedbackData.responseMetadata.currentFormType.toUpperCase() %> FEEDBACK VISUALIZATION
+                </h1>
+                <p class="text-center text-gray-600 mt-2" id="dataInfo">
+                    <span id="currentFilter"><%= subjectFilter || 'All Subjects' %></span> | 
+                    <span id="responseCount"><%= feedbackData.responseMetadata.totalResponses %> Responses</span>
+                    <% if (feedbackData.responseMetadata.currentFormType === 'Academic' && academicType) { %>
+                    | <span id="academicTypeLabel"><%= academicType === 'theory' ? 'Theory' : academicType === 'practical' ? 'Practical' : 'All Types' %></span>
+                    <% } %>
+                </p>
+            </div>
+            
+            <!-- Faculty Selector and Form Type in the same row -->
+            <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+                <!-- Form Type Dropdown (moved beside Faculty Select) -->
+                <div class="flex items-center space-x-4">
+                    <label for="formTypeSelect" class="font-medium text-gray-700">Form Type:</label>
+                    <select id="formTypeSelect" class="border border-gray-300 rounded-md p-2 w-48">
+                        <option value="Academic" <%= feedbackData.responseMetadata.currentFormType === 'Academic' ? 'selected' : '' %>>Academic Feedback</option>
+                        <option value="Institutional" <%= feedbackData.responseMetadata.currentFormType === 'Institutional' ? 'selected' : '' %>>Institutional Feedback</option>
+                        <option value="Training" <%= feedbackData.responseMetadata.currentFormType === 'Training' ? 'selected' : '' %>>Training Feedback</option>
+                    </select>
+                    
+                    <!-- Additional filters for Academic feedback -->
+                    <% if (feedbackData.responseMetadata.currentFormType === 'Academic') { %>
+                    <div class="flex items-center ml-6 space-x-4" id="academicFilters">
+                        <label for="academicTypeSelect" class="font-medium text-gray-700">Type:</label>
+                        <select id="academicTypeSelect" class="border border-gray-300 rounded-md p-2 w-40">
+                        <option value="all" <%= !academicType || academicType === 'all' ? 'selected' : '' %>>All</option>
+                        <option value="theory" <%= academicType === 'theory' ? 'selected' : '' %>>Theory</option>
+                        <option value="practical" <%= academicType === 'practical' ? 'selected' : '' %>>Practical</option>
+                        </select>
+                    </div>
+                    <% } %>
+                </div>
+                
+                <!-- Faculty Selector (for Academic and Training feedback) -->
+                <% if (feedbackData.responseMetadata.currentFormType === 'Academic' || feedbackData.responseMetadata.currentFormType === 'Training') { %>
+                <div class="flex items-center space-x-4">
+                    <label for="facultySelect" class="font-medium text-gray-700">Select Faculty:</label>
+                    <select id="facultySelect" class="border border-gray-300 rounded-md p-2 w-64">
+                        <option value="">All Faculty</option>
+                        <% faculties.forEach(faculty => { %>
+                        <option value="<%= faculty._id %>" <%= selectedFaculty === faculty._id.toString() ? 'selected' : '' %>><%= faculty.name %> (<%= faculty.subjects.join(', ') %>)</option>
+                        <% }); %>
+                    </select>
+                </div>
+                <% } %>
+            </div>
+            
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
+            <% if (feedbackData.responseMetadata.currentFormType === 'Academic') { %>
+                <!-- Academic Feedback Charts with updated chart types -->
+                <% if (Object.keys(feedbackData.sectionData).includes('Teacher Effectiveness')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Teacher Effectiveness</h3>
+                <canvas id="teacherEffectivenessChart" 
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Teacher Effectiveness'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Teacher Effectiveness'].values) %>"
+                    data-type="polarArea">
+                </canvas>
+                </div>
+                <% } %>
+                
+                <% if (Object.keys(feedbackData.sectionData).includes('Student Learning Experience')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Student Learning Experience</h3>
+                <canvas id="studentExperienceChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Student Learning Experience'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Student Learning Experience'].values) %>"
+                    data-type="polarArea">
+                </canvas>
+                </div>
+                <% } %>
+                
+                <% if (Object.keys(feedbackData.sectionData).includes('Exams and Evaluation')) { %>
+                <div class="chart-container chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Exams and Evaluation</h3>
+                <canvas id="examsEvaluationChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Exams and Evaluation'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Exams and Evaluation'].values) %>"
+                    data-type="doughnut">
+                </canvas>
+                </div>
+                <% } %>
+                
+                <% if (Object.keys(feedbackData.sectionData).includes('Overall Satisfaction')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Overall Satisfaction</h3>
+                <canvas id="overallSatisfactionChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Overall Satisfaction'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Overall Satisfaction'].values) %>"
+                    data-type="doughnut">
+                </canvas>
+                </div>
+                <% } %>
+            <% } else if (feedbackData.responseMetadata.currentFormType === 'Institutional') { %>
+                <!-- Institutional Feedback Charts with line charts -->
+                <% if (Object.keys(feedbackData.sectionData).includes('Resources and Administration')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Resources and Administration</h3>
+                <canvas id="resourcesAdminChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Resources and Administration'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Resources and Administration'].values) %>"
+                    data-type="line">
+                </canvas>
+                </div>
+                <% } %>
+                
+                <% if (Object.keys(feedbackData.sectionData).includes('Curriculum Aspects')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Curriculum Aspects</h3>
+                <canvas id="curriculumAspectsChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Curriculum Aspects'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Curriculum Aspects'].values) %>"
+                    data-type="line">
+                </canvas>
+                </div>
+                <% } %>
+                
+                <% if (Object.keys(feedbackData.sectionData).includes('Administrative Services')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Administrative Services</h3>
+                <canvas id="adminServicesChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Administrative Services'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Administrative Services'].values) %>"
+                    data-type="line">
+                </canvas>
+                </div>
+                <% } %>
+                
+                <% if (Object.keys(feedbackData.sectionData).includes('Student Support')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Student Support</h3>
+                <canvas id="studentSupportChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Student Support'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Student Support'].values) %>"
+                    data-type="line">
+                </canvas>
+                </div>
+                <% } %>
+                
+                <% if (Object.keys(feedbackData.sectionData).includes('Technology Resources')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Technology Resources</h3>
+                <canvas id="techResourcesChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Technology Resources'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Technology Resources'].values) %>"
+                    data-type="line">
+                </canvas>
+                </div>
+                <% } %>
+                
+                <% if (Object.keys(feedbackData.sectionData).includes('Campus Life')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Campus Life</h3>
+                <canvas id="campusLifeChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Campus Life'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Campus Life'].values) %>"
+                    data-type="line">
+                </canvas>
+                </div>
+                <% } %>
+            <% } else if (feedbackData.responseMetadata.currentFormType === 'Training') { %>
+                <!-- Training Feedback Charts with bar charts -->
+                <% if (Object.keys(feedbackData.sectionData).includes('Training Content')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Training Content</h3>
+                <canvas id="trainingContentChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Training Content'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Training Content'].values) %>"
+                    data-type="bar">
+                </canvas>
+                </div>
+                <% } %>
+                
+                <% if (Object.keys(feedbackData.sectionData).includes('Trainer Effectiveness')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Trainer Effectiveness</h3>
+                <canvas id="trainerEffectivenessChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Trainer Effectiveness'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Trainer Effectiveness'].values) %>"
+                    data-type="bar">
+                </canvas>
+                </div>
+                <% } %>
+                
+                <% if (Object.keys(feedbackData.sectionData).includes('Training Materials')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Training Materials</h3>
+                <canvas id="trainingMaterialsChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Training Materials'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Training Materials'].values) %>"
+                    data-type="bar">
+                </canvas>
+                </div>
+                <% } %>
+                
+                <% if (Object.keys(feedbackData.sectionData).includes('Workshop Facilities')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Workshop Facilities</h3>
+                <canvas id="workshopFacilitiesChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Workshop Facilities'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Workshop Facilities'].values) %>"
+                    data-type="bar">
+                </canvas>
+                </div>
+                <% } %>
+                
+                <% if (Object.keys(feedbackData.sectionData).includes('Practical Application')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Practical Application</h3>
+                <canvas id="practicalApplicationChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Practical Application'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Practical Application'].values) %>"
+                    data-type="bar">
+                </canvas>
+                </div>
+                <% } %>
+                
+                <% if (Object.keys(feedbackData.sectionData).includes('Overall Value')) { %>
+                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
+                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Overall Value</h3>
+                <canvas id="overallValueChart"
+                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Overall Value'].labels) %>"
+                    data-values="<%= JSON.stringify(feedbackData.sectionData['Overall Value'].values) %>"
+                    data-type="bar">
+                </canvas>
+                </div>
+                <% } %>
+            <% } %>
+            </div>
+            
+            <!-- Summary Section -->
+            <div class="mt-8 bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold mb-3">Overall Averages by Section</h3>
+           <!-- Replace the entire table div with this doughnut chart display -->
+<div class="bg-white shadow rounded-lg p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Section Feedback Analysis</h3>
+    <div class="h-64">
+      <canvas id="sectionDoughnutChart" data-labels="<%= JSON.stringify(feedbackData.sectionAverages.map(section => section.sectionTitle)) %>" data-values="<%= JSON.stringify(feedbackData.sectionAverages.map(section => section.averageScore)) %>"></canvas>
+    </div>
+    <div class="mt-4 pt-3 border-t">
+      <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+        <% feedbackData.sectionAverages.forEach(section => { %>
+          <li class="flex items-center justify-between py-1">
+            <span class="font-medium"><%= section.sectionTitle %></span>
+            <span class="text-gray-600"><%= section.averageScore.toFixed(2) %>/5</span>
+          </li>
+        <% }); %>
+      </ul>
+    </div>
+  </div>
+            </div>
+            
+            <!-- Metadata display -->
+            <div class="mt-8 bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold mb-3">Feedback Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gray-50 p-3 rounded">
+                <p class="text-sm text-gray-500">Form Type</p>
+                <p class="font-medium" id="formType"><%= feedbackData.responseMetadata.currentFormType %></p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded">
+                <p class="text-sm text-gray-500">Responses</p>
+                <p class="font-medium" id="responseCount"><%= feedbackData.responseMetadata.totalResponses %></p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded">
+                <p class="text-sm text-gray-500">Last Updated</p>
+                <p class="font-medium" id="lastUpdated"><%= feedbackData.responseMetadata.lastUpdated.toLocaleString() %></p>
+                </div>
+            </div>
+            </div>
+            
+            <div class="flex justify-center mt-6 md:mt-8 lg:mt-10">
+            <button id="downloadExcel"
+                class="bg-green-300 hover:bg-green-200 text-green-800 font-semibold py-2 md:py-3 px-4 md:px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-download">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" x2="12" y1="15" y2="3"></line>
+                </svg>
+                <span>Download Feedback Data</span>
+            </button>
+            </div>
+        </main> 
 
         <!-- Footer -->
         <%- include('partials/adminBottomNavbar') %>
@@ -1001,302 +1019,531 @@
         });
     });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const formType = document.getElementById('formType').textContent.trim();
-            
-            // Set common chart options with improved animation settings
-            const chartOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 5
-                    }
-                },
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                animation: {
-                    duration: 800,  // Shorter animation duration
-                    easing: 'easeOutQuad',  // Smoother easing function
-                    mode: 'fade'  // Fade in instead of growing from bottom
-                }
-            };
-            
-            // Create charts based on form type
-            if (formType === 'Academic') {
-                createAcademicCharts();
-            } else if (formType === 'Institutional') {
-                createInstitutionalCharts();
-            } else if (formType === 'Training') {
-                createTrainingCharts();
+        
+    
+    document.addEventListener('DOMContentLoaded', function() {
+  // Save scroll position
+  let scrollPosition = 0;
+  
+  // Form Type Dropdown Change Event
+  const formTypeSelect = document.getElementById('formTypeSelect');
+  if (formTypeSelect) {
+    formTypeSelect.addEventListener('change', function() {
+      scrollPosition = window.scrollY;
+      const formType = this.value;
+      const currentUrl = new URL(window.location.href);
+      
+      // Keep any existing query parameters
+      const academicType = currentUrl.searchParams.get('academicType');
+      const faculty = currentUrl.searchParams.get('faculty');
+      
+      // Build the new URL
+      let newUrl = `/admin/adminHome?formType=${formType}`;
+      
+      // Add the faculty parameter if it exists
+      if (faculty) {
+        newUrl += `&faculty=${faculty}`;
+      }
+      
+      // Add the academicType parameter if appropriate
+      if (formType === 'Academic' && academicType) {
+        newUrl += `&academicType=${academicType}`;
+      }
+      
+      // Save the scroll position in sessionStorage
+      sessionStorage.setItem('scrollPosition', scrollPosition);
+      
+      // Navigate to the new URL
+      window.location.href = newUrl;
+    });
+  }
+  
+  // Academic Type Filter Change Event
+  const academicTypeSelect = document.getElementById('academicTypeSelect');
+  if (academicTypeSelect) {
+    academicTypeSelect.addEventListener('change', function() {
+      scrollPosition = window.scrollY;
+      const academicType = this.value;
+      const currentUrl = new URL(window.location.href);
+      
+      // Keep form type and faculty parameters
+      const formType = currentUrl.searchParams.get('formType') || 'Academic';
+      const faculty = currentUrl.searchParams.get('faculty');
+      
+      // Build the new URL
+      let newUrl = `/admin/adminHome?formType=${formType}`;
+      
+      // Add the academicType parameter if not 'all'
+      if (academicType && academicType !== 'all') {
+        newUrl += `&academicType=${academicType}`;
+      }
+      
+      // Add the faculty parameter if it exists
+      if (faculty) {
+        newUrl += `&faculty=${faculty}`;
+      }
+      
+      // Save the scroll position in sessionStorage
+      sessionStorage.setItem('scrollPosition', scrollPosition);
+      
+      // Navigate to the new URL
+      window.location.href = newUrl;
+    });
+  }
+  
+  // Faculty Select Change Event
+  const facultySelect = document.getElementById('facultySelect');
+  if (facultySelect) {
+    facultySelect.addEventListener('change', function() {
+      scrollPosition = window.scrollY;
+      const faculty = this.value;
+      const currentUrl = new URL(window.location.href);
+      
+      // Keep form type and academicType parameters
+      const formType = currentUrl.searchParams.get('formType') || 'Academic';
+      const academicType = currentUrl.searchParams.get('academicType');
+      
+      // Build the new URL
+      let newUrl = `/admin/adminHome?formType=${formType}`;
+      
+      // Add the faculty parameter if it exists
+      if (faculty) {
+        newUrl += `&faculty=${faculty}`;
+      }
+      
+      // Add the academicType parameter if it exists
+      if (academicType) {
+        newUrl += `&academicType=${academicType}`;
+      }
+      
+      // Save the scroll position in sessionStorage
+      sessionStorage.setItem('scrollPosition', scrollPosition);
+      
+      // Navigate to the new URL
+      window.location.href = newUrl;
+    });
+  }
+  
+  // Restore scroll position after page load
+  const savedScrollPosition = sessionStorage.getItem('scrollPosition');
+  if (savedScrollPosition) {
+    window.scrollTo(0, parseInt(savedScrollPosition));
+    sessionStorage.removeItem('scrollPosition'); // Clear saved position
+  }
+  
+  // Initialize charts with their appropriate types
+  initializeCharts();
+  
+  // Initialize the section doughnut chart
+  initializeSectionDoughnutChart();
+  
+  // Download Excel button
+  const downloadBtn = document.getElementById('downloadExcel');
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', function() {
+      const formType = document.getElementById('formType').textContent.trim();
+      const academicType = document.getElementById('academicTypeLabel')?.textContent.trim();
+      const faculty = facultySelect?.value;
+      
+      // Build download URL with all active filters
+      let downloadUrl = `/feedback/download/${formType.toLowerCase()}`;
+      
+      // Add query parameters
+      const params = new URLSearchParams();
+      
+      if (faculty) {
+        params.append('faculty', faculty);
+      }
+      
+      if (academicType && academicType !== 'All Types') {
+        params.append('academicType', academicType.toLowerCase());
+      }
+      
+      if (params.toString()) {
+        downloadUrl += `?${params.toString()}`;
+      }
+      
+      window.location.href = downloadUrl;
+    });
+  }
+});
+
+// Initialize charts with their specific types
+function initializeCharts() {
+  const chartContainers = document.querySelectorAll('.chart-container canvas');
+  
+  chartContainers.forEach(canvas => {
+    const chartType = canvas.getAttribute('data-type') || 'bar';
+    let labels = [];
+    let values = [];
+    
+    try {
+      labels = JSON.parse(canvas.getAttribute('data-labels') || '[]');
+      values = JSON.parse(canvas.getAttribute('data-values') || '[]');
+    } catch (e) {
+      console.error(`Error parsing data for ${canvas.id}:`, e);
+    }
+    
+    // Create the appropriate chart based on type
+    if (chartType === 'polarArea') {
+      createPolarAreaChart(canvas, labels, values);
+    } else if (chartType === 'doughnut') {
+      createDoughnutChart(canvas, labels, values);
+    } else if (chartType === 'line') {
+      createLineChart(canvas, labels, values);
+    } else if (chartType === 'bar') {
+      createBarChart(canvas, labels, values);
+    }
+  });
+}
+
+// Function to initialize the section doughnut chart
+// Update this function in your JavaScript file
+function initializeSectionDoughnutChart() {
+  const sectionDoughnutCanvas = document.getElementById('sectionDoughnutChart');
+  
+  // Check if the canvas element exists
+  if (!sectionDoughnutCanvas) return;
+  
+  // Get section data from data attributes
+  let sectionTitles = [];
+  let sectionScores = [];
+  
+  try {
+    sectionTitles = JSON.parse(sectionDoughnutCanvas.getAttribute('data-labels') || '[]');
+    sectionScores = JSON.parse(sectionDoughnutCanvas.getAttribute('data-values') || '[]');
+  } catch (e) {
+    console.error('Error parsing section data for chart:', e);
+    return;
+  }
+  
+  // Create the doughnut chart
+  new Chart(sectionDoughnutCanvas, {
+    type: 'doughnut',
+    data: {
+      labels: sectionTitles,
+      datasets: [{
+        data: sectionScores,
+        backgroundColor: [
+          'rgba(54, 162, 235, 0.6)',
+          'rgba(75, 192, 192, 0.6)',
+          'rgba(255, 206, 86, 0.6)',
+          'rgba(255, 99, 132, 0.6)',
+          'rgba(153, 102, 255, 0.6)',
+          'rgba(255, 159, 64, 0.6)',
+          'rgba(199, 199, 199, 0.6)',
+          'rgba(83, 102, 255, 0.6)',
+          'rgba(78, 175, 74, 0.6)',
+          'rgba(255, 99, 132, 0.6)'
+        ],
+        borderColor: [
+          'rgba(54, 162, 235, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(255, 99, 132, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)',
+          'rgba(159, 159, 159, 1)',
+          'rgba(83, 102, 255, 1)',
+          'rgba(78, 175, 74, 1)',
+          'rgba(255, 99, 132, 1)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            padding: 20,
+            boxWidth: 12,
+            font: {
+              size: 11
             }
-            
-            // Faculty selector for Academic feedback
-            if (formType === 'Academic') {
-                const facultySelect = document.getElementById('facultySelect');
-                if (facultySelect) {
-                    facultySelect.addEventListener('change', function() {
-                        // Add AJAX call to filter data by faculty
-                        const facultyId = this.value;
-                        window.location.href = `/admin/adminHome?formType=Academic&faculty=${facultyId}`;
-                    });
-                }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              return `${label}: ${value.toFixed(2)} / 5`;
             }
-            
-            // Download Excel button
-            const downloadBtn = document.getElementById('downloadExcel');
-            if (downloadBtn) {
-                downloadBtn.addEventListener('click', function() {
-                    window.location.href = `/feedback/download/${formType.toLowerCase()}`;
-                });
+          }
+        }
+      },
+      animation: {
+        animateRotate: true,
+        animateScale: true,
+        duration: 800,
+        easing: 'easeOutCirc'
+      },
+      cutout: '60%'
+    }
+  });
+}
+// Create a Polar Area chart for Academic feedback
+function createPolarAreaChart(canvas, labels, values) {
+  new Chart(canvas, {
+    type: 'polarArea',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: [
+          'rgba(54, 162, 235, 0.6)',
+          'rgba(75, 192, 192, 0.6)',
+          'rgba(255, 206, 86, 0.6)',
+          'rgba(255, 99, 132, 0.6)',
+          'rgba(153, 102, 255, 0.6)',
+          'rgba(255, 159, 64, 0.6)',
+          'rgba(199, 199, 199, 0.6)',
+          'rgba(83, 102, 255, 0.6)',
+          'rgba(78, 175, 74, 0.6)',
+          'rgba(255, 99, 132, 0.6)'
+        ],
+        borderColor: [
+          'rgba(54, 162, 235, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(255, 99, 132, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)',
+          'rgba(159, 159, 159, 1)',
+          'rgba(83, 102, 255, 1)',
+          'rgba(78, 175, 74, 1)',
+          'rgba(255, 99, 132, 1)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 5,
+          ticks: {
+            stepSize: 1
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 12
+          }
+        },
+        tooltip: {
+          callbacks: {
+            title: function(context) {
+              return context[0].label;
+            },
+            label: function(context) {
+              return `Score: ${context.raw.toFixed(2)}`;
             }
-            
-            // Function to get data from canvas attributes
-            function getChartData(chartId) {
-                const canvas = document.getElementById(chartId);
-                if (!canvas) return null;
-                
-                try {
-                    const labels = JSON.parse(canvas.getAttribute('data-labels') || '[]');
-                    const values = JSON.parse(canvas.getAttribute('data-values') || '[]');
-                    
-                    return { labels, values };
-                } catch (e) {
-                    console.error(`Error parsing data for ${chartId}:`, e);
-                    return { labels: [], values: [] };
-                }
+          }
+        }
+      },
+      animation: {
+        animateRotate: true,
+        animateScale: true,
+        duration: 800,
+        easing: 'easeOutQuad'
+      }
+    }
+  });
+}
+
+// Create a Doughnut chart for Academic feedback
+function createDoughnutChart(canvas, labels, values) {
+  new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: [
+          'rgba(54, 162, 235, 0.6)',
+          'rgba(75, 192, 192, 0.6)',
+          'rgba(255, 206, 86, 0.6)',
+          'rgba(255, 99, 132, 0.6)',
+          'rgba(153, 102, 255, 0.6)',
+          'rgba(255, 159, 64, 0.6)'
+        ],
+        borderColor: [
+          'rgba(54, 162, 235, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(255, 99, 132, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 20,
+            boxWidth: 12
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              return `${label}: ${value.toFixed(2)}`;
             }
-            
-            // Function to create Academic charts
-            function createAcademicCharts() {
-                // Teacher Effectiveness Chart
-                if (document.getElementById('teacherEffectivenessChart')) {
-                    const chartData = getChartData('teacherEffectivenessChart');
-                    if (chartData) {
-                        new Chart(document.getElementById('teacherEffectivenessChart'), {
-                            type: 'bar',
-                            data: {
-                                labels: chartData.labels,
-                                datasets: [{
-                                    label: 'Average Rating (1-5)',
-                                    data: chartData.values,
-                                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                                    borderColor: 'rgba(54, 162, 235, 1)',
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: chartOptions
-                        });
-                    }
-                }
-                
-                // Student Learning Experience Chart
-                if (document.getElementById('studentExperienceChart')) {
-                    const chartData = getChartData('studentExperienceChart');
-                    if (chartData) {
-                        new Chart(document.getElementById('studentExperienceChart'), {
-                            type: 'radar',
-                            data: {
-                                labels: chartData.labels,
-                                datasets: [{
-                                    label: 'Average Rating (1-5)',
-                                    data: chartData.values,
-                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                    borderColor: 'rgba(255, 99, 132, 1)',
-                                    borderWidth: 1,
-                                    pointBackgroundColor: 'rgba(255, 99, 132, 1)'
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    r: {
-                                        min: 0,
-                                        max: 5,
-                                        ticks: {
-                                            stepSize: 1
-                                        }
-                                    }
-                                },
-                                animation: {
-                                    duration: 500,
-                                    easing: 'linear'
-                                }
-                            }
-                        });
-                    }
-                }
-                
-                // Exams and Evaluation Chart
-                if (document.getElementById('examsEvaluationChart')) {
-                    const chartData = getChartData('examsEvaluationChart');
-                    if (chartData) {
-                        new Chart(document.getElementById('examsEvaluationChart'), {
-                            type: 'bar',
-                            data: {
-                                labels: chartData.labels,
-                                datasets: [{
-                                    label: 'Average Rating (1-5)',
-                                    data: chartData.values,
-                                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                                    borderColor: 'rgba(75, 192, 192, 1)',
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: chartOptions
-                        });
-                    }
-                }
-                
-                // Overall Satisfaction Chart
-                if (document.getElementById('overallSatisfactionChart')) {
-                    const chartData = getChartData('overallSatisfactionChart');
-                    if (chartData) {
-                        // For pie/doughnut charts, we need labels and count data
-                        // If values are average scores, we format appropriately
-                        
-                        let displayData = chartData.values;
-                        // If we have a response distribution for satisfaction levels
-                        if (chartData.labels.some(label => ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied', 'Very Dissatisfied'].includes(label))) {
-                            displayData = chartData.values; // Keep as is - these are counts
-                        } else {
-                            // If we just have question averages, adapt the display
-                            displayData = chartData.values;
-                        }
-                        
-                        new Chart(document.getElementById('overallSatisfactionChart'), {
-                            type: 'doughnut',
-                            data: {
-                                labels: chartData.labels,
-                                datasets: [{
-                                    data: displayData,
-                                    backgroundColor: [
-                                        'rgba(75, 192, 192, 0.6)',
-                                        'rgba(54, 162, 235, 0.6)',
-                                        'rgba(255, 206, 86, 0.6)',
-                                        'rgba(255, 159, 64, 0.6)',
-                                        'rgba(255, 99, 132, 0.6)'
-                                    ],
-                                    borderColor: [
-                                        'rgba(75, 192, 192, 1)',
-                                        'rgba(54, 162, 235, 1)',
-                                        'rgba(255, 206, 86, 1)',
-                                        'rgba(255, 159, 64, 1)',
-                                        'rgba(255, 99, 132, 1)'
-                                    ],
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        position: 'bottom'
-                                    }
-                                },
-                                animation: {
-                                    animateRotate: true,
-                                    animateScale: false,
-                                    duration: 500,
-                                    easing: 'easeOutCirc'
-                                }
-                            }
-                        });
-                    }
-                }
+          }
+        }
+      },
+      animation: {
+        animateRotate: true,
+        animateScale: true,
+        duration: 800,
+        easing: 'easeOutCirc'
+      },
+      cutout: '60%'
+    }
+  });
+}
+
+// Create a Line chart for Institutional feedback
+function createLineChart(canvas, labels, values) {
+  new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Average Rating (1-5)',
+        data: values,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(75, 192, 192, 1)',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 5,
+          ticks: {
+            stepSize: 1
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          titleFont: {
+            size: 14
+          },
+          bodyFont: {
+            size: 13
+          },
+          callbacks: {
+            label: function(context) {
+              return `Rating: ${context.raw.toFixed(2)}`;
             }
-            
-            // Function to create Institutional charts
-            function createInstitutionalCharts() {
-                // Resources and Administration Chart
-                renderDynamicChart('resourcesAdminChart', 'bar', 'rgba(153, 102, 255, 0.6)', 'rgba(153, 102, 255, 1)');
-                
-                // Curriculum Aspects Chart
-                if (document.getElementById('curriculumAspectsChart')) {
-                    const chartData = getChartData('curriculumAspectsChart');
-                    if (chartData) {
-                        new Chart(document.getElementById('curriculumAspectsChart'), {
-                            type: 'radar',
-                            data: {
-                                labels: chartData.labels,
-                                datasets: [{
-                                    label: 'Average Rating (1-5)',
-                                    data: chartData.values,
-                                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                                    borderColor: 'rgba(255, 159, 64, 1)',
-                                    borderWidth: 1,
-                                    pointBackgroundColor: 'rgba(255, 159, 64, 1)'
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    r: {
-                                        min: 0,
-                                        max: 5,
-                                        ticks: {
-                                            stepSize: 1
-                                        }
-                                    }
-                                },
-                                animation: {
-                                    duration: 500,
-                                    easing: 'linear'
-                                }
-                            }
-                        });
-                    }
-                }
-                
-                // Render other charts
-                renderDynamicChart('adminServicesChart', 'bar', 'rgba(54, 162, 235, 0.6)', 'rgba(54, 162, 235, 1)');
-                renderDynamicChart('studentSupportChart', 'bar', 'rgba(75, 192, 192, 0.6)', 'rgba(75, 192, 192, 1)');
-                renderDynamicChart('techResourcesChart', 'bar', 'rgba(153, 102, 255, 0.6)', 'rgba(153, 102, 255, 1)');
-                renderDynamicChart('campusLifeChart', 'bar', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 159, 64, 1)');
+          }
+        }
+      },
+      animation: {
+        duration: 1000,
+        easing: 'easeOutQuart'
+      }
+    }
+  });
+}
+
+// Create a Bar chart for Training feedback
+function createBarChart(canvas, labels, values) {
+  new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Average Rating (1-5)',
+        data: values,
+        backgroundColor: [
+          'rgba(54, 162, 235, 0.6)',
+          'rgba(75, 192, 192, 0.6)',
+          'rgba(255, 206, 86, 0.6)',
+          'rgba(255, 99, 132, 0.6)',
+          'rgba(153, 102, 255, 0.6)',
+          'rgba(255, 159, 64, 0.6)'
+        ],
+        borderColor: [
+          'rgba(54, 162, 235, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(255, 99, 132, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 5,
+          ticks: {
+            stepSize: 1
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          callbacks: {
+            label: function(context) {
+              return `Rating: ${context.raw.toFixed(2)}`;
             }
-            
-            // Function to create Training charts
-            function createTrainingCharts() {
-                renderDynamicChart('trainingContentChart', 'bar', 'rgba(54, 162, 235, 0.6)', 'rgba(54, 162, 235, 1)');
-                renderDynamicChart('trainerEffectivenessChart', 'bar', 'rgba(75, 192, 192, 0.6)', 'rgba(75, 192, 192, 1)');
-                renderDynamicChart('trainingMaterialsChart', 'bar', 'rgba(153, 102, 255, 0.6)', 'rgba(153, 102, 255, 1)');
-                renderDynamicChart('workshopFacilitiesChart', 'bar', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 159, 64, 1)');
-                renderDynamicChart('practicalApplicationChart', 'bar', 'rgba(255, 99, 132, 0.6)', 'rgba(255, 99, 132, 1)');
-                renderDynamicChart('overallValueChart', 'bar', 'rgba(0, 128, 128, 0.6)', 'rgba(0, 128, 128, 1)');
-            }
-            
-            // Helper function to render dynamic charts
-            function renderDynamicChart(chartId, chartType, bgColor, borderColor) {
-                const chartElement = document.getElementById(chartId);
-                if (chartElement) {
-                    const chartData = getChartData(chartId);
-                    if (chartData) {
-                        new Chart(chartElement, {
-                            type: chartType,
-                            data: {
-                                labels: chartData.labels,
-                                datasets: [{
-                                    label: 'Average Rating (1-5)',
-                                    data: chartData.values,
-                                    backgroundColor: bgColor,
-                                    borderColor: borderColor,
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: chartOptions
-                        });
-                    }
-                }
-            }
-        });
-    // faculty management script
+          }
+        }
+      },
+      animation: {
+        duration: 1000,
+        easing: 'easeOutBounce'
+      },
+      barThickness: 'flex',
+      maxBarThickness: 30
+    }
+  });
+}
+
+// faculty management script
     // View faculty details with their assigned forms
     function viewFacultyDetails(facultyId) {
     const facultyData = getFacultyById(facultyId);

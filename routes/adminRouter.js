@@ -244,71 +244,144 @@ router.get('/logout', validateAdmin, (req, res) => {
     // Redirect to login page
     res.redirect('/adminLogin');
 });
+// router.get("/adminHome", validateAdmin, async (req, res) => {
+//     try {
+//       const subjectFilter = req.query.subject; // Get subject from query params
+//       const formTypeFilter = req.query.formType || "Academic"; // Default to Academic if not specified
+//       const facultyFilter = req.query.faculty; // Get faculty filter from query params
+  
+//       let faculties;
+//       const students = await Student.find(); // Fetch students from DB
+//       const uniqueSections = [...new Set(students.map(student => student.section))];
+  
+//       if (subjectFilter && subjectFilter !== "All") {
+//         faculties = await Faculty.find({ subjects: subjectFilter }); // Filter faculties by subject
+//       } else {
+//         faculties = await Faculty.find(); // Get all faculties
+//       }
+  
+//       let uniqueSubjects = [...new Set(faculties.flatMap(fac => fac.subjects))];
+  
+//       // Fetch forms data from Form model
+//       const forms = await FeedbackForm.find();
+  
+//       // Fetch feedback responses based on form type and potentially faculty
+//       let feedbackQuery = { formType: formTypeFilter };
+      
+//       // Add faculty filter if present
+//       if (facultyFilter) {
+//         feedbackQuery.facultyID = facultyFilter;
+//       }
+      
+//       // Add subject filter if present
+//       if (subjectFilter && subjectFilter !== "All") {
+//         feedbackQuery.subject = subjectFilter;
+//       }
+      
+//       const feedbackResponses = await FeedbackResponse.find(feedbackQuery);
+  
+//       // Process the feedback data for charts
+//       const feedbackData = processDataForCharts(feedbackResponses, formTypeFilter);
+  
+//       const adminData = req.session.admin;
+//       const currentPath = req.path;
+      
+//       // Determine if there's a selected faculty
+//       const selectedFaculty = facultyFilter || '';
+  
+//       // Render the page with all necessary data
+//       res.render("adminHome", {
+//         currentPath,
+//         adminData,
+//         uniqueSubjects,
+//         faculties,
+//         students,
+//         uniqueSections,
+//         forms,
+//         subjectFilter,
+//         selectedFaculty,
+//         feedbackData
+//       });
+  
+//     } catch (e) {
+//       console.error("Error in adminHome route:", e);
+//       res.status(500).send("Server Error");
+//     }
+// });
+  
 router.get("/adminHome", validateAdmin, async (req, res) => {
-    try {
-      const subjectFilter = req.query.subject; // Get subject from query params
-      const formTypeFilter = req.query.formType || "Academic"; // Default to Academic if not specified
-      const facultyFilter = req.query.faculty; // Get faculty filter from query params
-  
-      let faculties;
-      const students = await Student.find(); // Fetch students from DB
-      const uniqueSections = [...new Set(students.map(student => student.section))];
-  
-      if (subjectFilter && subjectFilter !== "All") {
-        faculties = await Faculty.find({ subjects: subjectFilter }); // Filter faculties by subject
-      } else {
-        faculties = await Faculty.find(); // Get all faculties
-      }
-  
-      let uniqueSubjects = [...new Set(faculties.flatMap(fac => fac.subjects))];
-  
-      // Fetch forms data from Form model
-      const forms = await FeedbackForm.find();
-  
-      // Fetch feedback responses based on form type and potentially faculty
-      let feedbackQuery = { formType: formTypeFilter };
-      
-      // Add faculty filter if present
-      if (facultyFilter) {
-        feedbackQuery.facultyID = facultyFilter;
-      }
-      
-      // Add subject filter if present
-      if (subjectFilter && subjectFilter !== "All") {
-        feedbackQuery.subject = subjectFilter;
-      }
-      
-      const feedbackResponses = await FeedbackResponse.find(feedbackQuery);
-  
-      // Process the feedback data for charts
-      const feedbackData = processDataForCharts(feedbackResponses, formTypeFilter);
-  
-      const adminData = req.session.admin;
-      const currentPath = req.path;
-      
-      // Determine if there's a selected faculty
-      const selectedFaculty = facultyFilter || '';
-  
-      // Render the page with all necessary data
-      res.render("adminHome", {
-        currentPath,
-        adminData,
-        uniqueSubjects,
-        faculties,
-        students,
-        uniqueSections,
-        forms,
-        subjectFilter,
-        selectedFaculty,
-        feedbackData
-      });
-  
-    } catch (e) {
-      console.error("Error in adminHome route:", e);
-      res.status(500).send("Server Error");
+  try {
+    const subjectFilter = req.query.subject; // Get subject from query params
+    const formTypeFilter = req.query.formType || "Academic"; // Default to Academic if not specified
+    const facultyFilter = req.query.faculty; // Get faculty filter from query params
+    const academicType = req.query.academicType || 'all'; // Add this line for academicType parameter
+
+    let faculties;
+    const students = await Student.find(); // Fetch students from DB
+    const uniqueSections = [...new Set(students.map(student => student.section))];
+
+    if (subjectFilter && subjectFilter !== "All") {
+      faculties = await Faculty.find({ subjects: subjectFilter }); // Filter faculties by subject
+    } else {
+      faculties = await Faculty.find(); // Get all faculties
     }
+
+    let uniqueSubjects = [...new Set(faculties.flatMap(fac => fac.subjects))];
+
+    // Fetch forms data from Form model
+    const forms = await FeedbackForm.find();
+
+    // Fetch feedback responses based on form type and potentially faculty
+    let feedbackQuery = { formType: formTypeFilter };
+    
+    // Add faculty filter if present
+    if (facultyFilter) {
+      feedbackQuery.facultyID = facultyFilter;
+    }
+    
+    // Add subject filter if present
+    if (subjectFilter && subjectFilter !== "All") {
+      feedbackQuery.subject = subjectFilter;
+    }
+    
+    // Add academic type filter if it's Academic form type and not 'all'
+    if (formTypeFilter === "Academic" && academicType !== 'all') {
+      feedbackQuery.academicType = academicType.charAt(0).toUpperCase() + academicType.slice(1); // Capitalize first letter
+    }
+    
+    const feedbackResponses = await FeedbackResponse.find(feedbackQuery);
+
+    // Process the feedback data for charts
+    const feedbackData = processDataForCharts(feedbackResponses, formTypeFilter);
+
+    const adminData = req.session.admin;
+    const currentPath = req.path;
+    
+    // Determine if there's a selected faculty
+    const selectedFaculty = facultyFilter || '';
+
+    // Render the page with all necessary data
+    res.render("adminHome", {
+      currentPath,
+      adminData,
+      uniqueSubjects,
+      faculties,
+      students,
+      uniqueSections,
+      forms,
+      subjectFilter,
+      selectedFaculty,
+      feedbackData,
+      academicType    // Pass academicType to the template
+    });
+
+  } catch (e) {
+    console.error("Error in adminHome route:", e);
+    res.status(500).send("Server Error");
+  }
 });
-  function processDataForCharts(feedbackResponses, formType) {
+
+function processDataForCharts(feedbackResponses, formType) {
     // Initialize the section data structure
     const sectionData = {};
     
@@ -467,23 +540,25 @@ router.get('/adminHome/forms/create/:formType', validateAdmin, async (req, res) 
     }
 
     // Fetch faculty list
-    const faculties = await Faculty.find({}, 'name _id department');
+    const faculties = await Faculty.find({}, 'name _id branch');
 
-    // Static data
-    const sectionCategories = ["CSE-A", "CSE-B", "IT-A", "IT-B", "ECE-A", "ECE-B"];
+    // ✅ Updated Sections and Subjects for CSE only
+    const sectionCategories = ["CSE-A", "CSE-B", "CSE-C"];
     const semesterCategories = [1, 2, 3, 4, 5, 6, 7, 8];
-    const subjects = ["Data Structures", "Database Management", "Computer Networks",
-      "Operating Systems", "Machine Learning", "Web Development"];
-    
-    // Generate dynamic academic years (current year and next 5 years)
-    const academicYears = generateAcademicYears(5); // Current + next 5 years
+    const subjects = [
+      "DBMS", "OS", "Data Structures", "Algorithms", "SQL", "Java", "Python",
+      "CN", "TOC", "AI", "ML", "Software Engineering", "Web Tech", "JavaScript",
+      "Cloud Computing", "Cyber Security", "Ethical Hacking", "Web Dev"
+    ];
+
+    // Generate academic years
+    const academicYears = generateAcademicYears(5);
     const semesterTypes = ["Odd", "Even"];
 
-    // ✅ Use top-level FormTemplate import
+    // Fetch templates
     const templates = await FormTemplate.find({ formType });
     console.log(`✅ Fetched ${templates.length} templates for form type: ${formType}`);
-    
-    // Convert templates to plain objects to ensure proper serialization
+
     const plainTemplates = templates.map(template => template.toObject());
 
     res.render('CreateFeedbackForms', {
@@ -492,11 +567,10 @@ router.get('/adminHome/forms/create/:formType', validateAdmin, async (req, res) 
       sectionCategories,
       semesterCategories,
       subjects,
-      // Add session-related data to the template
       academicYears,
       semesterTypes,
-      templates: plainTemplates, // Pass plain objects instead of Mongoose documents
-      templatesJSON: JSON.stringify(plainTemplates), // Add this line to provide pre-stringified JSON
+      templates: plainTemplates,
+      templatesJSON: JSON.stringify(plainTemplates),
       currentPath: req.path,
       adminData: req.session.admin || {}
     });
@@ -506,6 +580,7 @@ router.get('/adminHome/forms/create/:formType', validateAdmin, async (req, res) 
     res.status(500).send("Server error");
   }
 });
+
 function generateAcademicYears(futureYears = 5) {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
