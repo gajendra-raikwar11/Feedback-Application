@@ -19,6 +19,167 @@ const { FeedbackForm, validateFeedbackForm } = require('../models/feedbackForm')
 const { FeedbackResponse } = require("../models/feedbackResponse");
 const { FormTemplate, validateFormTemplate } = require('../models/FormTemplate');
 
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
+const xlsx = require("xlsx");
+
+// Route to download the Excel template
+router.get("/download-template", (req, res) => {
+  res.download(path.join(__dirname, "../templates/student_template.xlsx"));
+});
+// Route to upload student data from Excel
+// router.post("/upload-students", upload.single("studentFile"), async (req, res) => {
+//   try {
+//     if (!req.file) {
+//       return res.status(400).send("No file uploaded");
+//     }
+
+//     console.log("File received:", req.file.path);
+
+//     const workbook = xlsx.readFile(req.file.path);
+//     const sheetName = workbook.SheetNames[0];
+//     const studentsData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+//     console.log(`Processing ${studentsData.length} student records`);
+
+//     let added = 0, skipped = 0, failed = 0;
+
+//     for (const student of studentsData) {
+//       try {
+//         // Check if student already exists
+//         const exists = await Student.findOne({ email: student.email });
+//         if (exists) {
+//           console.log(`Student with email ${student.email} already exists. Skipping.`);
+//           skipped++;
+//           continue;
+//         }
+
+//         // Check required fields
+//         if (!student.email || !student.password) {
+//           console.log("Missing email or password in record:", student);
+//           failed++;
+//           continue;
+//         }
+
+//         // Hash password
+//         const salt = await bcrypt.genSalt(10);
+//         const hashedPassword = await bcrypt.hash(student.password, salt);
+
+//         const studentObj = { ...student, password: hashedPassword };
+
+//         // Convert contact to string if it's a number
+//         if (student.contact && typeof student.contact === "number") {
+//           studentObj.contact = student.contact.toString();
+//         }
+
+//         // Validate student data
+//         const { error } = validateStudent(studentObj);
+//         if (error) {
+//           console.log(`Validation error: ${error.details[0].message} for student: ${student.email}`);
+//           failed++;
+//           continue;
+//         }
+
+//         const newStudent = new Student(studentObj);
+//         await newStudent.save();
+//         console.log(`Student ${student.email} added successfully`);
+//         added++;
+//         res.redirect("adminStudentPage");
+//       } catch (individualError) {
+//         console.error(`Error processing student: ${student.email}`, individualError);
+//         failed++;
+//       }
+//     }
+
+//     // Remove temporary file
+//     fs.unlink(req.file.path, (err) => {
+//       if (err) console.error("Error deleting temporary file:", err);
+//     });
+
+//     res.send(`Upload results: ${added} added, ${skipped} skipped (already exist), ${failed} failed`);
+//   } catch (err) {
+//     console.error("Upload failed:", err);
+//     res.status(500).send("Something went wrong during upload.");
+//   }
+// });
+router.post("/upload-students", upload.single("studentFile"), async (req, res) => {
+  try {
+    if (!req.file) {
+      req.flash("error", "No file uploaded.");
+      return res.redirect("/admin/student"); // replace with your actual page
+    }
+
+    console.log("File received:", req.file.path);
+
+    const workbook = xlsx.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const studentsData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    console.log(`Processing ${studentsData.length} student records`);
+
+    let added = 0, skipped = 0, failed = 0;
+
+    for (const student of studentsData) {
+      try {
+        // Check if student already exists
+        const exists = await Student.findOne({ email: student.email });
+        if (exists) {
+          console.log(`Student with email ${student.email} already exists. Skipping.`);
+          skipped++;
+          continue;
+        }
+
+        // Check required fields
+        if (!student.email || !student.password) {
+          console.log("Missing email or password in record:", student);
+          failed++;
+          continue;
+        }
+
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(student.password, salt);
+
+        const studentObj = { ...student, password: hashedPassword };
+
+        // Convert contact to string if it's a number
+        if (student.contact && typeof student.contact === "number") {
+          studentObj.contact = student.contact.toString();
+        }
+
+        // Validate student data
+        const { error } = validateStudent(studentObj);
+        if (error) {
+          console.log(`Validation error: ${error.details[0].message} for student: ${student.email}`);
+          failed++;
+          continue;
+        }
+
+        const newStudent = new Student(studentObj);
+        await newStudent.save();
+        console.log(`Student ${student.email} added successfully`);
+        added++;
+      } catch (individualError) {
+        console.error(`Error processing student: ${student.email}`, individualError);
+        failed++;
+      }
+    }
+
+    // Remove temporary file
+    fs.unlink(req.file.path, (err) => {
+      if (err) console.error("Error deleting temporary file:", err);
+    });
+
+    // ✅ Flash message and redirect
+    req.flash("success", `Upload completed: ${added} added, ${skipped} skipped, ${failed} failed`);
+    res.redirect("/admin/adminStudentPage"); // 🔁 Replace with your actual route/page
+
+  } catch (err) {
+    console.error("Upload failed:", err);
+    req.flash("error", "Something went wrong during upload.");
+    res.redirect("/admin/adminStudentPage"); // 🔁 Replace with your actual route/page
+  }
+});
 
 // Define lockout parameters
 const MAX_ATTEMPTS = 3; // Maximum login attempts
@@ -90,75 +251,6 @@ if (typeof process.env.NODE_ENV !== "undefined" && process.env.NODE_ENV === "dev
 router.get('/', (req, res) => {
     res.render("adminLogin", { messages: req.flash() });
 });
-// Admin login route
-// router.post('/login', async (req, res) => {
-//   const { email, password } = req.body;
-
-//   try {
-//       // Find admin by email
-//       let validAdmin = await adminModel.findOne({ email: email });
-
-//       if (!validAdmin) {
-//           req.flash('error', 'Admin not found');
-//           return res.redirect('/adminLogin');
-//       }
-
-//       // Check if account is locked
-//       if (validAdmin.lockUntil && validAdmin.lockUntil > Date.now()) {
-//           let remainingTime = Math.ceil((validAdmin.lockUntil - Date.now()) / 60000);
-//           req.flash('error', `Account locked. Try again in ${remainingTime} minute(s).`);
-//           return res.redirect('/adminLogin');
-//       }
-
-//       // Validate password
-//       let valid = await bcrypt.compare(password, validAdmin.password);
-
-//       if (valid) {
-//           // Reset failed attempts and unlock account
-//           validAdmin.failedAttempts = 0;
-//           validAdmin.lockUntil = null;
-//           await validAdmin.save();
-
-//           // Generate JWT token
-//           let token = jwt.sign({ email: email, id: validAdmin._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
-//           res.cookie("adminToken", token, { httpOnly: true });
-
-//           // Store admin data in session
-//           req.session.admin = {
-//               id: validAdmin._id,
-//               name: validAdmin.name,
-//               email: validAdmin.email,
-//               department: validAdmin.department,
-//               image: validAdmin.image
-//           };
-
-//           // ⏳ Set session expiry to 24 hours
-//           req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-
-//           req.flash('success', 'Login successful!');
-//           return res.redirect('/admin/adminHome');
-//       } else {
-//           // Increase failed attempts count
-//           validAdmin.failedAttempts = (validAdmin.failedAttempts || 0) + 1;
-
-//           if (validAdmin.failedAttempts >= MAX_ATTEMPTS) {
-//               validAdmin.lockUntil = Date.now() + LOCK_TIME;
-//               await validAdmin.save();
-//               req.flash('error', 'Account locked. Try again in 5 minutes.');
-//               return res.redirect('/adminLogin');
-//           }
-
-//           await validAdmin.save();
-//           req.flash('error', `Login failed. ${MAX_ATTEMPTS - validAdmin.failedAttempts} attempts left.`);
-//           return res.redirect('/adminLogin');
-//       }
-//   } catch (error) {
-//       console.error("Login error:", error);
-//       req.flash('error', 'Internal Server Error. Please try again.');
-//       return res.redirect('/adminLogin');
-//   }
-// });
-
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -232,7 +324,6 @@ router.post('/login', async (req, res) => {
       return res.redirect('/adminLogin');
   }
 });
-
 // Logout Route
 router.get('/logout', validateAdmin, (req, res) => {
     // Clear the session
@@ -244,71 +335,6 @@ router.get('/logout', validateAdmin, (req, res) => {
     // Redirect to login page
     res.redirect('/adminLogin');
 });
-// router.get("/adminHome", validateAdmin, async (req, res) => {
-//     try {
-//       const subjectFilter = req.query.subject; // Get subject from query params
-//       const formTypeFilter = req.query.formType || "Academic"; // Default to Academic if not specified
-//       const facultyFilter = req.query.faculty; // Get faculty filter from query params
-  
-//       let faculties;
-//       const students = await Student.find(); // Fetch students from DB
-//       const uniqueSections = [...new Set(students.map(student => student.section))];
-  
-//       if (subjectFilter && subjectFilter !== "All") {
-//         faculties = await Faculty.find({ subjects: subjectFilter }); // Filter faculties by subject
-//       } else {
-//         faculties = await Faculty.find(); // Get all faculties
-//       }
-  
-//       let uniqueSubjects = [...new Set(faculties.flatMap(fac => fac.subjects))];
-  
-//       // Fetch forms data from Form model
-//       const forms = await FeedbackForm.find();
-  
-//       // Fetch feedback responses based on form type and potentially faculty
-//       let feedbackQuery = { formType: formTypeFilter };
-      
-//       // Add faculty filter if present
-//       if (facultyFilter) {
-//         feedbackQuery.facultyID = facultyFilter;
-//       }
-      
-//       // Add subject filter if present
-//       if (subjectFilter && subjectFilter !== "All") {
-//         feedbackQuery.subject = subjectFilter;
-//       }
-      
-//       const feedbackResponses = await FeedbackResponse.find(feedbackQuery);
-  
-//       // Process the feedback data for charts
-//       const feedbackData = processDataForCharts(feedbackResponses, formTypeFilter);
-  
-//       const adminData = req.session.admin;
-//       const currentPath = req.path;
-      
-//       // Determine if there's a selected faculty
-//       const selectedFaculty = facultyFilter || '';
-  
-//       // Render the page with all necessary data
-//       res.render("adminHome", {
-//         currentPath,
-//         adminData,
-//         uniqueSubjects,
-//         faculties,
-//         students,
-//         uniqueSections,
-//         forms,
-//         subjectFilter,
-//         selectedFaculty,
-//         feedbackData
-//       });
-  
-//     } catch (e) {
-//       console.error("Error in adminHome route:", e);
-//       res.status(500).send("Server Error");
-//     }
-// });
-  
 router.get("/adminHome", validateAdmin, async (req, res) => {
   try {
     const subjectFilter = req.query.subject; // Get subject from query params
@@ -506,24 +532,24 @@ router.get("/adminStudentPage", validateAdmin, async (req, res) => {
       res.status(500).send("Server Error");
     }
 });
-// Delete student by ID route
-router.delete('/students/:studentIdToDelete',validateAdmin, async (req, res) => {
-    try {
-      const studentIdToDelete = req.params.studentIdToDelete;
+// // Delete student by ID route
+// router.delete('/students/:studentIdToDelete',validateAdmin, async (req, res) => {
+//     try {
+//       const studentIdToDelete = req.params.studentIdToDelete;
   
-      // Find and delete the student from the database
-      const student = await Student.findByIdAndDelete(studentIdToDelete);
+//       // Find and delete the student from the database
+//       const student = await Student.findByIdAndDelete(studentIdToDelete);
   
-      if (!student) {
-        return res.status(404).json({ message: 'Student not found' });
-      }
+//       if (!student) {
+//         return res.status(404).json({ message: 'Student not found' });
+//       }
   
-      res.json({ message: `Student with ID ${studentIdToDelete} deleted successfully` });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Server error' });
-    }
-});
+//       res.json({ message: `Student with ID ${studentIdToDelete} deleted successfully` });
+//     } catch (err) {
+//       console.error(err);
+//       res.status(500).json({ message: 'Server error' });
+//     }
+// });
 //---------------------------------------------Admin Home Form Realted all routes--------------------------------------------------------------------
 //form related all routes
 router.get('/adminHome/forms/create/:formType', validateAdmin, async (req, res) => {
@@ -2045,4 +2071,26 @@ router.get('/export-faculty-data', async (req, res) => {
       res.status(500).send('Failed to export faculty data');
   }
 });
+
+// Express route to delete student
+router.delete('/students/delete/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Try to find and delete the student by ID
+    const deletedStudent = await Student.findByIdAndDelete(id);
+
+    // If student is not found, return an error response
+    if (!deletedStudent) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    // Return success response
+    res.status(200).json({ message: 'Student deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting student:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 module.exports = router;

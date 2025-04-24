@@ -9,8 +9,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { Student, validateStudent } = require("../models/studentSchema");
 const MongoStore = require("connect-mongo"); //store the session even after server is restarted
-const authorizedStudentsPath = path.join(__dirname,"..","authorized_students.json");
-const authorizedStudents = JSON.parse(fs.readFileSync(authorizedStudentsPath, "utf-8"));
+
 const sendOTPByEmail = require("../config/NodeMailer");
 
 router.get("/", (req, res) => {

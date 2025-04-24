@@ -76,7 +76,7 @@ function validateStudent(data) {
             "any.required": "Email is required"
         }),
         branch: Joi.string().required().messages({
-            "any.required": "Branch is required"
+            "any.required": "Branch is required" 
         }),
         section: Joi.string().required().messages({
             "any.required": "Section is required"
@@ -86,7 +86,15 @@ function validateStudent(data) {
             "number.min": "Semester must be at least 1",
             "number.max": "Semester cannot exceed 8"
         }),
-        contact: Joi.string().pattern(/^[0-9]{10}$/).required(),
+        contact: Joi.alternatives()
+      .try(
+        Joi.string().pattern(/^[0-9]{10}$/),
+        Joi.number().integer().min(1000000000).max(9999999999)
+      )
+      .required()
+      .messages({
+        "alternatives.types": "Contact must be a valid 10-digit phone number",
+        }),
         feedbackGiven: Joi.array().items(Joi.string()).optional(),
         role: Joi.string().valid("student").default("student"),
         password: Joi.string().required().messages({

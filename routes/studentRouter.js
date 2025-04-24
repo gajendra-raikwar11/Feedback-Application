@@ -9,14 +9,11 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { Student, validateStudent } = require("../models/studentSchema");
 const MongoStore = require("connect-mongo");
-const authorizedStudentsPath = path.join(
-  __dirname,
-  "..",
-  "authorized_students.json"
-);
-const authorizedStudents = JSON.parse(
-  fs.readFileSync(authorizedStudentsPath, "utf-8")
-);
+
+// const multer = require("multer");
+// const upload = multer({ dest: "uploads/" });
+// const xlsx = require("xlsx");
+
 const sendOTPByEmail = require("../config/NodeMailer");
 const studentValidate = require("../middlewares/studentValidate");
 const {
@@ -32,91 +29,105 @@ const {
   FeedbackResponse,
   validateFeedbackResponse,
 } = require("../models/feedbackResponse");
+// Student Login (Updated to check directly in DB)
+// router.post("/studentLogin", async (req, res) => {
+//   const { email, password } = req.body;
 
-router.use(
-  session({
-    secret: process.env.JWT_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URL }),
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000,
-    },
-  })
-);
-// Student Login (without studentValidate, because user is logging in)
+//   try {
+//     const student = await Student.findOne({ email });
+
+//     if (!student) {
+//       return res.status(401).send("Invalid email or password.");
+//     }
+
+//     const validPassword = await bcrypt.compare(password, student.password);
+//     if (!validPassword) {
+//       return res.status(401).send("Invalid email or password.");
+//     }
+
+//     // Session में student ID, semester और contact स्टोर करें
+//     req.session.studentId = student._id.toString();
+//     req.session.semester = student.semester;
+//     req.session.contact = student.contact;
+//     await req.session.save();
+
+//     // JWT Token बनाएं
+//     const token = jwt.sign(
+//       {
+//         _id: student._id,
+//         name: student.name,
+//         semester: student.semester,
+//         contact: student.contact,
+//       },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "1h" }
+//     );
+
+//     res.cookie("token", token, {
+//       httpOnly: true,
+//       secure: process.env.NODE_ENV === "production",
+//       maxAge: 60 * 60 * 1000, // 1 hour
+//     });
+
+//     res.redirect("/student/studentHomepage");
+//   } catch (error) {
+//     console.error("Error processing login:", error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
+
 router.post("/studentLogin", async (req, res) => {
   const { email, password } = req.body;
 
-  const authorizedStudent = authorizedStudents.find(
-    (student) => student.email === email && student.password === password
-  );
+  try {
+    const student = await Student.findOne({ email });
 
-  if (authorizedStudent) {
-    try {
-      let student = await Student.findOne({ email });
-
-      if (!student) {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const studentData = {
-          ...authorizedStudent,
-          password: hashedPassword,
-          semester: authorizedStudent.semester || 1, // ✅ Semester जोड़ना
-          contact: authorizedStudent.contact || "", // ✅ Contact जोड़ना
-        };
-
-        const { error } = validateStudent(studentData);
-        if (error) return res.status(400).send(error.details[0].message);
-
-        student = new Student(studentData);
-        await student.save();
-
-        console.log(`User account created for ${student.name}`);
-      } else {
-        console.log(`User ${student.name} logged in now.`);
-      }
-
-      // Session में student ID, semester और contact स्टोर करें
-      req.session.studentId = student._id.toString();
-      req.session.semester = student.semester; // ✅ Semester Session में
-      req.session.contact = student.contact; // ✅ Contact Session में
-      await req.session.save();
-
-      // JWT Token में Semester और Contact शामिल करें (Optional)
-      const token = jwt.sign(
-        {
-          _id: student._id,
-          name: student.name,
-          semester: student.semester,
-          contact: student.contact,
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
-      );
-
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 1000,
-      });
-
-      res.redirect("/student/studentHomepage");
-    } catch (error) {
-      console.error("Error processing login:", error);
-      res.status(500).send("Internal Server Error");
+    if (!student) {
+      return res.status(401).send("Invalid email or password.");
     }
-  } else {
-    res
-      .status(401)
-      .send("Invalid email or password. You are not an authorized student.");
+
+    const validPassword = await bcrypt.compare(password, student.password);
+    if (!validPassword) {
+      return res.status(401).send("Invalid email or password.");
+    }
+
+    // ✅ Update isLoggedIn to true
+    student.isLoggedIn = true;
+    await student.save();
+
+    // ✅ Save session data
+    req.session.studentId = student._id.toString();
+    req.session.semester = student.semester;
+    req.session.contact = student.contact;
+    await req.session.save();
+
+    // ✅ Generate JWT Token
+    const token = jwt.sign(
+      {
+        _id: student._id,
+        name: student.name,
+        semester: student.semester,
+        contact: student.contact,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // ✅ Set cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
+
+    res.redirect("/student/studentHomepage");
+  } catch (error) {
+    console.error("Error processing login:", error);
+    res.status(500).send("Internal Server Error");
   }
 });
-// Student Homepage (Protected Route)
+
+// // Student Homepage (Protected Route)
 router.get("/studentHomepage", studentValidate, async (req, res) => {
   try {
     const student = req.student;
@@ -200,44 +211,6 @@ router.get("/studentHomepage", studentValidate, async (req, res) => {
   } catch (error) {
     console.error("❌ Error in /studentHomepage route:", error);
     res.redirect("/studentLogin");
-  }
-});
-// API route for updating profile within dashboard
-router.put("/update-profile", studentValidate, async (req, res) => {
-  try {
-    // Use req.session.studentId instead of req.user._id
-    if (!req.session.studentId) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication required. Please login again.",
-      });
-    }
-
-    const { name, email, contact } = req.body;
-
-    // Find and update the student document
-    const updatedStudent = await Student.findByIdAndUpdate(
-      req.session.studentId,
-      { name, email, contact },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedStudent) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Student not found" });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "Profile updated successfully",
-      student: updatedStudent,
-    });
-  } catch (err) {
-    console.error(err);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to update profile" });
   }
 });
 router.get("/studentFormsPage", studentValidate, async (req, res) => {
@@ -918,16 +891,17 @@ function determineCurrentSession() {
     };
   }
 }
+
 // Enhanced POST route to submit form responses - aligned with HTML form structure
 router.post("/submitFormResponse/:id", studentValidate, async (req, res) => {
   try {
     const formId = req.params.id;
     const studentId = req.student._id;
-    const { 
-      answers, 
-      formTitle, 
-      formType, 
-      facultyID, 
+    const {
+      answers,
+      formTitle,
+      formType,
+      facultyID,
       section,
       semester,
       subject,
@@ -984,67 +958,57 @@ router.post("/submitFormResponse/:id", studentValidate, async (req, res) => {
 
     // Process answers to add numeric values
     const processedAnswers = [];
-    
-    // Process each answer - handling all the various input types from the form
+
     if (Array.isArray(answers)) {
       for (let i = 0; i < answers.length; i++) {
         const answer = answers[i];
-        
-        // Skip empty answers (no response for non-required questions)
         if (!answer) continue;
-        
-        // Clone the answer to avoid modifying the original
+
         const processedAnswer = { ...answer };
-        
-        // Handle different response types
+
         if (answer.questionType === "grid" && answer.gridResponses) {
-          // Handle grid responses specially
           const gridData = answer.gridResponses || {};
           processedAnswer.responseOriginalText = JSON.stringify(gridData);
           processedAnswer.responseText = JSON.stringify(gridData);
           processedAnswer.responseNumericValue = convertResponseToNumeric(processedAnswer.responseText, "grid");
         } else if (answer.responseText) {
-          // Text, textarea, date inputs
           processedAnswer.responseOriginalText = answer.responseText;
           processedAnswer.responseNumericValue = convertResponseToNumeric(answer.responseText, answer.questionType);
         } else if (answer.responseRating !== undefined && answer.responseRating !== null) {
-          // Rating inputs
           processedAnswer.responseOriginalText = answer.responseRating.toString();
           processedAnswer.responseText = answer.responseRating.toString();
           processedAnswer.responseNumericValue = Number(answer.responseRating);
         } else if (answer.responseOptions) {
-          // Radio, checkbox, dropdown inputs
-          const optionValues = Array.isArray(answer.responseOptions) 
-            ? answer.responseOptions 
+          const optionValues = Array.isArray(answer.responseOptions)
+            ? answer.responseOptions
             : [answer.responseOptions];
-            
+
           processedAnswer.responseOriginalText = optionValues.join(", ");
           processedAnswer.responseText = optionValues.join(", ");
-          
-          if (answer.questionType === "yes_no" || answer.questionType === "radio" || 
-              answer.questionType === "mcq" || answer.questionType === "dropdown") {
-            // For single-select inputs, use the first/only option
+
+          if (
+            answer.questionType === "yes_no" ||
+            answer.questionType === "radio" ||
+            answer.questionType === "mcq" ||
+            answer.questionType === "dropdown"
+          ) {
             processedAnswer.responseNumericValue = convertResponseToNumeric(
               optionValues[0],
               answer.questionType
             );
           } else {
-            // For multi-select inputs, can't easily assign a numeric value
             processedAnswer.responseNumericValue = null;
           }
         } else if (answer.responseDate) {
-          // Date input (separate field)
           processedAnswer.responseOriginalText = answer.responseDate;
           processedAnswer.responseText = answer.responseDate;
-          processedAnswer.responseNumericValue = null; // Date doesn't have a numeric equivalent
+          processedAnswer.responseNumericValue = null;
         } else {
-          // Handle other cases or empty responses
           processedAnswer.responseOriginalText = "";
           processedAnswer.responseText = "";
           processedAnswer.responseNumericValue = null;
         }
-        
-        // Add the processed answer to our array
+
         processedAnswers.push(processedAnswer);
       }
     }
@@ -1052,32 +1016,24 @@ router.post("/submitFormResponse/:id", studentValidate, async (req, res) => {
     // Calculate section averages and overall average
     const { sectionAverages, overallAverage, totalResponses } = calculateAverages(processedAnswers);
 
-    // Create a new response
+    // Create new FeedbackResponse
     const newResponse = new FeedbackResponse({
       formID: formId,
       formTitle: formTitle || form.title,
       formType: formType || form.formType,
       academicType: form.academicType || null,
-      
-      // Session information
       session: form.session || sessionInfo.session,
       semesterType: form.semesterType || sessionInfo.semesterType,
       sessionLabel: form.sessionLabel || sessionInfo.sessionLabel,
-      
-      // Student and faculty information
       studentID: studentId,
       studentName: student.name || student.fullName,
       studentEmail: student.email,
       facultyID: facultyID || null,
-      
-      // Section and semester information
       section: section || student.section || form.sectionsAssigned?.[0] || "N/A",
       semester: semester || student.semester || "N/A",
       subject: subject || form.subjects?.[0] || null,
       commonSemester: commonSemester || form.commonSemester || null,
       commonSection: commonSection || form.commonSection || null,
-      
-      // Response data
       answers: processedAnswers,
       sectionAverages: sectionAverages,
       overallAverage: overallAverage,
@@ -1085,42 +1041,53 @@ router.post("/submitFormResponse/:id", studentValidate, async (req, res) => {
       submittedAt: new Date()
     });
 
-    // Save the response
+    // Save feedback response
     const savedResponse = await newResponse.save();
 
-    // Update form with the response reference
+    // ✅ Update student feedbackGiven list
+    student.feedbackGiven = student.feedbackGiven || [];
+    student.feedbackGiven.push(savedResponse._id);
+    await student.save();
+
+    // Update form submission data
     form.responses = [...(form.responses || []), savedResponse._id];
     form.submissionCount = (form.submissionCount || 0) + 1;
     await form.save();
 
-    // Redirect with success message
     req.flash("success", "Your feedback has been submitted successfully");
     return res.redirect("/student/studentFormsPage?success=true");
+
   } catch (error) {
     console.error("Error submitting form response:", error);
     req.flash("error", "An error occurred while submitting your response: " + error.message);
     return res.redirect("/student/studentFormsPage");
   }
 });
+
+
 router.get("/logout", async (req, res) => {
   try {
-    if (req.session.studentId) {
-      await Student.findByIdAndUpdate(req.session.studentId, {
-        isLoggedIn: false,
-      }); // 🔥 Mark as logged out
+    const studentId = req.session.studentId;
+
+    // ✅ Set isLoggedIn to false
+    if (studentId) {
+      await Student.findByIdAndUpdate(studentId, { isLoggedIn: false });
     }
 
+    // ✅ Destroy session
     req.session.destroy((err) => {
       if (err) {
-        console.error("Error destroying session:", err);
-        return res.status(500).send("Error logging out");
+        console.error("Session destroy error:", err);
+        return res.status(500).send("Error destroying session.");
       }
+
+      // ✅ Clear token cookie
       res.clearCookie("token");
-      res.redirect("/studentLogin");
+      res.redirect("/"); // change if needed
     });
   } catch (error) {
-    console.error("Error logging out:", error);
-    res.redirect("/studentLogin");
+    console.error("Logout error:", error);
+    res.status(500).send("Internal Server Error");
   }
 });
 module.exports = router;
