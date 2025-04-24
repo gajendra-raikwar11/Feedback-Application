@@ -23,90 +23,17 @@ const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 const xlsx = require("xlsx");
 
+
 // Route to download the Excel template
 router.get("/download-template", (req, res) => {
   res.download(path.join(__dirname, "../templates/student_template.xlsx"));
 });
 // Route to upload student data from Excel
-// router.post("/upload-students", upload.single("studentFile"), async (req, res) => {
-//   try {
-//     if (!req.file) {
-//       return res.status(400).send("No file uploaded");
-//     }
-
-//     console.log("File received:", req.file.path);
-
-//     const workbook = xlsx.readFile(req.file.path);
-//     const sheetName = workbook.SheetNames[0];
-//     const studentsData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-//     console.log(`Processing ${studentsData.length} student records`);
-
-//     let added = 0, skipped = 0, failed = 0;
-
-//     for (const student of studentsData) {
-//       try {
-//         // Check if student already exists
-//         const exists = await Student.findOne({ email: student.email });
-//         if (exists) {
-//           console.log(`Student with email ${student.email} already exists. Skipping.`);
-//           skipped++;
-//           continue;
-//         }
-
-//         // Check required fields
-//         if (!student.email || !student.password) {
-//           console.log("Missing email or password in record:", student);
-//           failed++;
-//           continue;
-//         }
-
-//         // Hash password
-//         const salt = await bcrypt.genSalt(10);
-//         const hashedPassword = await bcrypt.hash(student.password, salt);
-
-//         const studentObj = { ...student, password: hashedPassword };
-
-//         // Convert contact to string if it's a number
-//         if (student.contact && typeof student.contact === "number") {
-//           studentObj.contact = student.contact.toString();
-//         }
-
-//         // Validate student data
-//         const { error } = validateStudent(studentObj);
-//         if (error) {
-//           console.log(`Validation error: ${error.details[0].message} for student: ${student.email}`);
-//           failed++;
-//           continue;
-//         }
-
-//         const newStudent = new Student(studentObj);
-//         await newStudent.save();
-//         console.log(`Student ${student.email} added successfully`);
-//         added++;
-//         res.redirect("adminStudentPage");
-//       } catch (individualError) {
-//         console.error(`Error processing student: ${student.email}`, individualError);
-//         failed++;
-//       }
-//     }
-
-//     // Remove temporary file
-//     fs.unlink(req.file.path, (err) => {
-//       if (err) console.error("Error deleting temporary file:", err);
-//     });
-
-//     res.send(`Upload results: ${added} added, ${skipped} skipped (already exist), ${failed} failed`);
-//   } catch (err) {
-//     console.error("Upload failed:", err);
-//     res.status(500).send("Something went wrong during upload.");
-//   }
-// });
 router.post("/upload-students", upload.single("studentFile"), async (req, res) => {
   try {
     if (!req.file) {
       req.flash("error", "No file uploaded.");
-      return res.redirect("/admin/student"); // replace with your actual page
+      return res.redirect("/admin/adminStudentPage");
     }
 
     console.log("File received:", req.file.path);
@@ -160,7 +87,7 @@ router.post("/upload-students", upload.single("studentFile"), async (req, res) =
         console.log(`Student ${student.email} added successfully`);
         added++;
       } catch (individualError) {
-        console.error(`Error processing student: ${student.email}`, individualError);
+        console.error(`Error processing student: ${student.email || 'unknown'}`, individualError);
         failed++;
       }
     }
@@ -170,14 +97,17 @@ router.post("/upload-students", upload.single("studentFile"), async (req, res) =
       if (err) console.error("Error deleting temporary file:", err);
     });
 
-    // ✅ Flash message and redirect
-    req.flash("success", `Upload completed: ${added} added, ${skipped} skipped, ${failed} failed`);
-    res.redirect("/admin/adminStudentPage"); // 🔁 Replace with your actual route/page
+    // Flash message with detailed statistics
+    const message = `Upload completed: ${added} added, ${skipped} skipped, ${failed} failed`;
+    req.flash("success", message);
+    
+    // Redirect with status parameters for client-side toast notifications
+    return res.redirect(`/admin/adminStudentPage?uploadStatus=success&added=${added}&skipped=${skipped}&failed=${failed}`);
 
   } catch (err) {
     console.error("Upload failed:", err);
-    req.flash("error", "Something went wrong during upload.");
-    res.redirect("/admin/adminStudentPage"); // 🔁 Replace with your actual route/page
+    req.flash("error", "Something went wrong during upload: " + (err.message || "Unknown error"));
+    res.redirect("/admin/adminStudentPage");
   }
 });
 
@@ -2092,5 +2022,4 @@ router.delete('/students/delete/:id', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 module.exports = router;
