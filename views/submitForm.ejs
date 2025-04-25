@@ -456,46 +456,49 @@
                                                                <% if (question.required) { %>required<% } %>>
                                                                 
                                                     <% } else if (question.type === 'grid') { %>
-                                                        <div class="table-responsive">
-                                                            <table class="grid-question-table table table-bordered" data-grid-id="<%= question._id %>">
-                                                                <thead class="table-light">
-                                                                    <tr>
-                                                                        <th></th>
-                                                                        <% if (question.gridOptions && Array.isArray(question.gridOptions.columns)) { %>
-                                                                            <% question.gridOptions.columns.forEach(column => { %>
-                                                                                <th class="text-center"><%= column %></th>
-                                                                            <% }); %>
-                                                                        <% } %>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <% if (question.gridOptions && Array.isArray(question.gridOptions.rows)) { %>
-                                                                        <% question.gridOptions.rows.forEach(row => { %>
-                                                                            <tr>
-                                                                                <td class="fw-semibold"><%= row %></td>
-                                                                                <% if (question.gridOptions && Array.isArray(question.gridOptions.columns)) { %>
-                                                                                    <% question.gridOptions.columns.forEach((column, colIndex) => { %>
-                                                                                        <td class="text-center">
-                                                                                            <input type="radio" 
-                                                                                                   class="form-check-input" 
-                                                                                                   name="answers[<%= globalQuestionIndex %>][gridResponses][<%= row %>]" 
-                                                                                                   value="<%= column %>"
-                                                                                                   data-section-title="<%= section.title %>"
-                                                                                                   data-section-id="<%= section._id %>"
-                                                                                                   data-section-index="<%= sIndex %>"
-                                                                                                   data-row="<%= row %>"
-                                                                                                   <% if (question.required) { %>required<% } %>>
-                                                                                        </td>
-                                                                                    <% }); %>
-                                                                                <% } %>
-                                                                            </tr>
+                                                      <div class="table-responsive">
+                                                        <table class="grid-question-table table table-bordered" data-grid-id="<%= question._id %>">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th></th>
+                                                                    <% if (question.gridOptions && Array.isArray(question.gridOptions.columns)) { %>
+                                                                        <% question.gridOptions.columns.forEach(column => { %>
+                                                                            <th class="text-center"><%= column %></th>
                                                                         <% }); %>
                                                                     <% } %>
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                        <input type="hidden" name="answers[<%= globalQuestionIndex %>][responseText]" id="grid-data-<%= section._id %>-<%= question._id %>">
-                                                        
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <% if (question.gridOptions && Array.isArray(question.gridOptions.rows)) { %>
+                                                                    <% question.gridOptions.rows.forEach((row, rowIndex) => { %>
+                                                                        <tr>
+                                                                            <td class="fw-semibold"><%= row %></td>
+                                                                            <% if (question.gridOptions && Array.isArray(question.gridOptions.columns)) { %>
+                                                                                <% question.gridOptions.columns.forEach((column, colIndex) => { %>
+                                                                                    <td class="text-center">
+                                                                                        <input type="radio" 
+                                                                                               class="form-check-input grid-radio" 
+                                                                                               name="answers[<%= globalQuestionIndex %>][gridResponses][<%= row %>]" 
+                                                                                               value="<%= column %>"
+                                                                                               data-section-title="<%= section.title %>"
+                                                                                               data-section-id="<%= section._id %>"
+                                                                                               data-section-index="<%= sIndex %>"
+                                                                                               data-row="<%= row %>"
+                                                                                               data-column="<%= column %>"
+                                                                                               data-numeric-value="<%= colIndex + 1 %>"
+                                                                                               <% if (question.required) { %>required<% } %>>
+                                                                                    </td>
+                                                                                <% }); %>
+                                                                            <% } %>
+                                                                        </tr>
+                                                                    <% }); %>
+                                                                <% } %>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <!-- Updated hidden input to store clean grid response data -->
+                                                    <input type="hidden" name="answers[<%= globalQuestionIndex %>][responseText]" id="grid-data-<%= question._id %>-<%= globalQuestionIndex %>">
+                                                
                                                     <% } else { %>
                                                         <!-- Default to text input if type is not recognized -->
                                                         <input type="text" 
@@ -548,6 +551,7 @@
                             </button>
                         </div>
                     </form>
+                    
                 </div>
             </div>
         </div>
@@ -557,509 +561,600 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Toastify JS -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-          // Show toast function
-          const showToast = (message, type) => {
-              const backgroundColor = type === 'error' ? '#e74c3c' : 
-                                      type === 'success' ? '#2ecc71' : 
-                                      type === 'warning' ? '#f39c12' : '#3498db';
-              
-              Toastify({
-                  text: message,
-                  duration: 3000,
-                  close: true,
-                  gravity: "top",
-                  position: "right", 
-                  backgroundColor: backgroundColor,
-                  stopOnFocus: true
-              }).showToast();
-          };
-          
-          // Display flash messages if they exist
-          if (typeof messages !== 'undefined') {
-              if (messages.error) {
-                  messages.error.forEach(function(message) {
-                      showToast(message, 'error');
-                  });
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+  // Show toast function
+  const showToast = (message, type) => {
+      const backgroundColor = type === 'error' ? '#e74c3c' : 
+                              type === 'success' ? '#2ecc71' : 
+                              type === 'warning' ? '#f39c12' : '#3498db';
+      
+      Toastify({
+          text: message,
+          duration: 3000,
+          close: true,
+          gravity: "top",
+          position: "right", 
+          backgroundColor: backgroundColor,
+          stopOnFocus: true
+      }).showToast();
+  };
+  
+  // Display flash messages if they exist
+  if (typeof messages !== 'undefined') {
+      if (messages.error) {
+          messages.error.forEach(function(message) {
+              showToast(message, 'error');
+          });
+      }
+      if (messages.success) {
+          messages.success.forEach(function(message) {
+              showToast(message, 'success');
+          });
+      }
+  }
+  
+  if (typeof successMessage !== 'undefined' && successMessage) {
+      showToast(successMessage, 'success');
+  }
+  
+  // Form validation and submission handling
+  const form = document.getElementById('feedbackForm');
+  if (form) {
+      // Create a response tracker to store all form responses
+      const formResponses = {};
+      
+      // Create section data tracker
+      const sectionData = {};
+      
+      // Helper function to convert text responses to numeric values
+      function convertResponseToNumeric(responseText, questionType) {
+        // Skip processing if response is empty
+        if (!responseText && responseText !== 0) {
+          return null;
+        }
+        
+        // If responseText is already a number, return it directly
+        if (!isNaN(responseText) && responseText !== '') {
+          return Number(responseText);
+        }
+        
+        // For scale: Poor, Average, Good, Very Good, Excellent, No Opinion
+        const ratingMap = {
+          "Poor": 1,
+          "Average": 2,
+          "Good": 3,
+          "Very Good": 4,
+          "Excellent": 5,
+          "No Opinion": null
+        };
+
+        // For Yes/No: No, Yes, No Opinion
+        const yesNoMap = {
+          "No": 0,
+          "Yes": 5,
+          "No Opinion": null
+        };
+
+        // For weight scale: Just right, Too light, Too Heavy, No Opinion
+        const weightMap = {
+          "Just right": 3,
+          "Too light": 1,
+          "Too Heavy": 5,
+          "No Opinion": null
+        };
+
+        // For satisfaction scale: Very Good, Good, Fair, Satisfactory, Unsatisfied
+        const satisfactionMap = {
+          "Very Good": 5,
+          "Good": 4,
+          "Fair": 3,
+          "Satisfactory": 2,
+          "Unsatisfied": 1,
+          "No Opinion": null
+        };
+        
+        // For agreement scale: Strongly Agree, Agree, Neutral, Disagree, Strongly Disagree
+        const agreementMap = {
+          "Strongly Agree": 5,
+          "Agree": 4,
+          "Neutral": 3,
+          "Disagree": 2,
+          "Strongly Disagree": 1,
+          "No Opinion": null
+        };
+        
+        // For frequency scale: Always, Frequently, Sometimes, Rarely, Never
+        const frequencyMap = {
+          "Always": 5,
+          "Frequently": 4,
+          "Sometimes": 3,
+          "Rarely": 2,
+          "Never": 1,
+          "No Opinion": null
+        };
+
+        // Handle different question types
+        switch (questionType) {
+          case "rating":
+            return ratingMap[responseText] !== undefined ? ratingMap[responseText] : Number(responseText) || null;
+            
+          case "yes_no":
+            return yesNoMap[responseText] !== undefined ? yesNoMap[responseText] : null;
+            
+          case "mcq":
+          case "radio":
+          case "dropdown":
+            // Try to match with any of the scales
+            const allMaps = [
+              ratingMap, 
+              yesNoMap, 
+              weightMap, 
+              satisfactionMap, 
+              agreementMap, 
+              frequencyMap
+            ];
+            
+            for (const map of allMaps) {
+              if (map[responseText] !== undefined) {
+                return map[responseText];
               }
-              if (messages.success) {
-                  messages.success.forEach(function(message) {
-                      showToast(message, 'success');
-                  });
-              }
-          }
-          
-          if (typeof successMessage !== 'undefined' && successMessage) {
-              showToast(successMessage, 'success');
-          }
-          
-          // Form validation and submission handling
-          const form = document.getElementById('feedbackForm');
-          if (form) {
-              // Create a response tracker to store all form responses
-              const formResponses = {};
-              
-              // Create section data tracker
-              const sectionData = {};
-              
-              // Helper function to convert text responses to numeric values
-              // Implementation from provided code
-              function convertResponseToNumeric(responseText, questionType) {
-                // Skip processing if response is empty
-                if (!responseText && responseText !== 0) {
-                  return null;
-                }
-                
-                // If responseText is already a number, return it directly
-                if (!isNaN(responseText) && responseText !== '') {
-                  return Number(responseText);
-                }
-                
-                // For scale: Poor, Average, Good, Very Good, Excellent, No Opinion
-                const ratingMap = {
-                  "Poor": 1,
-                  "Average": 2,
-                  "Good": 3,
-                  "Very Good": 4,
-                  "Excellent": 5,
-                  "No Opinion": null
-                };
-
-                // For Yes/No: No, Yes, No Opinion
-                const yesNoMap = {
-                  "No": 0,
-                  "Yes": 1,
-                  "No Opinion": null
-                };
-
-                // For weight scale: Just right, Too light, Too Heavy, No Opinion
-                const weightMap = {
-                  "Just right": 2,
-                  "Too light": 1,
-                  "Too Heavy": 3,
-                  "No Opinion": null
-                };
-
-                // For satisfaction scale: Very Good, Good, Fair, Satisfactory, Unsatisfied
-                const satisfactionMap = {
-                  "Very Good": 5,
-                  "Good": 4,
-                  "Fair": 3,
-                  "Satisfactory": 2,
-                  "Unsatisfied": 1,
-                  "No Opinion": null
-                };
-                
-                // For agreement scale: Strongly Agree, Agree, Neutral, Disagree, Strongly Disagree
-                const agreementMap = {
-                  "Strongly Agree": 5,
-                  "Agree": 4,
-                  "Neutral": 3,
-                  "Disagree": 2,
-                  "Strongly Disagree": 1,
-                  "No Opinion": null
-                };
-                
-                // For frequency scale: Always, Frequently, Sometimes, Rarely, Never
-                const frequencyMap = {
-                  "Always": 5,
-                  "Frequently": 4,
-                  "Sometimes": 3,
-                  "Rarely": 2,
-                  "Never": 1,
-                  "No Opinion": null
-                };
-
-                // Handle different question types
-                switch (questionType) {
-                  case "rating":
-                    return ratingMap[responseText] !== undefined ? ratingMap[responseText] : Number(responseText) || null;
-                    
-                  case "yes_no":
-                    return yesNoMap[responseText] !== undefined ? yesNoMap[responseText] : null;
-                    
-                  case "mcq":
-                  case "radio":
-                  case "dropdown":
-                    // Try to match with any of the scales
-                    const allMaps = [
-                      ratingMap, 
-                      yesNoMap, 
-                      weightMap, 
-                      satisfactionMap, 
-                      agreementMap, 
-                      frequencyMap
-                    ];
-                    
-                    for (const map of allMaps) {
-                      if (map[responseText] !== undefined) {
-                        return map[responseText];
-                      }
+            }
+            break;
+            
+          case "grid":
+            // Handle grid response format
+            try {
+              // Check if responseText is an array of column values
+              if (Array.isArray(responseText)) {
+                const numericValues = responseText.map(val => {
+                  for (const map of allMaps) {
+                    if (map[val] !== undefined) {
+                      return map[val];
                     }
-                    break;
-                    
-                  case "grid":
-                    // Try to extract numeric value from grid response
-                    if (typeof responseText === 'string') {
-                      const numMatch = responseText.match(/\d+/);
-                      if (numMatch) {
-                        return Number(numMatch[0]);
-                      }
-                      
-                      // Try to match with keyword patterns
-                      const lowerText = responseText.toLowerCase();
-                      
-                      if (lowerText.includes('excellent') || lowerText.includes('strongly agree') || 
-                          lowerText.includes('very good') || lowerText.includes('always')) {
-                        return 5;
-                      } else if (lowerText.includes('good') || lowerText.includes('agree') && 
-                                !lowerText.includes('disagree') && !lowerText.includes('strongly')) {
-                        return 4;
-                      } else if (lowerText.includes('neutral') || lowerText.includes('fair') || 
-                                lowerText.includes('sometimes')) {
-                        return 3;
-                      } else if (lowerText.includes('poor') || lowerText.includes('disagree') && 
-                                !lowerText.includes('strongly') || lowerText.includes('rarely')) {
-                        return 2;
-                     // Continuing from where the code was cut off
-                    } else if (lowerText.includes('poor') || lowerText.includes('disagree') && 
-                                !lowerText.includes('strongly') || lowerText.includes('rarely')) {
-                        return 2;
-                      } else if (lowerText.includes('very poor') || lowerText.includes('strongly disagree') || 
-                                lowerText.includes('unsatisfied') || lowerText.includes('never')) {
-                        return 1;
-                      }
-                    }
-                    break;
-                }
+                  }
+                  return Number(val) || null;
+                }).filter(v => v !== null);
                 
-                // If no match found but looks like a number, try parsing it
-                if (typeof responseText === 'string' && /^\d+(\.\d+)?$/.test(responseText)) {
-                  return Number(responseText);
+                if (numericValues.length > 0) {
+                  return numericValues.reduce((sum, val) => sum + val, 0) / numericValues.length;
                 }
-                
-                // Return null if no numeric value could be determined
                 return null;
               }
               
-              // Function to update summary statistics
-              function updateSummaryStatistics() {
-                // Get all questions and count
-                const totalQuestions = document.querySelectorAll('.question-container').length;
+              // If responseText is an object with column values
+              if (typeof responseText === 'object' && responseText !== null && !Array.isArray(responseText)) {
+                const values = Object.values(responseText);
                 
-                // Count answered questions
-                let answeredQuestions = 0;
-                let totalRatingValue = 0;
-                let totalRatedQuestions = 0;
-                
-                // Process each section
-                Object.keys(sectionData).forEach(sectionId => {
-                  const section = sectionData[sectionId];
-                  let sectionAnswered = 0;
-                  let sectionTotal = section.questions.length;
-                  let sectionRatingTotal = 0;
-                  let sectionRatedQuestions = 0;
-                  
-                  // Process each question in the section
-                  section.questions.forEach(question => {
-                    if (question.answered) {
-                      sectionAnswered++;
-                      answeredQuestions++;
-                      
-                      // If the question has a numeric value, add it to the average calculation
-                      if (question.numericValue !== null && question.numericValue !== undefined) {
-                        sectionRatingTotal += question.numericValue;
-                        sectionRatedQuestions++;
-                        
-                        totalRatingValue += question.numericValue;
-                        totalRatedQuestions++;
-                      }
-                    }
-                  });
-                  
-                  // Calculate section completion percentage
-                  const sectionCompletionPercentage = sectionTotal > 0 ? Math.round((sectionAnswered / sectionTotal) * 100) : 0;
-                  
-                  // Update section summary in the UI
-                  const sectionSummaries = document.getElementById('sectionSummaries');
-                  let sectionSummaryElement = document.getElementById(`section-summary-${sectionId}`);
-                  
-                  if (!sectionSummaryElement) {
-                    sectionSummaryElement = document.createElement('div');
-                    sectionSummaryElement.id = `section-summary-${sectionId}`;
-                    sectionSummaryElement.className = 'section-summary-item mb-2';
-                    sectionSummaries.appendChild(sectionSummaryElement);
-                  }
-                  
-                  // Calculate section average rating
-                  const sectionAverage = sectionRatedQuestions > 0 ? 
-                    (sectionRatingTotal / sectionRatedQuestions).toFixed(1) : 'N/A';
-                  
-                  sectionSummaryElement.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                      <span>${section.title}</span>
-                      <span class="badge bg-${sectionCompletionPercentage === 100 ? 'success' : 
-                        sectionCompletionPercentage > 50 ? 'primary' : 'warning'}">
-                        ${sectionAnswered}/${sectionTotal} (${sectionCompletionPercentage}%)
-                      </span>
-                    </div>
-                    <div class="progress mb-1" style="height: 8px;">
-                      <div class="progress-bar bg-${sectionCompletionPercentage === 100 ? 'success' : 
-                        sectionCompletionPercentage > 50 ? 'primary' : 'warning'}" 
-                        role="progressbar" style="width: ${sectionCompletionPercentage}%" 
-                        aria-valuenow="${sectionCompletionPercentage}" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <div class="small text-muted text-end">Avg. Rating: ${sectionAverage}</div>
-                  `;
-                });
-                
-                // Update total statistics
-                const completionPercentage = totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
-                const averageRating = totalRatedQuestions > 0 ? (totalRatingValue / totalRatedQuestions).toFixed(1) : 'N/A';
-                
-                document.getElementById('totalQuestions').textContent = totalQuestions;
-                document.getElementById('questionsAnswered').textContent = answeredQuestions;
-                document.getElementById('completionRate').textContent = `${completionPercentage}%`;
-                document.getElementById('estimatedAverage').textContent = averageRating;
-              }
-              
-              // Initialize section data from the DOM
-              document.querySelectorAll('.section-card').forEach(sectionElement => {
-                const sectionId = sectionElement.dataset.sectionId;
-                const sectionIndex = sectionElement.dataset.sectionIndex;
-                const sectionTitle = sectionElement.querySelector('.section-title').textContent;
-                
-                sectionData[sectionId] = {
-                  id: sectionId,
-                  index: sectionIndex,
-                  title: sectionTitle,
-                  questions: []
-                };
-                
-                // Initialize questions for this section
-                sectionElement.querySelectorAll('.question-container').forEach(questionElement => {
-                  const questionId = questionElement.dataset.questionId;
-                  const questionType = questionElement.dataset.questionType;
-                  const questionText = questionElement.querySelector('h4').childNodes[0].textContent.trim();
-                  
-                  sectionData[sectionId].questions.push({
-                    id: questionId,
-                    type: questionType,
-                    text: questionText,
-                    answered: false,
-                    value: null,
-                    numericValue: null
-                  });
-                });
-              });
-              
-              // Add event listeners to track form inputs
-              document.querySelectorAll('input, textarea, select').forEach(input => {
-                if (input.type === 'hidden') return;
-                
-                const sectionId = input.dataset.sectionId;
-                if (!sectionId) return;
-                
-                const questionContainer = input.closest('.question-container');
-                if (!questionContainer) return;
-                
-                const questionId = questionContainer.dataset.questionId;
-                const questionType = questionContainer.dataset.questionType;
-                const globalIndex = questionContainer.dataset.globalIndex;
-                
-                // Handle different input types
-                const updateQuestionStatus = () => {
-                  // Find the question in section data
-                  const section = sectionData[sectionId];
-                  if (!section) return;
-                  
-                  const question = section.questions.find(q => q.id === questionId);
-                  if (!question) return;
-                  
-                  let value = null;
-                  let answered = false;
-                  
-                  // Get value based on input type
-                  switch (input.type) {
-                    case 'text':
-                    case 'textarea':
-                    case 'date':
-                      value = input.value.trim();
-                      answered = value !== '';
-                      break;
-                      
-                    case 'radio':
-                      if (input.checked) {
-                        value = input.value;
-                        answered = true;
-                      }
-                      break;
-                      
-                    case 'checkbox':
-                      // For checkboxes, we need to collect all checked values in the question
-                      const checkedInputs = questionContainer.querySelectorAll('input[type="checkbox"]:checked');
-                      if (checkedInputs.length > 0) {
-                        value = Array.from(checkedInputs).map(cb => cb.value).join(', ');
-                        answered = true;
-                      }
-                      break;
-                      
-                    case 'select-one':
-                      value = input.value;
-                      answered = value !== '';
-                      break;
-                  }
-                  
-                  // Update question status
-                  if (answered) {
-                    question.answered = true;
-                    question.value = value;
-                    
-                    // Try to get numeric value for statistics
-                    if (input.dataset.numericValue) {
-                      question.numericValue = parseFloat(input.dataset.numericValue);
-                    } else {
-                      question.numericValue = convertResponseToNumeric(value, questionType);
-                    }
-                  } else {
-                    // If checking a single input that's not answered, we need to check if any other inputs for this question are answered
-                    const allInputs = questionContainer.querySelectorAll('input:not([type="hidden"]), textarea, select');
-                    const anyAnswered = Array.from(allInputs).some(inp => {
-                      if (inp.type === 'radio' || inp.type === 'checkbox') {
-                        return inp.checked;
-                      } else {
-                        return inp.value.trim() !== '';
-                      }
-                    });
-                    
-                    question.answered = anyAnswered;
-                    if (!anyAnswered) {
-                      question.value = null;
-                      question.numericValue = null;
+                // Extract numeric values when possible
+                const numericValues = values.map(val => {
+                  for (const map of allMaps) {
+                    if (map[val] !== undefined) {
+                      return map[val];
                     }
                   }
-                  
-                  // Update statistics
-                  updateSummaryStatistics();
-                };
+                  return Number(val) || null;
+                }).filter(v => v !== null);
                 
-                // Add appropriate event listeners based on input type
-                if (input.type === 'radio' || input.type === 'checkbox') {
-                  input.addEventListener('change', updateQuestionStatus);
-                } else {
-                  input.addEventListener('input', updateQuestionStatus);
-                  input.addEventListener('change', updateQuestionStatus);
-                }
-              });
-              
-              // Handle form submission
-              form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Check for required fields that are not filled
-                const requiredInputs = form.querySelectorAll('[required]');
-                let allFilled = true;
-                
-                requiredInputs.forEach(input => {
-                  if (input.type === 'radio') {
-                    // For radio buttons, check if any in the group is selected
-                    const name = input.name;
-                    const radioGroup = form.querySelectorAll(`input[type="radio"][name="${name}"]`);
-                    const isChecked = Array.from(radioGroup).some(radio => radio.checked);
-                    
-                    if (!isChecked) {
-                      allFilled = false;
-                      // Find the question container and highlight it
-                      const questionContainer = input.closest('.question-container');
-                      if (questionContainer) {
-                        questionContainer.classList.add('border-danger');
-                      }
-                    }
-                  } else if (input.type === 'checkbox' && input.required) {
-                    // For checkboxes, simply check if it's checked
-                    if (!input.checked) {
-                      allFilled = false;
-                      const questionContainer = input.closest('.question-container');
-                      if (questionContainer) {
-                        questionContainer.classList.add('border-danger');
-                      }
-                    }
-                  } else {
-                    // For other input types
-                    if (!input.value.trim()) {
-                      allFilled = false;
-                      input.classList.add('border-danger');
-                      const questionContainer = input.closest('.question-container');
-                      if (questionContainer) {
-                        questionContainer.classList.add('border-danger');
-                      }
-                    }
-                  }
-                });
-                
-                if (!allFilled) {
-                  showToast('Please complete all required questions before submitting.', 'error');
-                  // Scroll to the first incomplete required question
-                  const firstIncomplete = form.querySelector('.border-danger');
-                  if (firstIncomplete) {
-                    firstIncomplete.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }
-                  return;
-                }
-                
-                // If all required fields are filled, prepare grid data before submitting
-                document.querySelectorAll('.grid-question-table').forEach(table => {
-                  const gridId = table.dataset.gridId;
-                  const gridData = {};
-                  
-                  // Collect grid responses
-                  table.querySelectorAll('input[type="radio"]:checked').forEach(input => {
-                    const row = input.dataset.row;
-                    const column = input.value;
-                    
-                    if (row) {
-                      gridData[row] = column;
-                    }
-                  });
-                  
-                  // Store grid data in hidden field
-                  const hiddenInput = document.getElementById(`grid-data-${gridId}`);
-                  if (hiddenInput) {
-                    hiddenInput.value = JSON.stringify(gridData);
-                  }
-                });
-                
-                // Show loading state
-                const submitButton = form.querySelector('.btn-submit');
-                const originalButtonText = submitButton.innerHTML;
-                submitButton.disabled = true;
-                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Submitting...';
-                
-                // Submit the form
-                form.submit();
-              });
-
-              // Initialize summary statistics on page load
-              updateSummaryStatistics();
-              
-              // Check deadline
-              const deadlineElement = document.querySelector('[data-deadline]');
-              if (deadlineElement) {
-                const deadline = new Date(deadlineElement.dataset.deadline);
-                const now = new Date();
-                
-                if (now > deadline) {
-                  showToast('Warning: The deadline for this form has passed.', 'warning');
-                } else {
-                  const daysLeft = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
-                  if (daysLeft <= 3) {
-                    showToast(`Only ${daysLeft} day${daysLeft !== 1 ? 's' : ''} left until the deadline!`, 'warning');
-                  }
+                if (numericValues.length > 0) {
+                  return numericValues.reduce((sum, val) => sum + val, 0) / numericValues.length;
                 }
               }
+            } catch (e) {
+              console.error("Error parsing grid data:", e);
+            }
+            break;
+        }
+        
+        // If no match found but looks like a number, try parsing it
+        if (typeof responseText === 'string' && /^\d+(\.\d+)?$/.test(responseText)) {
+          return Number(responseText);
+        }
+        
+        // Return null if no numeric value could be determined
+        return null;
+      }
+      
+      // Function to update summary statistics
+      function updateSummaryStatistics() {
+        // Get all questions and count
+        const totalQuestions = document.querySelectorAll('.question-container').length;
+        
+        // Count answered questions
+        let answeredQuestions = 0;
+        let totalRatingValue = 0;
+        let totalRatedQuestions = 0;
+        
+        // Process each section
+        Object.keys(sectionData).forEach(sectionId => {
+          const section = sectionData[sectionId];
+          let sectionAnswered = 0;
+          let sectionTotal = section.questions.length;
+          let sectionRatingTotal = 0;
+          let sectionRatedQuestions = 0;
+          
+          // Process each question in the section
+          section.questions.forEach(question => {
+            if (question.answered) {
+              sectionAnswered++;
+              answeredQuestions++;
+              
+              // If the question has a numeric value, add it to the average calculation
+              if (question.numericValue !== null && question.numericValue !== undefined) {
+                sectionRatingTotal += question.numericValue;
+                sectionRatedQuestions++;
+                
+                totalRatingValue += question.numericValue;
+                totalRatedQuestions++;
+              }
+            }
+          });
+          
+          // Calculate section completion percentage
+          const sectionCompletionPercentage = sectionTotal > 0 ? Math.round((sectionAnswered / sectionTotal) * 100) : 0;
+          
+          // Update section summary in the UI
+          const sectionSummaries = document.getElementById('sectionSummaries');
+          let sectionSummaryElement = document.getElementById(`section-summary-${sectionId}`);
+          
+          if (!sectionSummaryElement) {
+            sectionSummaryElement = document.createElement('div');
+            sectionSummaryElement.id = `section-summary-${sectionId}`;
+            sectionSummaryElement.className = 'section-summary-item mb-2';
+            sectionSummaries.appendChild(sectionSummaryElement);
           }
+          
+          // Calculate section average rating
+          const sectionAverage = sectionRatedQuestions > 0 ? 
+            (sectionRatingTotal / sectionRatedQuestions).toFixed(1) : 'N/A';
+          
+          sectionSummaryElement.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+              <span>${section.title}</span>
+              <span class="badge bg-${sectionCompletionPercentage === 100 ? 'success' : 
+                sectionCompletionPercentage > 50 ? 'primary' : 'warning'}">
+                ${sectionAnswered}/${sectionTotal} (${sectionCompletionPercentage}%)
+              </span>
+            </div>
+            <div class="progress mb-1" style="height: 8px;">
+              <div class="progress-bar bg-${sectionCompletionPercentage === 100 ? 'success' : 
+                sectionCompletionPercentage > 50 ? 'primary' : 'warning'}" 
+                role="progressbar" style="width: ${sectionCompletionPercentage}%" 
+                aria-valuenow="${sectionCompletionPercentage}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="small text-muted text-end">Avg. Rating: ${sectionAverage}</div>
+          `;
+        });
+        
+        // Update total statistics
+        const completionPercentage = totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
+        const averageRating = totalRatedQuestions > 0 ? (totalRatingValue / totalRatedQuestions).toFixed(1) : 'N/A';
+        
+        document.getElementById('totalQuestions').textContent = totalQuestions;
+        document.getElementById('questionsAnswered').textContent = answeredQuestions;
+        document.getElementById('completionRate').textContent = `${completionPercentage}%`;
+        document.getElementById('estimatedAverage').textContent = averageRating;
+      }
+      
+      // Initialize section data from the DOM
+      document.querySelectorAll('.section-card').forEach(sectionElement => {
+        const sectionId = sectionElement.dataset.sectionId;
+        const sectionIndex = sectionElement.dataset.sectionIndex;
+        const sectionTitle = sectionElement.querySelector('.section-title').textContent;
+        
+        sectionData[sectionId] = {
+          id: sectionId,
+          index: sectionIndex,
+          title: sectionTitle,
+          questions: []
+        };
+        
+        // Initialize questions for this section
+        sectionElement.querySelectorAll('.question-container').forEach(questionElement => {
+          const questionId = questionElement.dataset.questionId;
+          const questionType = questionElement.dataset.questionType;
+          const questionText = questionElement.querySelector('h4').childNodes[0].textContent.trim();
+          
+          sectionData[sectionId].questions.push({
+            id: questionId,
+            type: questionType,
+            text: questionText,
+            answered: false,
+            value: null,
+            numericValue: null
+          });
+        });
       });
-    </script>
+      
+      // Add special handling for grid responses
+      document.querySelectorAll('.grid-radio').forEach(input => {
+        input.addEventListener('change', function() {
+          // Find the parent grid table
+          const questionContainer = this.closest('.question-container');
+          if (!questionContainer) return;
+          
+          const globalIndex = questionContainer.dataset.globalIndex;
+          const questionId = questionContainer.dataset.questionId;
+          const hiddenInput = document.getElementById(`grid-data-${questionId}-${globalIndex}`);
+          if (!hiddenInput) return;
+          
+          // Collect all selected grid responses for this question
+          const allSelectedRadios = questionContainer.querySelectorAll('.grid-radio:checked');
+          const gridResponses = {};
+          
+          allSelectedRadios.forEach(radio => {
+            const row = radio.dataset.row;
+            // Store only the column value (the selected option text)
+            const columnValue = radio.value;
+            gridResponses[row] = columnValue;
+          });
+          
+          // Update the hidden input with clean JSON
+          hiddenInput.value = JSON.stringify(gridResponses);
+          
+          // Update question status for summary stats
+          const sectionId = input.dataset.sectionId;
+          const section = sectionData[sectionId];
+          
+          if (section) {
+            const question = section.questions.find(q => q.id === questionId);
+            if (question) {
+              question.answered = Object.keys(gridResponses).length > 0;
+              question.value = Object.keys(gridResponses).length > 0 ? 
+                              `Grid: ${Object.keys(gridResponses).length} responses` : null;
+              
+              // Calculate average numeric value for this grid question
+              if (question.answered) {
+                // Get numeric values from the selected columns
+                const numericValues = [];
+                
+                for (const row in gridResponses) {
+                  const columnValue = gridResponses[row];
+                  // Convert column text to numeric value using rating maps
+                  const ratingMap = {
+                    "Poor": 1, "Average": 2, "Good": 3, "Very Good": 4, "Excellent": 5,
+                    "Strongly Disagree": 1, "Disagree": 2, "Neutral": 3, "Agree": 4, "Strongly Agree": 5,
+                    "Never": 1, "Rarely": 2, "Sometimes": 3, "Frequently": 4, "Always": 5
+                  };
+                  
+                  const numValue = ratingMap[columnValue] || parseInt(columnValue) || null;
+                  if (numValue !== null) {
+                    numericValues.push(numValue);
+                  }
+                }
+                
+                if (numericValues.length > 0) {
+                  const sum = numericValues.reduce((acc, val) => acc + val, 0);
+                  question.numericValue = sum / numericValues.length;
+                } else {
+                  question.numericValue = null;
+                }
+              } else {
+                question.numericValue = null;
+              }
+              
+              // Update summary statistics
+              updateSummaryStatistics();
+            }
+          }
+        });
+      });
+      
+      // Add event listeners to track form inputs
+      document.querySelectorAll('input, textarea, select').forEach(input => {
+        if (input.type === 'hidden' || input.classList.contains('grid-radio')) return;
+        
+        const sectionId = input.dataset.sectionId;
+        if (!sectionId) return;
+        
+        const questionContainer = input.closest('.question-container');
+        if (!questionContainer) return;
+        
+        const questionId = questionContainer.dataset.questionId;
+        const questionType = questionContainer.dataset.questionType;
+        const globalIndex = questionContainer.dataset.globalIndex;
+        
+        // Handle different input types
+        const updateQuestionStatus = () => {
+          // Find the question in section data
+          const section = sectionData[sectionId];
+          if (!section) return;
+          
+          const question = section.questions.find(q => q.id === questionId);
+          if (!question) return;
+          
+          let value = null;
+          let answered = false;
+          
+          // Get value based on input type
+          switch (input.type) {
+            case 'text':
+            case 'textarea':
+            case 'date':
+              value = input.value.trim();
+              answered = value !== '';
+              break;
+              
+            case 'radio':
+              if (input.checked) {
+                // Store only the selected option value
+                value = input.value;
+                answered = true;
+              }
+              break;
+              
+            case 'checkbox':
+              // For checkboxes, we need to collect all checked values in the question
+              const checkedInputs = questionContainer.querySelectorAll('input[type="checkbox"]:checked');
+              if (checkedInputs.length > 0) {
+                // Store only the checked option values
+                value = Array.from(checkedInputs).map(cb => cb.value).join(', ');
+                answered = true;
+              }
+              break;
+              
+            case 'select-one':
+              // Store only the selected option value
+              value = input.value;
+              answered = value !== '';
+              break;
+          }
+          
+          // Update question status
+          if (answered) {
+            question.answered = true;
+            question.value = value;
+            
+            // Try to get numeric value for statistics
+            if (input.dataset.numericValue) {
+              question.numericValue = parseFloat(input.dataset.numericValue);
+            } else {
+              question.numericValue = convertResponseToNumeric(value, questionType);
+            }
+          } else {
+            // If checking a single input that's not answered, we need to check if any other inputs for this question are answered
+            const allInputs = questionContainer.querySelectorAll('input:not([type="hidden"]), textarea, select');
+            const anyAnswered = Array.from(allInputs).some(inp => {
+              if (inp.type === 'radio' || inp.type === 'checkbox') {
+                return inp.checked;
+              } else {
+                return inp.value.trim() !== '';
+              }
+            });
+            
+            question.answered = anyAnswered;
+            if (!anyAnswered) {
+              question.value = null;
+              question.numericValue = null;
+            }
+          }
+          
+          // Update statistics
+          updateSummaryStatistics();
+        };
+        
+        // Add appropriate event listeners based on input type
+        if (input.type === 'radio' || input.type === 'checkbox') {
+          input.addEventListener('change', updateQuestionStatus);
+        } else {
+          input.addEventListener('input', updateQuestionStatus);
+          input.addEventListener('change', updateQuestionStatus);
+        }
+      });
+      
+      // Handle form submission
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Check for required fields that are not filled
+        const requiredInputs = form.querySelectorAll('[required]');
+        let allFilled = true;
+        
+        requiredInputs.forEach(input => {
+          if (input.type === 'radio') {
+            // For radio buttons, check if any in the group is selected
+            const name = input.name;
+            const radioGroup = form.querySelectorAll(`input[type="radio"][name="${name}"]`);
+            const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+            
+            if (!isChecked) {
+              allFilled = false;
+              // Find the question container and highlight it
+              const questionContainer = input.closest('.question-container');
+              if (questionContainer) {
+                questionContainer.classList.add('border-danger');
+              }
+            }
+          } else if (input.type === 'checkbox' && input.required) {
+            // For checkboxes, simply check if it's checked
+            if (!input.checked) {
+              allFilled = false;
+              const questionContainer = input.closest('.question-container');
+              if (questionContainer) {
+                questionContainer.classList.add('border-danger');
+              }
+            }
+          } else {
+            // For other input types
+            if (!input.value.trim()) {
+              allFilled = false;
+              input.classList.add('border-danger');
+              const questionContainer = input.closest('.question-container');
+              if (questionContainer) {
+                questionContainer.classList.add('border-danger');
+              }
+            }
+          }
+        });
+        
+        if (!allFilled) {
+          showToast('Please complete all required questions before submitting.', 'error');
+          // Scroll to the first incomplete required question
+          const firstIncomplete = form.querySelector('.border-danger');
+          if (firstIncomplete) {
+            firstIncomplete.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return;
+        }
+        
+        // If all required fields are filled, prepare grid data before submitting
+        document.querySelectorAll('.grid-question-table').forEach(table => {
+          const gridId = table.dataset.gridId;
+          const questionContainer = table.closest('.question-container');
+          if (!questionContainer) return;
+          
+          const globalIndex = questionContainer.dataset.globalIndex;
+          const hiddenInput = document.getElementById(`grid-data-${gridId}-${globalIndex}`);
+          
+          if (!hiddenInput || !hiddenInput.value) {
+            // If no data collected yet, collect it now
+            const gridResponses = {};
+            const selectedRadios = table.querySelectorAll('input[type="radio"]:checked');
+            
+            selectedRadios.forEach(radio => {
+              const row = radio.dataset.row;
+              // Store only the column value (the selected option)
+              const columnValue = radio.value;
+              gridResponses[row] = columnValue;
+            });
+            
+            // Store clean data
+            if (hiddenInput) {
+              hiddenInput.value = JSON.stringify(gridResponses);
+            }
+          }
+        });
+        
+        // Show loading state
+        const submitButton = form.querySelector('.btn-submit');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Submitting...';
+        
+        // Submit the form
+        form.submit();
+      });
+
+      // Initialize summary statistics on page load
+      updateSummaryStatistics();
+      
+      // Check deadline
+      const deadlineElement = document.querySelector('[data-deadline]');
+      if (deadlineElement) {
+        const deadline = new Date(deadlineElement.dataset.deadline);
+        const now = new Date();
+        
+        if (now > deadline) {
+          showToast('Warning: The deadline for this form has passed.', 'warning');
+        } else {
+          const daysLeft = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+          if (daysLeft <= 3) {
+            showToast(`Only ${daysLeft} day${daysLeft !== 1 ? 's' : ''} left until the deadline!`, 'warning');
+          }
+        }
+      }
+  }
+});
+</script>
 </body>
+  </html>

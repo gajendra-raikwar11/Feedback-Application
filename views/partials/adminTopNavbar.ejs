@@ -50,27 +50,22 @@
         display: inline-block;
         position: relative;
     }
-
-    
-    /* Navbar styling without hide/show functionality */
     .navbar {
-        height: calc(60px + 1.8px);
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1; /* Lower z-index to keep behind sidebar */
-        background: #4048D8 !important;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
-        padding-top: 0.9rem;
-        padding-bottom: 0.9rem;
-    }
-    
+    height: calc(60px + 1.8px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 900; /* Increased z-index so nothing overlaps */
+    background: #4048D8 !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+    }  
     /* Fix content position */
     body {
         padding-top: calc(56px + 1.8px + 1rem);
     }
-    
     /* Animated hamburger toggle button */
     .navbar-toggler {
         background: transparent;
@@ -83,12 +78,10 @@
         height: 34px;
         transition: all 0.3s ease;
     }
-    
     .navbar-toggler:focus {
         outline: none;
         box-shadow: none;
     }
-    
     /* Toggle icon bars */
     .toggle-icon {
         display: block;
@@ -100,60 +93,48 @@
         left: 8px;
         transition: all 0.3s ease;
     }
-    
     /* Position the toggle icon bars */
     .toggle-icon:nth-child(1) {
         top: 8px;
     }
-    
     .toggle-icon:nth-child(2) {
         top: 16px;
     }
-    
     .toggle-icon:nth-child(3) {
         top: 24px;
     }
-    
     /* Responsive styling */
     @media (max-width: 768px) {
         .navbar {
             padding: 0.85rem 1rem;
             height: calc(50px + 1.8px);
         }
-        
         body {
             padding-top: calc(50px + 1.8px + 1rem);
         }
-        
         .topbar {
             margin-bottom: 1rem !important;
         }
-        
         .college-name {
             font-size: 1.1rem;
         }
-        
         /* Make toggle button more visible on mobile */
         .navbar-toggler {
             margin-right: 5px;
         }
-    }
-    
+    } 
     .text-white {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
     }
-    
     /* Ensure sidebar has higher z-index */
     .sidebar {
         z-index: 1030;
     }
 </style>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const toggleBtn = document.getElementById('navbarToggleBtn');
-        
         // Toggle button functionality
         if (toggleBtn) {
             toggleBtn.addEventListener('click', function() {
@@ -169,7 +150,6 @@
                 }
             });
         }
-        
         // Handle window resize
         window.addEventListener('resize', function() {
             // If resized to mobile size, ensure navbar is visible
