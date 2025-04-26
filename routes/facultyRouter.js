@@ -7,6 +7,7 @@ const path = require("path");
 const { Faculty, validateFacultyLogin } = require("../models/facultySchema");
 const { FeedbackForm, validateFeedbackForm } = require('../models/feedbackForm');
 const { Student, validateStudent } = require("../models/studentSchema");
+const {FeedbackResponse, validateFeedbackResponse} = require("../models/feedbackResponse");
 
 // Path to the JSON file with initial faculty data
 const FACULTY_JSON_PATH = path.join(__dirname, "../data/facultyDataFile.json");
@@ -214,7 +215,7 @@ router.get("/dashboard", async (req, res) => {
     
     // Find all forms where this faculty is assigned
     const assignedForms = await FeedbackForm.find({
-      facultyAssigned: facultyId
+      facultyAssigned: faculty.id
     }).select('title formType sectionsAssigned deadline semester status');
     
     // Get unique sections from all forms assigned to this faculty
@@ -371,11 +372,17 @@ router.get("/dashboard", async (req, res) => {
         };
       }
     });
+    // retrive details of all students and login faculty
+    const studentsDetails = await Student.find({});
+    const facultyDetails = await Faculty.findById(faculty.id);
+  
     
     // Render dashboard with all data
     res.render("facultyDashboard", {
       faculty: faculty,
       students: studentsWithFeedbackStatus,
+      facultyDetails,
+      studentsDetails,
       forms: assignedForms,
       feedbackData: JSON.stringify(feedbackAnalytics)
     });
@@ -400,10 +407,27 @@ router.get("/logout", (req, res) => {
 });
 
 
-router.get('/students', (req, res) => {
-  // Just render the static HTML page
+router.get('/students', async (req, res) => {
 
- res.render("faculty-students");
-});
+  const faculty = req.session.faculty;
+  
+  // retrive details of all students and login faculty
+    const studentsDetails = await Student.find({})
+    const facultyDetails = await Faculty.findById(faculty.id);
+
+    const assignedForms = await FeedbackForm.find({
+      facultyAssigned: faculty.id,
+    }).select("title formType sectionsAssigned deadline semester status");
+
+    const feedbackData = await FeedbackResponse.find({})
+
+  // Render the page with the data
+ res.render("faculty-students",{
+    studentsDetails,
+    facultyDetails,
+    forms: assignedForms,
+    feedbackData,
+  });
+ });
 
 module.exports = router;
