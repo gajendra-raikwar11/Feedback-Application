@@ -269,7 +269,17 @@
                     <div class="card stats-card" style="border-left-color: #3f51b5;">
                         <div class="card-body">
                             <h6 class="card-title text-muted mb-0">Total Students</h6>
-                            <h3 class="mt-2 mb-0">45</h3>
+                            <h3 class="mt-2 mb-0">
+                                <%
+                                    let StudentCount = 0;
+                                    studentsDetails.forEach(student => { 
+                                        if(String(facultyDetails.sections).includes(student.section)) {
+                                            StudentCount++;
+                                        }
+                                    });
+                                %>
+                                    <%= StudentCount %>
+                                </h3>
                             <small class="text-success">Across 4 Sections</small>
                         </div>
                     </div>
@@ -356,7 +366,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body"style="max-height: 540px; overflow-y: auto;">
                     <div class="table-responsive">
                         <table id="studentTable" class="table table-hover">
                             <thead>
@@ -364,14 +374,54 @@
                                     <th>Student ID</th>
                                     <th>Name</th>
                                     <th>Section</th>
-                                    <th>Form Submissions</th>
-                                    <th>Attendance</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>Institutional</th>
+                                    <th>Academic</th>
+                                    <th>Training</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <!-- Table data will be populated by JavaScript -->
+                                 <% studentsDetails.forEach(student => { %>
+                                    <% if(String(facultyDetails.sections).includes(student.section)) { %>
+                                    <tr>
+                                        <td><%= student.enrollmentNumber %></td>
+                                        <td><%= student.name %></td>
+                                        <td><%= student.section %></td>
+                                        <td> 
+                                            <% let institute = 0; %>
+                                            <% feedbackData.forEach((feedback) => { %>
+                                                <% if (
+                                                student._Id === feedback.studentId &&
+                                                feedback.formId === feedback.facultyId &&
+                                                feedback.formType === "Institutional"
+                                                ) { %>
+                                                <% institute++; %>
+                                                <% } %>
+                                            <% }); %>
+                                            <%= institute %>
+                                            /
+                                         <% let filteredInstituteForm = 0; %>
+                                        <% forms.forEach((form) => { %>
+                                            <% if (form.formType === 'Institutional') { %>
+                                            <% filteredInstituteForm++; %>
+                                            <% } %>
+                                        <% }); %>
+                                        <%= filteredInstituteForm %>                            
+                                        </td>
+                                        <td>0 /
+                                              <% let filteredAcademicForm = 0; forms.forEach((form) => { if
+                                                (form.formType === 'Academic') { filteredAcademicForm++; } });
+                                                %> <%= filteredAcademicForm %>
+                                        </td>
+                                        <td>0 /
+                                              <% let filteredTrainingForm = 0; forms.forEach((form) => { if
+                                                (form.formType === 'Academic') { filteredTrainingForm++; } });
+                                                %> <%= filteredTrainingForm %>
+                                        </td>
+                                    </tr>
+                                     <% } %>
+                                <% }) %>
+
                             </tbody>
                         </table>
                     </div>
@@ -394,83 +444,7 @@
 
     <script>
         // Sample Student Data - In a real application, this would come from your backend
-        const sampleStudents = [
-            { 
-                id: "CS2021-001", name: "Aisha Khan", section: "A", 
-                formsAssigned: 8, formsSubmitted: 7, formsPending: 1, formsOverdue: 0,
-                attendance: 95, status: "active", email: "aisha.khan@example.com" 
-            },
-            { 
-                id: "CS2021-002", name: "Rahul Sharma", section: "A", 
-                formsAssigned: 8, formsSubmitted: 6, formsPending: 2, formsOverdue: 0,
-                attendance: 88, status: "active", email: "rahul.sharma@example.com" 
-            },
-            { 
-                id: "CS2021-003", name: "Priya Patel", section: "B", 
-                formsAssigned: 8, formsSubmitted: 5, formsPending: 2, formsOverdue: 1,
-                attendance: 76, status: "active", email: "priya.patel@example.com" 
-            },
-            { 
-                id: "CS2021-004", name: "Muhammad Ali", section: "B", 
-                formsAssigned: 8, formsSubmitted: 8, formsPending: 0, formsOverdue: 0,
-                attendance: 92, status: "active", email: "muhammad.ali@example.com" 
-            },
-            { 
-                id: "CS2021-005", name: "Zainab Ahmed", section: "A", 
-                formsAssigned: 8, formsSubmitted: 3, formsPending: 3, formsOverdue: 2,
-                attendance: 65, status: "active", email: "zainab.ahmed@example.com" 
-            },
-            { 
-                id: "CS2021-006", name: "Vikram Singh", section: "C", 
-                formsAssigned: 8, formsSubmitted: 7, formsPending: 1, formsOverdue: 0,
-                attendance: 87, status: "active", email: "vikram.singh@example.com" 
-            },
-            { 
-                id: "CS2021-007", name: "Sarah Khan", section: "C", 
-                formsAssigned: 8, formsSubmitted: 2, formsPending: 2, formsOverdue: 4,
-                attendance: 55, status: "inactive", email: "sarah.khan@example.com" 
-            },
-            { 
-                id: "CS2021-008", name: "Arjun Reddy", section: "B", 
-                formsAssigned: 8, formsSubmitted: 5, formsPending: 3, formsOverdue: 0,
-                attendance: 78, status: "active", email: "arjun.reddy@example.com" 
-            },
-            { 
-                id: "CS2021-009", name: "Fatima Zahra", section: "A", 
-                formsAssigned: 8, formsSubmitted: 8, formsPending: 0, formsOverdue: 0,
-                attendance: 91, status: "active", email: "fatima.zahra@example.com" 
-            },
-            { 
-                id: "CS2021-010", name: "Rajesh Kumar", section: "D", 
-                formsAssigned: 8, formsSubmitted: 4, formsPending: 3, formsOverdue: 1,
-                attendance: 68, status: "active", email: "rajesh.kumar@example.com" 
-            },
-            { 
-                id: "CS2021-011", name: "Ayesha Malik", section: "A", 
-                formsAssigned: 8, formsSubmitted: 6, formsPending: 2, formsOverdue: 0,
-                attendance: 86, status: "active", email: "ayesha.malik@example.com" 
-            },
-            { 
-                id: "CS2021-012", name: "Sanjay Gupta", section: "D", 
-                formsAssigned: 8, formsSubmitted: 0, formsPending: 3, formsOverdue: 5,
-                attendance: 45, status: "inactive", email: "sanjay.gupta@example.com" 
-            },
-            { 
-                id: "CS2021-013", name: "Meera Joshi", section: "C", 
-                formsAssigned: 8, formsSubmitted: 7, formsPending: 1, formsOverdue: 0,
-                attendance: 89, status: "active", email: "meera.joshi@example.com" 
-            },
-            { 
-                id: "CS2021-014", name: "Hassan Ahmed", section: "B", 
-                formsAssigned: 8, formsSubmitted: 4, formsPending: 4, formsOverdue: 0,
-                attendance: 72, status: "active", email: "hassan.ahmed@example.com" 
-            },
-            { 
-                id: "CS2021-015", name: "Divya Sharma", section: "D", 
-                formsAssigned: 8, formsSubmitted: 5, formsPending: 3, formsOverdue: 0,
-                attendance: 83, status: "active", email: "divya.sharma@example.com" 
-            }
-        ];
+        
 
         // DOM Elements and Variables
         const sidebarToggle = document.getElementById('sidebarToggle');
@@ -488,100 +462,9 @@
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
-            initializePage();
             setupEventListeners();
         });
 
-        // Initialize page components
-        function initializePage() {
-            // Initialize DataTable
-            dataTable = $('#studentTable').DataTable({
-                data: sampleStudents,
-                columns: [
-                    { data: 'id' },
-                    { data: 'name' },
-                    { data: 'section' },
-                    { 
-                        data: null,
-                        render: function(data, type, row) {
-                            const progress = Math.round((row.formsSubmitted / row.formsAssigned) * 100);
-                            let badgeClass = 'bg-success';
-                            
-                            if (row.formsOverdue > 0) {
-                                badgeClass = 'bg-danger';
-                            } else if (row.formsPending > 0) {
-                                badgeClass = 'bg-warning';
-                            }
-                            
-                            return `
-                                <div>
-                                    <span class="badge ${badgeClass} badge-forms">${row.formsSubmitted}/${row.formsAssigned}</span>
-                                </div>
-                                <div class="progress mt-1">
-                                    <div class="progress-bar ${badgeClass}" role="progressbar" style="width: ${progress}%" 
-                                        aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            `;
-                        }
-                    },
-                    { 
-                        data: 'attendance',
-                        render: function(data, type, row) {
-                            let badgeClass = '';
-                            if (data >= 90) badgeClass = 'bg-success';
-                            else if (data >= 75) badgeClass = 'bg-primary';
-                            else if (data >= 60) badgeClass = 'bg-warning';
-                            else badgeClass = 'bg-danger';
-                            
-                            return `<span class="badge ${badgeClass}">${data}%</span>`;
-                        }
-                    },
-                    { 
-                        data: 'status',
-                        render: function(data, type, row) {
-                            const statusClass = data === 'active' ? 'status-active' : 'status-inactive';
-                            return `<span class="student-status ${statusClass}"></span>${data.charAt(0).toUpperCase() + data.slice(1)}`;
-                        }
-                    },
-                    { 
-                        data: null,
-                        render: function(data, type, row) {
-                            return `
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <button type="button" class="btn btn-outline-primary view-details" data-id="${row.id}">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-outline-success send-form" data-id="${row.id}">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-outline-info contact-student" data-id="${row.id}">
-                                        <i class="fas fa-envelope"></i>
-                                    </button>
-                                </div>
-                            `;
-                        }
-                    }
-                ],
-                responsive: true,
-                dom: '<"d-flex justify-content-between align-items-center mb-3"<"#tableTools">f>tip',
-                language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search students..."
-                },
-                initComplete: function() {
-                    $("#tableTools").html(`
-                        <div>
-                            <button class="btn btn-sm btn-primary" id="bulkEmail">
-                                <i class="fas fa-envelope me-1"></i> Bulk Email
-                            </button>
-                            <button class="btn btn-sm btn-info" id="quickSummary">
-                                <i class="fas fa-chart-pie me-1"></i> Quick Summary
-                            </button>
-                        </div>
-                    `);
-                }
-            });
-        }
 
         // Set up event listeners
         function setupEventListeners() {
