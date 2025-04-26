@@ -12,6 +12,7 @@ const {FeedbackResponse, validateFeedbackResponse} = require("../models/feedback
 // Path to the JSON file with initial faculty data
 const FACULTY_JSON_PATH = path.join(__dirname, "../data/facultyDataFile.json");
 
+
 // Helper function to read faculty data from JSON file
 const readFacultyJSON = () => {
   try {
@@ -186,22 +187,6 @@ router.post("/login", async (req, res) => {
     return res.redirect("/faculty/login");
   }
 });
-
-
-// Other routes remain the same...
-
-// Dummy dashboard route
-// router.get("/dashboard", (req, res) => {
-//   // Check if faculty is logged in
-//   if (!req.session || !req.session.faculty) {
-//     return res.redirect("/faculty/login");
-//   }
-  
-//   // Render dashboard with faculty info
-//   res.render("facultyDashboard", {
-//     faculty: req.session.faculty
-//   });
-// });
 
 router.get("/dashboard", async (req, res) => {
   try {

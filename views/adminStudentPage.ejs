@@ -381,7 +381,7 @@
 </div>
 
 <!-- Toast Container for notifications -->
-<div class="toast-container"></div>
+<!-- <div class="toast-container"></div> -->
 
 <!-- Topbar -->
 <%- include('partials/adminTopNavbar', { admin: adminData }) %>
@@ -461,34 +461,39 @@
         </div>
 
         <!-- Student Data Upload Section -->
-        <div class="card mb-4">
-          <div class="card-body">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-              <!-- Title -->
-              <h4 class="mb-0"><i class="fas fa-upload me-2"></i>Upload Student Data</h4>
-              
-              <!-- Download Template Button -->
-              <a href="/admin/download-template"
-                class="btn btn-primary">
-                <i class="fas fa-download me-1"></i> Download Template
-              </a>
-              
-              <!-- Upload Excel Form -->
-              <form action="/admin/upload-students" method="POST" enctype="multipart/form-data"
-                class="d-flex flex-grow-1 align-items-center gap-3 mt-2 mt-md-0">
-                <div class="flex-grow-1">
-                  <input type="file" name="studentFile" accept=".xlsx, .xls" required
-                    class="form-control"
-                    aria-label="Upload Excel File (.xlsx or .xls)" />
-                </div>
-                <button type="submit"
-                  class="btn btn-success">
-                  <i class="fas fa-rocket me-1"></i> Upload
-                </button>
-              </form>
-            </div>
-          </div>
+      
+<!-- Student Data Upload Section -->
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <!-- Title -->
+      <h4 class="mb-0"><i class="fas fa-upload me-2"></i>Upload Student Data</h4>
+      
+      <!-- Download Template Button -->
+      <a href="/admin/download-template"
+        class="btn btn-primary">
+        <i class="fas fa-download me-1"></i> Download Template
+      </a>
+      
+      <!-- Upload Excel Form -->
+      <form action="/admin/upload-students" method="POST" enctype="multipart/form-data"
+        class="d-flex flex-grow-1 align-items-center gap-3 mt-2 mt-md-0">
+        <div class="flex-grow-1 position-relative">
+          <input type="file" name="studentFile" accept=".xlsx, .xls" required
+            class="form-control"
+            aria-label="Upload Excel File (.xlsx or .xls)" />
         </div>
+        <button type="submit"
+          class="btn btn-success">
+          <i class="fas fa-rocket me-1"></i> Upload
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container for notifications -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1060;"></div>
 
         <!-- Filter Section with Excel Export -->
         <div class="filter-section mb-4">
@@ -685,6 +690,65 @@
     toastElement.on('hidden.bs.toast', function() {
       $(this).remove();
     });
+  }
+  
+  // Handle student file upload form submission
+  $('form[action="/admin/upload-students"]').on('submit', function(e) {
+    const fileInput = $('input[name="studentFile"]')[0];
+    
+    if (fileInput.files.length === 0) {
+      e.preventDefault();
+      showToast('Upload Error', 'Please select an Excel file to upload', 'danger');
+      return false;
+    }
+    
+    const fileName = fileInput.files[0].name;
+    const fileExt = fileName.split('.').pop().toLowerCase();
+    
+    if (fileExt !== 'xlsx' && fileExt !== 'xls') {
+      e.preventDefault();
+      showToast('Upload Error', 'Only Excel files (.xlsx, .xls) are allowed', 'danger');
+      return false;
+    }
+    
+    // Show loading overlay
+    $('#loadingOverlay').css('display', 'flex');
+    showToast('Upload Started', 'Processing your file, please wait...', 'info');
+    
+    // Form will submit normally
+  });
+  
+  // Custom file input enhancement
+  $('input[name="studentFile"]').on('change', function() {
+    const fileName = $(this).val().split('\\').pop();
+    if (fileName) {
+      // Show selected file name
+      if ($(this).next('.custom-file-label').length) {
+        $(this).next('.custom-file-label').html(fileName);
+      }
+      
+      // Show a info toast about the selected file
+      showToast('File Selected', `"${fileName}" ready for upload`, 'info');
+    } else {
+      if ($(this).next('.custom-file-label').length) {
+        $(this).next('.custom-file-label').html('Choose file');
+      }
+    }
+  });
+  
+  // Check for flash messages when page loads and display as toasts
+  function displayFlashMessages() {
+    <% if (messages && messages.success) { %>
+      showToast('Success', '<%= messages.success %>', 'success');
+    <% } %>
+    
+    <% if (messages && messages.error) { %>  
+      showToast('Error', '<%= messages.error %>', 'danger');
+    <% } %>
+
+    <% if (messages && messages.info) { %>
+      showToast('Info', '<%= messages.info %>', 'info');
+    <% } %>
   }
   
   // Function to export table data to Excel using SheetJS
@@ -1031,11 +1095,10 @@
     }
   });
   
-  
   // Reset filters
   $('#resetFilters').on('click', function() {
     // Reset all select inputs
-    $('#Filter StudentsanchFilter, #sectionFilter, #semesterFilter, #statusFilter').val('');
+    $('#branchFilter, #sectionFilter, #semesterFilter, #statusFilter').val('');
     
     // Clear DataTable search
     studentsTable.search('').columns().search('').draw();
@@ -1061,8 +1124,6 @@
       return;
     }
     
-
-
     // Show loading indicator
     $('#loadingOverlay').css('display', 'flex');
     
@@ -1083,7 +1144,7 @@
         // Hide loading indicator
         $('#loadingOverlay').css('display', 'none');
         
-        // or refresh the page to get updated stats from the server
+        // Update stats count
         const totalStudentsElement = $('.stats-card .number').first();
         let totalStudents = parseInt(totalStudentsElement.text()) - 1;
         totalStudentsElement.text(totalStudents);
@@ -1108,6 +1169,24 @@
   // Close loading overlay when page is fully loaded
   $(window).on('load', function() {
     $('#loadingOverlay').css('display', 'none');
+    
+    // Check for flash messages when page loads
+    displayFlashMessages();
+    
+    // Check if there's a URL parameter indicating an upload was just completed
+    const urlParams = new URLSearchParams(window.location.search);
+    const uploadStatus = urlParams.get('uploadStatus');
+    
+    if (uploadStatus === 'success') {
+      const added = urlParams.get('added') || 0;
+      const skipped = urlParams.get('skipped') || 0;
+      const failed = urlParams.get('failed') || 0;
+      
+      showToast('Upload Complete', `${added} students added, ${skipped} skipped, ${failed} failed`, 'success');
+      
+      // Remove the query parameters from URL without refreshing
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   });
 });
   </script>

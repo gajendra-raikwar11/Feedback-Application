@@ -23,90 +23,17 @@ const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 const xlsx = require("xlsx");
 
+
 // Route to download the Excel template
 router.get("/download-template", (req, res) => {
   res.download(path.join(__dirname, "../templates/student_template.xlsx"));
 });
 // Route to upload student data from Excel
-// router.post("/upload-students", upload.single("studentFile"), async (req, res) => {
-//   try {
-//     if (!req.file) {
-//       return res.status(400).send("No file uploaded");
-//     }
-
-//     console.log("File received:", req.file.path);
-
-//     const workbook = xlsx.readFile(req.file.path);
-//     const sheetName = workbook.SheetNames[0];
-//     const studentsData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-//     console.log(`Processing ${studentsData.length} student records`);
-
-//     let added = 0, skipped = 0, failed = 0;
-
-//     for (const student of studentsData) {
-//       try {
-//         // Check if student already exists
-//         const exists = await Student.findOne({ email: student.email });
-//         if (exists) {
-//           console.log(`Student with email ${student.email} already exists. Skipping.`);
-//           skipped++;
-//           continue;
-//         }
-
-//         // Check required fields
-//         if (!student.email || !student.password) {
-//           console.log("Missing email or password in record:", student);
-//           failed++;
-//           continue;
-//         }
-
-//         // Hash password
-//         const salt = await bcrypt.genSalt(10);
-//         const hashedPassword = await bcrypt.hash(student.password, salt);
-
-//         const studentObj = { ...student, password: hashedPassword };
-
-//         // Convert contact to string if it's a number
-//         if (student.contact && typeof student.contact === "number") {
-//           studentObj.contact = student.contact.toString();
-//         }
-
-//         // Validate student data
-//         const { error } = validateStudent(studentObj);
-//         if (error) {
-//           console.log(`Validation error: ${error.details[0].message} for student: ${student.email}`);
-//           failed++;
-//           continue;
-//         }
-
-//         const newStudent = new Student(studentObj);
-//         await newStudent.save();
-//         console.log(`Student ${student.email} added successfully`);
-//         added++;
-//         res.redirect("adminStudentPage");
-//       } catch (individualError) {
-//         console.error(`Error processing student: ${student.email}`, individualError);
-//         failed++;
-//       }
-//     }
-
-//     // Remove temporary file
-//     fs.unlink(req.file.path, (err) => {
-//       if (err) console.error("Error deleting temporary file:", err);
-//     });
-
-//     res.send(`Upload results: ${added} added, ${skipped} skipped (already exist), ${failed} failed`);
-//   } catch (err) {
-//     console.error("Upload failed:", err);
-//     res.status(500).send("Something went wrong during upload.");
-//   }
-// });
 router.post("/upload-students", upload.single("studentFile"), async (req, res) => {
   try {
     if (!req.file) {
       req.flash("error", "No file uploaded.");
-      return res.redirect("/admin/student"); // replace with your actual page
+      return res.redirect("/admin/adminStudentPage");
     }
 
     console.log("File received:", req.file.path);
@@ -160,7 +87,7 @@ router.post("/upload-students", upload.single("studentFile"), async (req, res) =
         console.log(`Student ${student.email} added successfully`);
         added++;
       } catch (individualError) {
-        console.error(`Error processing student: ${student.email}`, individualError);
+        console.error(`Error processing student: ${student.email || 'unknown'}`, individualError);
         failed++;
       }
     }
@@ -170,14 +97,17 @@ router.post("/upload-students", upload.single("studentFile"), async (req, res) =
       if (err) console.error("Error deleting temporary file:", err);
     });
 
-    // ✅ Flash message and redirect
-    req.flash("success", `Upload completed: ${added} added, ${skipped} skipped, ${failed} failed`);
-    res.redirect("/admin/adminStudentPage"); // 🔁 Replace with your actual route/page
+    // Flash message with detailed statistics
+    const message = `Upload completed: ${added} added, ${skipped} skipped, ${failed} failed`;
+    req.flash("success", message);
+    
+    // Redirect with status parameters for client-side toast notifications
+    return res.redirect(`/admin/adminStudentPage?uploadStatus=success&added=${added}&skipped=${skipped}&failed=${failed}`);
 
   } catch (err) {
     console.error("Upload failed:", err);
-    req.flash("error", "Something went wrong during upload.");
-    res.redirect("/admin/adminStudentPage"); // 🔁 Replace with your actual route/page
+    req.flash("error", "Something went wrong during upload: " + (err.message || "Unknown error"));
+    res.redirect("/admin/adminStudentPage");
   }
 });
 
@@ -335,12 +265,166 @@ router.get('/logout', validateAdmin, (req, res) => {
     // Redirect to login page
     res.redirect('/adminLogin');
 });
+// router.get("/adminHome", validateAdmin, async (req, res) => {
+//   try {
+//     const subjectFilter = req.query.subject; // Get subject from query params
+//     const formTypeFilter = req.query.formType || "Academic"; // Default to Academic if not specified
+//     const facultyFilter = req.query.faculty; // Get faculty filter from query params
+//     const academicType = req.query.academicType || 'all'; // Add this line for academicType parameter
+
+//     let faculties;
+//     const students = await Student.find(); // Fetch students from DB
+//     const uniqueSections = [...new Set(students.map(student => student.section))];
+
+//     if (subjectFilter && subjectFilter !== "All") {
+//       faculties = await Faculty.find({ subjects: subjectFilter }); // Filter faculties by subject
+//     } else {
+//       faculties = await Faculty.find(); // Get all faculties
+//     }
+
+//     let uniqueSubjects = [...new Set(faculties.flatMap(fac => fac.subjects))];
+
+//     // Fetch forms data from Form model
+//     const forms = await FeedbackForm.find();
+
+//     // Fetch feedback responses based on form type and potentially faculty
+//     let feedbackQuery = { formType: formTypeFilter };
+    
+//     // Add faculty filter if present
+//     if (facultyFilter) {
+//       feedbackQuery.facultyID = facultyFilter;
+//     }
+    
+//     // Add subject filter if present
+//     if (subjectFilter && subjectFilter !== "All") {
+//       feedbackQuery.subject = subjectFilter;
+//     }
+    
+//     // Add academic type filter if it's Academic form type and not 'all'
+//     if (formTypeFilter === "Academic" && academicType !== 'all') {
+//       feedbackQuery.academicType = academicType.charAt(0).toUpperCase() + academicType.slice(1); // Capitalize first letter
+//     }
+    
+//     const feedbackResponses = await FeedbackResponse.find(feedbackQuery);
+
+//     // Process the feedback data for charts
+//     const feedbackData = processDataForCharts(feedbackResponses, formTypeFilter);
+
+//     const adminData = req.session.admin;
+//     const currentPath = req.path;
+    
+//     // Determine if there's a selected faculty
+//     const selectedFaculty = facultyFilter || '';
+
+//     // Render the page with all necessary data
+//     res.render("adminHome", {
+//       currentPath,
+//       adminData,
+//       uniqueSubjects,
+//       faculties,
+//       students,
+//       uniqueSections,
+//       forms,
+//       subjectFilter,
+//       selectedFaculty,
+//       feedbackData,
+//       academicType    // Pass academicType to the template
+//     });
+
+//   } catch (e) {
+//     console.error("Error in adminHome route:", e);
+//     res.status(500).send("Server Error");
+//   }
+// });
+// function processDataForCharts(feedbackResponses, formType) {
+//     // Initialize the section data structure
+//     const sectionData = {};
+    
+//     // Process each feedback response
+//     feedbackResponses.forEach(response => {
+//       // Process answers from this response
+//       response.answers.forEach(answer => {
+//         if (answer.responseNumericValue !== null) {
+//           // Initialize section if it doesn't exist
+//           if (!sectionData[answer.sectionTitle]) {
+//             sectionData[answer.sectionTitle] = {
+//               questions: {},
+//               labels: [],
+//               values: []
+//             };
+//           }
+          
+//           // Process question data
+//           if (!sectionData[answer.sectionTitle].questions[answer.questionText]) {
+//             sectionData[answer.sectionTitle].questions[answer.questionText] = {
+//               totalScore: 0,
+//               count: 0,
+//               average: 0
+//             };
+//           }
+          
+//           sectionData[answer.sectionTitle].questions[answer.questionText].totalScore += answer.responseNumericValue;
+//           sectionData[answer.sectionTitle].questions[answer.questionText].count++;
+//         }
+//       });
+//     });
+    
+//     // Calculate averages and prepare chart data
+//     Object.keys(sectionData).forEach(sectionTitle => {
+//       const section = sectionData[sectionTitle];
+      
+//       // Calculate averages for each question
+//       Object.keys(section.questions).forEach(questionText => {
+//         const question = section.questions[questionText];
+//         if (question.count > 0) {
+//           question.average = parseFloat((question.totalScore / question.count).toFixed(2));
+//         }
+        
+//         // Add to labels and values arrays for charts
+//         section.labels.push(questionText);
+//         section.values.push(question.average);
+//       });
+//     });
+    
+//     // Calculate section averages for the summary table
+//     const sectionAverages = Object.keys(sectionData).map(sectionTitle => {
+//       const section = sectionData[sectionTitle];
+//       const questionValues = Object.values(section.questions);
+//       const totalAverage = questionValues.reduce((sum, q) => sum + q.average, 0) / questionValues.length;
+      
+//       return {
+//         sectionTitle,
+//         averageScore: parseFloat(totalAverage.toFixed(2))
+//       };
+//     });
+    
+//     // Build response metadata
+//     const responseMetadata = {
+//       totalResponses: feedbackResponses.length,
+//       formTypes: ["Academic", "Institutional", "Training"],
+//       currentFormType: formType,
+//       lastUpdated: feedbackResponses.length > 0 ?
+//         new Date(Math.max(...feedbackResponses.map(r => r.updatedAt))) :
+//         new Date()
+//     };
+    
+//     return {
+//       sectionData,
+//       sectionAverages,
+//       responseMetadata
+//     };
+//   }
+//---------------------------------------------Admin Home Student Realted all routes--------------------------------------------------------------------
+// Admin Student Page Route - Added auth middleware
+
+
 router.get("/adminHome", validateAdmin, async (req, res) => {
   try {
     const subjectFilter = req.query.subject; // Get subject from query params
     const formTypeFilter = req.query.formType || "Academic"; // Default to Academic if not specified
     const facultyFilter = req.query.faculty; // Get faculty filter from query params
-    const academicType = req.query.academicType || 'all'; // Add this line for academicType parameter
+    const academicType = req.query.academicType || 'all'; // For academicType parameter
+    const sessionFilter = req.query.session; // Add session filter parameter
 
     let faculties;
     const students = await Student.find(); // Fetch students from DB
@@ -357,7 +441,7 @@ router.get("/adminHome", validateAdmin, async (req, res) => {
     // Fetch forms data from Form model
     const forms = await FeedbackForm.find();
 
-    // Fetch feedback responses based on form type and potentially faculty
+    // Fetch feedback responses based on filters
     let feedbackQuery = { formType: formTypeFilter };
     
     // Add faculty filter if present
@@ -375,7 +459,21 @@ router.get("/adminHome", validateAdmin, async (req, res) => {
       feedbackQuery.academicType = academicType.charAt(0).toUpperCase() + academicType.slice(1); // Capitalize first letter
     }
     
+    // Add session filter if present
+    if (sessionFilter && sessionFilter !== "All") {
+      feedbackQuery.session = sessionFilter;
+    }
+    
     const feedbackResponses = await FeedbackResponse.find(feedbackQuery);
+
+    // Get unique sessions for the filter dropdown
+    const allSessions = await FeedbackResponse.distinct("session");
+    const uniqueSessions = [...new Set(allSessions)].sort((a, b) => {
+      // Sort sessions in descending order (newest first)
+      const yearA = parseInt(a.split(' ')[0]);
+      const yearB = parseInt(b.split(' ')[0]);
+      return yearB - yearA;
+    });
 
     // Process the feedback data for charts
     const feedbackData = processDataForCharts(feedbackResponses, formTypeFilter);
@@ -385,6 +483,8 @@ router.get("/adminHome", validateAdmin, async (req, res) => {
     
     // Determine if there's a selected faculty
     const selectedFaculty = facultyFilter || '';
+    // Determine if there's a selected session
+    const selectedSession = sessionFilter || '';
 
     // Render the page with all necessary data
     res.render("adminHome", {
@@ -398,7 +498,9 @@ router.get("/adminHome", validateAdmin, async (req, res) => {
       subjectFilter,
       selectedFaculty,
       feedbackData,
-      academicType    // Pass academicType to the template
+      academicType,    // Pass academicType to the template
+      uniqueSessions,  // Pass sessions list for dropdown
+      selectedSession  // Pass selected session
     });
 
   } catch (e) {
@@ -413,29 +515,59 @@ function processDataForCharts(feedbackResponses, formType) {
     
     // Process each feedback response
     feedbackResponses.forEach(response => {
-      // Process answers from this response
+      // Use the pre-calculated section averages from the model
+      response.sectionAverages.forEach(sectionAvg => {
+        if (!sectionData[sectionAvg.sectionTitle]) {
+          sectionData[sectionAvg.sectionTitle] = {
+            questions: {},
+            labels: [],
+            values: [],
+            totalQuestions: sectionAvg.questionCount,
+            countedQuestions: sectionAvg.countedQuestions,
+            averageScore: sectionAvg.averageScore
+          };
+        } else {
+          // Update existing section with this response's data
+          sectionData[sectionAvg.sectionTitle].totalQuestions += sectionAvg.questionCount;
+          sectionData[sectionAvg.sectionTitle].countedQuestions += sectionAvg.countedQuestions;
+        }
+      });
+      
+      // Process individual questions for detailed data
       response.answers.forEach(answer => {
-        if (answer.responseNumericValue !== null) {
-          // Initialize section if it doesn't exist
-          if (!sectionData[answer.sectionTitle]) {
-            sectionData[answer.sectionTitle] = {
-              questions: {},
-              labels: [],
-              values: []
-            };
-          }
-          
-          // Process question data
-          if (!sectionData[answer.sectionTitle].questions[answer.questionText]) {
-            sectionData[answer.sectionTitle].questions[answer.questionText] = {
-              totalScore: 0,
-              count: 0,
-              average: 0
-            };
-          }
-          
+        // Skip text and date questions as they don't have numeric values
+        if (answer.questionType === "text" || answer.questionType === "date") {
+          return;
+        }
+        
+        // Ensure section exists in our data structure
+        if (!sectionData[answer.sectionTitle]) {
+          sectionData[answer.sectionTitle] = {
+            questions: {},
+            labels: [],
+            values: [],
+            totalQuestions: 0,
+            countedQuestions: 0
+          };
+        }
+        
+        // Initialize question if it doesn't exist
+        if (!sectionData[answer.sectionTitle].questions[answer.questionText]) {
+          sectionData[answer.sectionTitle].questions[answer.questionText] = {
+            totalScore: 0,
+            count: 0,           // Total number of responses for this question
+            countedResponses: 0, // Responses excluding "No Opinion"
+            average: 0
+          };
+        }
+        
+        // Count all questions, even "No Opinion" ones
+        sectionData[answer.sectionTitle].questions[answer.questionText].count++;
+        
+        // Only add to score if it's not "No Opinion" (null)
+        if (answer.responseNumericValue !== null && answer.responseNumericValue !== undefined) {
           sectionData[answer.sectionTitle].questions[answer.questionText].totalScore += answer.responseNumericValue;
-          sectionData[answer.sectionTitle].questions[answer.questionText].count++;
+          sectionData[answer.sectionTitle].questions[answer.questionText].countedResponses++;
         }
       });
     });
@@ -444,29 +576,82 @@ function processDataForCharts(feedbackResponses, formType) {
     Object.keys(sectionData).forEach(sectionTitle => {
       const section = sectionData[sectionTitle];
       
-      // Calculate averages for each question
+      // Calculate averages for each question, excluding "No Opinion" responses
       Object.keys(section.questions).forEach(questionText => {
         const question = section.questions[questionText];
-        if (question.count > 0) {
-          question.average = parseFloat((question.totalScore / question.count).toFixed(2));
+        if (question.countedResponses > 0) {
+          question.average = parseFloat((question.totalScore / question.countedResponses).toFixed(2));
         }
-        
         // Add to labels and values arrays for charts
         section.labels.push(questionText);
         section.values.push(question.average);
       });
     });
     
-    // Calculate section averages for the summary table
+    // Calculate section averages for the summary table, respecting "No Opinion" exclusions
     const sectionAverages = Object.keys(sectionData).map(sectionTitle => {
       const section = sectionData[sectionTitle];
-      const questionValues = Object.values(section.questions);
-      const totalAverage = questionValues.reduce((sum, q) => sum + q.average, 0) / questionValues.length;
+      
+      // Use pre-calculated average if available, otherwise calculate it
+      if (section.averageScore !== undefined) {
+        return {
+          sectionTitle,
+          averageScore: section.averageScore,
+          totalQuestions: section.totalQuestions,
+          countedQuestions: section.countedQuestions
+        };
+      }
+      
+      // Calculate from question data if we don't have the pre-calculated average
+      let totalScore = 0;
+      let countedQuestions = 0;
+      
+      Object.values(section.questions).forEach(q => {
+        if (q.countedResponses > 0) {
+          totalScore += q.totalScore;
+          countedQuestions += q.countedResponses;
+        }
+      });
+      
+      const averageScore = countedQuestions > 0 ? 
+        parseFloat((totalScore / countedQuestions).toFixed(2)) : 0;
       
       return {
         sectionTitle,
-        averageScore: parseFloat(totalAverage.toFixed(2))
+        averageScore,
+        totalQuestions: Object.keys(section.questions).length,
+        countedQuestions
       };
+    });
+    
+    // Calculate overall average across all sections
+    let overallTotalScore = 0;
+    let overallCountedQuestions = 0;
+    
+    sectionAverages.forEach(section => {
+      const questionsInSection = sectionData[section.sectionTitle].questions;
+      
+      Object.values(questionsInSection).forEach(q => {
+        if (q.countedResponses > 0) {
+          overallTotalScore += q.totalScore;
+          overallCountedQuestions += q.countedResponses;
+        }
+      });
+    });
+    
+    const overallAverage = overallCountedQuestions > 0 ?
+      parseFloat((overallTotalScore / overallCountedQuestions).toFixed(2)) : 0;
+    
+    // Get session information for filtering
+    const sessionData = [];
+    feedbackResponses.forEach(response => {
+      if (!sessionData.some(s => s.session === response.session)) {
+        sessionData.push({
+          session: response.session,
+          sessionLabel: response.sessionLabel,
+          semesterType: response.semesterType
+        });
+      }
     });
     
     // Build response metadata
@@ -476,17 +661,18 @@ function processDataForCharts(feedbackResponses, formType) {
       currentFormType: formType,
       lastUpdated: feedbackResponses.length > 0 ?
         new Date(Math.max(...feedbackResponses.map(r => r.updatedAt))) :
-        new Date()
+        new Date(),
+      sessions: sessionData
     };
     
     return {
       sectionData,
       sectionAverages,
+      overallAverage,
       responseMetadata
     };
-  }
-//---------------------------------------------Admin Home Student Realted all routes--------------------------------------------------------------------
-// Admin Student Page Route - Added auth middleware
+}
+
 router.get("/adminStudentPage", validateAdmin, async (req, res) => {
     try {
       // Fetch all students from database
@@ -532,24 +718,6 @@ router.get("/adminStudentPage", validateAdmin, async (req, res) => {
       res.status(500).send("Server Error");
     }
 });
-// // Delete student by ID route
-// router.delete('/students/:studentIdToDelete',validateAdmin, async (req, res) => {
-//     try {
-//       const studentIdToDelete = req.params.studentIdToDelete;
-  
-//       // Find and delete the student from the database
-//       const student = await Student.findByIdAndDelete(studentIdToDelete);
-  
-//       if (!student) {
-//         return res.status(404).json({ message: 'Student not found' });
-//       }
-  
-//       res.json({ message: `Student with ID ${studentIdToDelete} deleted successfully` });
-//     } catch (err) {
-//       console.error(err);
-//       res.status(500).json({ message: 'Server error' });
-//     }
-// });
 //---------------------------------------------Admin Home Form Realted all routes--------------------------------------------------------------------
 //form related all routes
 router.get('/adminHome/forms/create/:formType', validateAdmin, async (req, res) => {
@@ -2092,5 +2260,4 @@ router.delete('/students/delete/:id', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 module.exports = router;

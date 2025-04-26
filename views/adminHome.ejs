@@ -210,6 +210,11 @@
         padding: 0.75rem; /* Smaller padding on header for mobile */
     }
 }
+    .table thead th {
+    background: white; /* For sticky header visibility */
+    z-index: 2;         /* Stay above rows */
+    }
+
     </style>
 </head>
 <body>
@@ -356,7 +361,7 @@
                                 <!-- Fixed height table container -->
                                 <div class="table-responsive" style="height: 240px; overflow-y: auto;">
                                     <table class="table table-hover">
-                                        <thead style="position: sticky; top: 0; z-index: 0;">
+                                        <thead style="position: sticky; top: 0; background: white; z-index: 2;">
                                             <tr>
                                                 <th>Form Title</th>
                                                 <th>Type</th>
@@ -382,7 +387,7 @@
                                                                 <button class="btn btn-sm btn-primary" onclick="editForm('<%= form._id %>')">
                                                                     <i class="fas fa-edit"></i>
                                                                 </button>
-                                                                
+                                
                                                                 <% if(form.status === 'active') { %>
                                                                     <button class="btn btn-sm btn-danger" onclick="toggleFormStatus('<%= form._id %>', 'closed')">
                                                                         <i class="fas fa-power-off"></i>
@@ -392,7 +397,7 @@
                                                                         <i class="fas fa-power-off"></i>
                                                                     </button>
                                                                 <% } %>
-                                    
+                                
                                                                 <button class="btn btn-sm btn-info" onclick="viewForm('<%= form._id %>')">
                                                                     <i class="fas fa-eye"></i>
                                                                 </button>
@@ -408,6 +413,7 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                
                                 <div class="d-flex flex-column flex-md-row justify-content-between mt-3 gap-2">
                                     <a href="/admin/Total-Forms" class="btn btn-outline-secondary">View All Forms</a>
                                 </div>
@@ -432,10 +438,10 @@
                 </div>
             </div>
             <div class="card-body">
-                <!-- Fixed height table container -->
+                <!-- Fixed height table container -->   
                 <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                     <table class="table table-hover">
-                        <thead style="position: sticky; top: 0; background: white; z-index: 0;">
+                        <thead style="position: sticky; top: 0; background: white; z-index: 2;">
                             <tr>
                                 <th>Name</th>
                                 <th>ID</th>
@@ -462,11 +468,10 @@
                                         </td>
                                         <td>
                                             <div class="btn-group">
-                                                
                                                 <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#assignFormModal" onclick="prepareFormAssignment('<%= faculty._id %>')">
                                                     <i class="fas fa-clipboard-list"></i>
                                                 </button>
-                        
+
                                                 <% if(faculty.feedbackForms && faculty.feedbackForms.length > 0) { %>
                                                     <button class="btn btn-sm btn-info" onclick="viewAssignedForms('<%= faculty._id %>')">
                                                         <i class="fas fa-eye"></i>
@@ -488,6 +493,9 @@
                         </tbody>
                     </table>
                 </div>
+
+                
+                
                 <div class="d-flex flex-column flex-md-row justify-content-between mt-3 gap-2">
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bulkAssignModal">
                         <i class="fas fa-clipboard-check me-1"></i> Bulk Assign Forms
