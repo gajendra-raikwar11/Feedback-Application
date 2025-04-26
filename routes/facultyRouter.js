@@ -391,4 +391,10 @@ router.get('/students', (req, res) => {
  res.render("faculty-students");
 });
 
+router.get('/forgot-password', (req, res) => {
+  // Just render the static HTML page
+
+ res.render("facultyChangePassword");
+});
+
 module.exports = router;
