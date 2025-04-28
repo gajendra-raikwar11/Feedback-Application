@@ -184,15 +184,6 @@
             transform: translateY(-5px);
         }
         
-        .pagination .page-item.active .page-link {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        
-        .pagination .page-link {
-            color: var(--primary-color);
-        }
-        
         .dt-button {
             background-color: var(--primary-color) !important;
             color: white !important;
@@ -240,6 +231,48 @@
             .mobile-left-shift {
                 margin-left: 40px;
             }
+        }
+        
+        /* Hide DataTable elements we don't want */
+        .dataTables_length, .dataTables_info {
+            display: none !important;
+        }
+        
+        /* Style for quick search in filter section */
+        #quickSearch {
+            width: 100%;
+        }
+        
+        .dataTables_filter {
+            width: 100%;
+        }
+        
+        .dataTables_filter input {
+            width: 100%;
+            margin-left: 0 !important;
+        }
+
+        /* Added styles for scrollable table */
+        .table-scroll-container {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        /* Hide pagination */
+        .dataTables_paginate {
+            display: none !important;
+        }
+        
+        /* Improved search styling */
+        #Search {
+            padding-left: 30px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 25px;
+            top: 40px;
+            color: #777;
         }
     </style>
 </head>
@@ -316,6 +349,10 @@
             <!-- Filter Section -->
             <div class="filter-section mb-4">
                 <div class="row align-items-end">
+                     <div class="col-md-3 mb-3 mb-md-0 position-relative">
+                        <label for="Search" class="form-label">Search Student</label>
+                        <input type="text" class="form-control" id="Search" placeholder="Search by name or ID">
+                    </div>
                     <div class="col-md-3 mb-3 mb-md-0">
                         <label for="sectionFilter" class="form-label">Section</label>
                         <select class="form-select" id="sectionFilter">
@@ -333,16 +370,6 @@
                             <option value="submitted">Submitted</option>
                             <option value="pending">Pending</option>
                             <option value="overdue">Overdue</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-3 mb-md-0">
-                        <label for="attendanceFilter" class="form-label">Attendance</label>
-                        <select class="form-select" id="attendanceFilter">
-                            <option value="all">All</option>
-                            <option value="excellent">Excellent (>90%)</option>
-                            <option value="good">Good (75-90%)</option>
-                            <option value="average">Average (60-75%)</option>
-                            <option value="poor">Poor (<60%)</option>
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end">
@@ -366,8 +393,8 @@
                         </button>
                     </div>
                 </div>
-                <div class="card-body"style="max-height: 540px; overflow-y: auto;">
-                    <div class="table-responsive">
+                <div class="card-body">
+                    <div class="table-scroll-container">
                         <table id="studentTable" class="table table-hover">
                             <thead>
                                 <tr>
@@ -388,12 +415,13 @@
                                         <td><%= student.name %></td>
                                         <td><%= student.section %></td>
                                         <td> 
-                                            <% let institute = 0; %>
+                                            <% var institute = 0; %>
                                             <% feedbackData.forEach((feedback) => { %>
                                                 <% if (
                                                 student._Id === feedback.studentId &&
-                                                feedback.formId === feedback.facultyId &&
-                                                feedback.formType === "Institutional"
+                                                feedback.formId === forms._id &&
+                                                feedback.formType === "Institutional" &&
+                                                feedback.sections === student.section
                                                 ) { %>
                                                 <% institute++; %>
                                                 <% } %>
@@ -421,7 +449,6 @@
                                     </tr>
                                      <% } %>
                                 <% }) %>
-
                             </tbody>
                         </table>
                     </div>
@@ -442,217 +469,312 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
 
-    <script>
-        // Sample Student Data - In a real application, this would come from your backend
-        
+   <script>
+    // DOM Elements and Variables
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const content = document.getElementById('content');
+    const sectionFilter = document.getElementById('sectionFilter');
+    const submissionFilter = document.getElementById('submissionFilter');
+    const applyFiltersBtn = document.getElementById('applyFilters');
+    const resetFiltersBtn = document.getElementById('resetFilters');
+    const exportExcelBtn = document.getElementById('exportExcel');
+    const searchInput = document.getElementById('Search');
+    
+    let dataTable;
+    let sampleStudents = []; // Will be populated from table data
+    let filteredStudents = [];
 
-        // DOM Elements and Variables
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebar = document.getElementById('sidebar');
-        const content = document.getElementById('content');
-        const sectionFilter = document.getElementById('sectionFilter');
-        const submissionFilter = document.getElementById('submissionFilter');
-        const attendanceFilter = document.getElementById('attendanceFilter');
-        const applyFiltersBtn = document.getElementById('applyFilters');
-        const resetFiltersBtn = document.getElementById('resetFilters');
-        const exportExcelBtn = document.getElementById('exportExcel');
-        
-        let dataTable;
-        let filteredStudents = [...sampleStudents];
-
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize DataTable with pagination disabled
+        dataTable = $('#studentTable').DataTable({
+            responsive: true,
+            lengthChange: false,  // Hide "Show entries" dropdown
+            info: false,  // Hide "Showing 1 to 10 of 15 entries" text
+            order: [[0, 'asc']], // Sort by Student ID by default
+            language: {
+                search: "",
+                emptyTable: "No student records found",
+                zeroRecords: "No results found for your filter criteria"
+            },
+            dom: 't', // Only show table (remove pagination 'p')
+            paging: false // Explicitly disable pagination
         });
+        
+        // Extract student data from the rendered table
+        extractStudentData();
+        
+        // Setup event listeners
+        setupEventListeners();
+        
+        // Initialize tooltips
+        initTooltips();
+    });
 
+    // Extract student data from the table
+    function extractStudentData() {
+        sampleStudents = [];
+        
+        $('#studentTable tbody tr').each(function() {
+            const $row = $(this);
+            const studentId = $row.find('td:eq(0)').text().trim();
+            const name = $row.find('td:eq(1)').text().trim();
+            const section = $row.find('td:eq(2)').text().trim();
+            
+            // Parse institutional forms
+            const institutionalText = $row.find('td:eq(3)').text().trim();
+            const institutionalParts = institutionalText.split('/');
+            const institutionalSubmitted = parseInt(institutionalParts[0].trim()) || 0;
+            const institutionalTotal = parseInt(institutionalParts[1].trim()) || 0;
+            
+            // Parse academic forms
+            const academicText = $row.find('td:eq(4)').text().trim();
+            const academicParts = academicText.split('/');
+            const academicSubmitted = parseInt(academicParts[0].trim()) || 0;
+            const academicTotal = parseInt(academicParts[1].trim()) || 0;
+            
+            // Parse training forms
+            const trainingText = $row.find('td:eq(5)').text().trim();
+            const trainingParts = trainingText.split('/');
+            const trainingSubmitted = parseInt(trainingParts[0].trim()) || 0;
+            const trainingTotal = parseInt(trainingParts[1].trim()) || 0;
+            
+            // Calculate aggregate values
+            const formsSubmitted = institutionalSubmitted + academicSubmitted + trainingSubmitted;
+            const formsAssigned = institutionalTotal + academicTotal + trainingTotal;
+            const formsPending = formsAssigned - formsSubmitted;
+            
+            // Assume any pending forms that are more than 7 days old are overdue (for demo purposes)
+            const formsOverdue = Math.floor(formsPending * 0.3); // Estimate 30% of pending forms are overdue
+            
+            // Create student object
+            const student = {
+                id: studentId,
+                name: name,
+                section: section,
+                institutionalSubmitted: institutionalSubmitted,
+                institutionalTotal: institutionalTotal,
+                academicSubmitted: academicSubmitted,
+                academicTotal: academicTotal,
+                trainingSubmitted: trainingSubmitted,
+                trainingTotal: trainingTotal,
+                formsSubmitted: formsSubmitted,
+                formsAssigned: formsAssigned,
+                formsPending: formsPending,
+                formsOverdue: formsOverdue,
+                attendance: Math.floor(Math.random() * 30) + 70, // Random attendance between 70-100%
+                status: 'active',
+                email: `${name.toLowerCase().replace(/\s+/g, '.')}@university.edu` // Generate sample email
+            };
+            
+            sampleStudents.push(student);
+        });
+        
+        // Initialize filteredStudents with all students
+        filteredStudents = [...sampleStudents];
+    }
 
-        // Set up event listeners
-        function setupEventListeners() {
-            // Sidebar toggle
-            sidebarToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('active');
-                content.classList.toggle('active');
-                
-                const isExpanded = sidebar.classList.contains('active');
-                sidebarToggle.setAttribute('aria-expanded', isExpanded);
-                
-                if (isExpanded) {
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    document.body.style.overflow = '';
-                }
-            });
+    // Set up event listeners
+    function setupEventListeners() {
+        // Sidebar toggle
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            content.classList.toggle('active');
             
-            // Close sidebar when clicking on the blur overlay
-            content.addEventListener('click', (e) => {
-                if (content.classList.contains('active') && e.target === content) {
-                    sidebar.classList.remove('active');
-                    content.classList.remove('active');
-                    document.body.style.overflow = '';
-                    sidebarToggle.setAttribute('aria-expanded', 'false');
-                }
-            });
+            const isExpanded = sidebar.classList.contains('active');
+            sidebarToggle.setAttribute('aria-expanded', isExpanded);
             
-            // Close sidebar with close button
+            if (isExpanded) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        });
+        
+        // Close sidebar when clicking on the blur overlay
+        content.addEventListener('click', (e) => {
+            if (content.classList.contains('active') && e.target === content) {
+                sidebar.classList.remove('active');
+                content.classList.remove('active');
+                document.body.style.overflow = '';
+                sidebarToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+        
+        // Close sidebar with close button
+        if (document.querySelector('.sidebar-close-btn')) {
             document.querySelector('.sidebar-close-btn').addEventListener('click', () => {
                 sidebar.classList.remove('active');
                 content.classList.remove('active');
                 document.body.style.overflow = '';
                 sidebarToggle.setAttribute('aria-expanded', 'false');
             });
+        }
+        
+        // Apply filters button
+        applyFiltersBtn.addEventListener('click', function() {
+            applyFilters();
+            showToast('Filters applied successfully', 'success');
+        });
+        
+        // Reset filters button
+        resetFiltersBtn.addEventListener('click', function() {
+            sectionFilter.value = 'all';
+            submissionFilter.value = 'all';
+            searchInput.value = ''; // Clear the search input field
+            dataTable.search('').draw(); // Clear any DataTable search
             
-            // Apply filters button
-            applyFiltersBtn.addEventListener('click', function() {
-                applyFilters();
-                showToast('Filters applied successfully', 'success');
-            });
-            
-            // Reset filters button
-            resetFiltersBtn.addEventListener('click', function() {
-                sectionFilter.value = 'all';
-                submissionFilter.value = 'all';
-                attendanceFilter.value = 'all';
-                applyFilters();
-                showToast('Filters have been reset', 'info');
-            });
-            
-            // Export to Excel button
-            exportExcelBtn.addEventListener('click', function() {
-                exportToExcel();
-            });
-            
-            // View student details
-            $('#studentTable').on('click', '.view-details', function() {
-                const studentId = $(this).data('id');
-                const student = sampleStudents.find(s => s.id === studentId);
+            applyFilters();
+            showToast('Filters have been reset', 'info');
+        });
+        
+        // Export to Excel button
+        exportExcelBtn.addEventListener('click', function() {
+            exportToExcel();
+        });
+        
+        // Search input for live filtering
+        searchInput.addEventListener('keyup', function() {
+            dataTable.search(this.value).draw();
+            updateFilteredStudents();
+        });
+        
+        // View student details (delegation pattern)
+        $('#studentTable').on('click', '.view-details', function() {
+            const studentId = $(this).data('id');
+            const student = sampleStudents.find(s => s.id === studentId);
+            if (student) {
                 showToast(`Viewing details for ${student.name}`, 'info');
                 // In a real app, this would open a modal with student details
                 console.log('View details for student:', student);
-            });
+            }
+        });
+        
+        // Bulk email button
+        $(document).on('click', '#bulkEmail', function() {
+            if (filteredStudents.length === 0) {
+                showToast('No students selected for bulk email', 'error');
+            } else {
+                showToast(`Preparing to send email to ${filteredStudents.length} students`, 'info');
+                // In a real app, this would open a bulk email compose interface
+            }
+        });
+        
+        // Quick summary button
+        $(document).on('click', '#quickSummary', function() {
+            const totalStudents = filteredStudents.length;
+            const totalSubmitted = filteredStudents.reduce((sum, student) => sum + student.formsSubmitted, 0);
+            const totalAssigned = filteredStudents.reduce((sum, student) => sum + student.formsAssigned, 0);
+            const submissionRate = totalAssigned > 0 ? ((totalSubmitted / totalAssigned) * 100).toFixed(1) : 0;
             
-            // Send form to student
-            $('#studentTable').on('click', '.send-form', function() {
-                const studentId = $(this).data('id');
-                const student = sampleStudents.find(s => s.id === studentId);
-                showToast(`Form sent successfully to ${student.name}`, 'success');
-                // In a real app, this would open a modal to select forms to send
-                console.log('Send form to student:', student);
-            });
-            
-            // Contact student
-            $('#studentTable').on('click', '.contact-student', function() {
-                const studentId = $(this).data('id');
-                const student = sampleStudents.find(s => s.id === studentId);
-                showToast(`Contacting ${student.name} at ${student.email}`, 'info');
-                // In a real app, this would open an email compose interface
-                console.log('Contact student:', student);
-            });
-            
-            // Bulk email button
-            $(document).on('click', '#bulkEmail', function() {
-                if (filteredStudents.length === 0) {
-                    showToast('No students selected for bulk email', 'error');
-                } else {
-                    showToast(`Preparing to send email to ${filteredStudents.length} students`, 'info');
-                    // In a real app, this would open a bulk email compose interface
-                }
-            });
-            
-            // Quick summary button
-            $(document).on('click', '#quickSummary', function() {
-                const totalStudents = filteredStudents.length;
-                const totalSubmitted = filteredStudents.reduce((sum, student) => sum + student.formsSubmitted, 0);
-                const totalAssigned = filteredStudents.reduce((sum, student) => sum + student.formsAssigned, 0);
-                const submissionRate = totalAssigned > 0 ? ((totalSubmitted / totalAssigned) * 100).toFixed(1) : 0;
-                
-                showToast(`Summary: ${totalStudents} students with ${submissionRate}% form submission rate`, 'info');
-                // In a real app, this would open a summary modal with charts
-            });
-        }
+            showToast(`Summary: ${totalStudents} students with ${submissionRate}% form submission rate`, 'info');
+            // In a real app, this would open a summary modal with charts
+        });
+    }
 
-        // Apply filters to the data table
-        function applyFilters() {
-            const section = sectionFilter.value;
-            const submission = submissionFilter.value;
-            const attendance = attendanceFilter.value;
+    // Apply filters to the data table
+    function applyFilters() {
+        const section = sectionFilter.value;
+        const submission = submissionFilter.value;
+        const searchTerm = searchInput.value;
+        
+        // Clear any previous DataTable search filters
+        dataTable.search('').columns().search('').draw();
+        
+        // Apply search term if provided
+        if (searchTerm) {
+            dataTable.search(searchTerm).draw();
+        }
+        
+        // Apply section filter if not "all"
+        if (section !== 'all') {
+            dataTable.column(2).search(section).draw();
+        }
+        
+        // For submission status, we need custom filtering
+        if (submission !== 'all') {
+            // Remove any existing custom filters
+            $.fn.dataTable.ext.search.pop();
             
-            // Reset the search
-            dataTable.search('').draw();
-            
-            // Apply section filter
-            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-                const student = sampleStudents[dataIndex];
+            // Add our custom filter
+            $.fn.dataTable.ext.search.push(function(settings, searchData, index) {
+                const rowId = searchData[0]; // Student ID is in the first column
+                const student = sampleStudents.find(s => s.id === rowId);
                 
-                // Section filter
-                if (section !== 'all' && student.section !== section) {
-                    return false;
-                }
+                if (!student) return true; // If student not found, include the row
                 
-                // Submission status filter
-                if (submission === 'submitted' && student.formsSubmitted < student.formsAssigned) {
+                if (submission === 'submitted' && student.formsSubmitted === 0) {
                     return false;
-                // Continuation of the applyFilters function which was cut off
-            } else if (submission === 'pending' && student.formsPending === 0) {
+                } else if (submission === 'pending' && student.formsPending === 0) {
                     return false;
                 } else if (submission === 'overdue' && student.formsOverdue === 0) {
-                    return false;
-                }
-                
-                // Attendance filter
-                if (attendance === 'excellent' && student.attendance <= 90) {
-                    return false;
-                } else if (attendance === 'good' && (student.attendance < 75 || student.attendance > 90)) {
-                    return false;
-                } else if (attendance === 'average' && (student.attendance < 60 || student.attendance > 75)) {
-                    return false;
-                } else if (attendance === 'poor' && student.attendance >= 60) {
                     return false;
                 }
                 
                 return true;
             });
             
-            // Redraw the table with filters applied
+            // Redraw the table with the filter applied
             dataTable.draw();
             
-            // Remove all filters after drawing
+            // Remove the filter after drawing
             $.fn.dataTable.ext.search.pop();
-            
-            // Update the filtered students array for other operations
-            filteredStudents = [];
-            dataTable.rows({ search: 'applied' }).every(function() {
-                filteredStudents.push(this.data());
-            });
         }
+        
+        // Update the filteredStudents array
+        updateFilteredStudents();
+    }
+    
+    // Update the filteredStudents array based on visible table rows
+    function updateFilteredStudents() {
+        filteredStudents = [];
+        
+        dataTable.rows({ search: 'applied' }).every(function(rowIdx) {
+            const data = this.data();
+            const studentId = data[0]; // Assuming ID is the first column
+            const student = sampleStudents.find(s => s.id === studentId);
+            if (student) {
+                filteredStudents.push(student);
+            }
+        });
+    }
 
-        // Export table data to Excel
-        function exportToExcel() {
-            // Get the visible/filtered data
-            const exportData = [];
-            dataTable.rows({ search: 'applied' }).every(function() {
-                const student = this.data();
+    // Export table data to Excel
+    function exportToExcel() {
+        // Get the visible/filtered data
+        const exportData = [];
+        
+        dataTable.rows({ search: 'applied' }).every(function(rowIdx) {
+            const data = this.data();
+            const student = sampleStudents.find(s => s.id === data[0]);
+            
+            if (student) {
                 exportData.push({
                     'Student ID': student.id,
                     'Name': student.name,
                     'Section': student.section,
-                    'Forms Submitted': student.formsSubmitted,
-                    'Forms Assigned': student.formsAssigned,
-                    'Forms Pending': student.formsPending,
-                    'Forms Overdue': student.formsOverdue,
-                    'Attendance (%)': student.attendance,
-                    'Status': student.status
+                    'Institutional Forms': `${student.institutionalSubmitted}/${student.institutionalTotal}`,
+                    'Academic Forms': `${student.academicSubmitted}/${student.academicTotal}`,
+                    'Training Forms': `${student.trainingSubmitted}/${student.trainingTotal}`,
+                    'Total Submitted': student.formsSubmitted,
+                    'Total Assigned': student.formsAssigned,
+                    'Completion Rate': `${((student.formsSubmitted / student.formsAssigned) * 100).toFixed(1)}%`
                 });
-            });
-            
-            // Create worksheet
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            
-            // Create workbook
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Students");
-            
-            // Set column widths
-            const wscols = [
+            }
+        });
+        
+        // Create worksheet
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        
+        // Create workbook
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Students");
+        
+        // Set column widths
+        
+        // Set column widths
+      const wscols = [
                 { wch: 12 }, // Student ID width
                 { wch: 20 }, // Name width
                 { wch: 10 }, // Section width
