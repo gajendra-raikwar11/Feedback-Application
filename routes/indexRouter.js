@@ -78,14 +78,14 @@ const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString()
 
 // Change Password Section
 router.get("/student/changepassword", (req, res) => {
-    res.render("changePassword");
-  });
+  res.render("changePassword");
+});
 
 // send otp page
 router.post("/sendotp", async (req, res) => {
     const { email } = req.body;
   
-    const authorizedStudent = await Student.findOne({ Email: email });
+    const authorizedStudent = await Student.findOne({ email: email });
   
     if (!authorizedStudent) return res.send("You are not authorized user");
   
@@ -116,14 +116,14 @@ router.post("/checkotp", async (req, res) => {
 
 //reset password route
 router.post("/reset-password", async (req, res) => {
-    const { password, confirmpassword } = req.body;
-  
+    const { password, confirmPassword } = req.body;
+    console.log(password,confirmPassword);
     // if(!studentId) return res.send("user not found");
   
     // if(!password || !confirmpassword) return res.send("password should not be empty");
   
-    if (password !== confirmpassword)
-      return res.send(`password did not match ${password} ${confirmpassword}`);
+    if (password !== confirmPassword)
+      return res.send(`password did not match ${password} ${confirmPassword}`);
   
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -133,8 +133,9 @@ router.post("/reset-password", async (req, res) => {
       { Password: hashedPassword },
       { new: true }
     );
+    student1.save();
     // res.send(hashedPassword === student1.Password);
-    updateStudentPassword(req.session.studentEmail, password);
+    // updateStudentPassword(req.session.studentEmail, password);
     req.session.destroy();
     const match = await bcrypt.compare(password, hashedPassword);
     console.log(match);
