@@ -672,9 +672,9 @@
             </div>
             
             <!-- Faculty Selector and Form Type in the same row -->
-            <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div class="mb-6 flex flex-wrap items-center justify-between gap-4 ">
                 <!-- Form Type Dropdown (moved beside Faculty Select) -->
-                <div class="flex items-center space-x-4">
+                <div class="items-center space-x-4 sm:flex flex-col gap-4 md:flex flex-row">
                     <label for="formTypeSelect" class="font-medium text-gray-700">Form Type:</label>
                     <select id="formTypeSelect" class="border border-gray-300 rounded-md p-2 w-48">
                         <option value="Academic" <%= feedbackData.responseMetadata.currentFormType === 'Academic' ? 'selected' : '' %>>Academic Feedback</option>
