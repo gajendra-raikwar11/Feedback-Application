@@ -420,73 +420,66 @@ router.get('/logout', validateAdmin, (req, res) => {
 
 router.get("/adminHome", validateAdmin, async (req, res) => {
   try {
-    const subjectFilter = req.query.subject; // Get subject from query params
-    const formTypeFilter = req.query.formType || "Academic"; // Default to Academic if not specified
-    const facultyFilter = req.query.faculty; // Get faculty filter from query params
-    const academicType = req.query.academicType || 'all'; // For academicType parameter
-    const sessionFilter = req.query.session; // Add session filter parameter
+    const subjectFilter = req.query.subject;
+    const formTypeFilter = req.query.formType || "Academic";
+    const facultyFilter = req.query.faculty;
+    const academicType = req.query.academicType || 'all';
+    const sessionFilter = req.query.session;
 
     let faculties;
-    const students = await Student.find(); // Fetch students from DB
+    const students = await Student.find();
     const uniqueSections = [...new Set(students.map(student => student.section))];
 
     if (subjectFilter && subjectFilter !== "All") {
-      faculties = await Faculty.find({ subjects: subjectFilter }); // Filter faculties by subject
+      faculties = await Faculty.find({ subjects: subjectFilter });
     } else {
-      faculties = await Faculty.find(); // Get all faculties
+      faculties = await Faculty.find();
     }
 
     let uniqueSubjects = [...new Set(faculties.flatMap(fac => fac.subjects))];
 
-    // Fetch forms data from Form model
     const forms = await FeedbackForm.find();
 
-    // Fetch feedback responses based on filters
     let feedbackQuery = { formType: formTypeFilter };
-    
-    // Add faculty filter if present
+
     if (facultyFilter) {
       feedbackQuery.facultyID = facultyFilter;
     }
-    
-    // Add subject filter if present
+
     if (subjectFilter && subjectFilter !== "All") {
       feedbackQuery.subject = subjectFilter;
     }
-    
-    // Add academic type filter if it's Academic form type and not 'all'
+
     if (formTypeFilter === "Academic" && academicType !== 'all') {
-      feedbackQuery.academicType = academicType.charAt(0).toUpperCase() + academicType.slice(1); // Capitalize first letter
+      feedbackQuery.academicType = academicType.charAt(0).toUpperCase() + academicType.slice(1);
     }
-    
-    // Add session filter if present
+
     if (sessionFilter && sessionFilter !== "All") {
       feedbackQuery.session = sessionFilter;
     }
-    
+
     const feedbackResponses = await FeedbackResponse.find(feedbackQuery);
 
-    // Get unique sessions for the filter dropdown
+    // ✅ Count of responses with current filters
+    const submissionCount = await FeedbackResponse.countDocuments(feedbackQuery);
+
+    // ✅ Total count of all feedback responses
+    const totalSubmissionCount = await FeedbackResponse.countDocuments();
+
     const allSessions = await FeedbackResponse.distinct("session");
     const uniqueSessions = [...new Set(allSessions)].sort((a, b) => {
-      // Sort sessions in descending order (newest first)
       const yearA = parseInt(a.split(' ')[0]);
       const yearB = parseInt(b.split(' ')[0]);
       return yearB - yearA;
     });
 
-    // Process the feedback data for charts
     const feedbackData = processDataForCharts(feedbackResponses, formTypeFilter);
 
     const adminData = req.session.admin;
     const currentPath = req.path;
-    
-    // Determine if there's a selected faculty
     const selectedFaculty = facultyFilter || '';
-    // Determine if there's a selected session
     const selectedSession = sessionFilter || '';
 
-    // Render the page with all necessary data
     res.render("adminHome", {
       currentPath,
       adminData,
@@ -498,9 +491,11 @@ router.get("/adminHome", validateAdmin, async (req, res) => {
       subjectFilter,
       selectedFaculty,
       feedbackData,
-      academicType,    // Pass academicType to the template
-      uniqueSessions,  // Pass sessions list for dropdown
-      selectedSession  // Pass selected session
+      academicType,
+      uniqueSessions,
+      selectedSession,
+      submissionCount,        // 👈 Filtered count
+      totalSubmissionCount    // 👈 Total count
     });
 
   } catch (e) {
@@ -508,6 +503,8 @@ router.get("/adminHome", validateAdmin, async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
+
+
 
 function processDataForCharts(feedbackResponses, formType) {
     // Initialize the section data structure
@@ -991,44 +988,48 @@ router.get('/adminHome/forms/filterBySession', validateAdmin, async (req, res) =
   }
 });
 router.get('/Total-Forms', validateAdmin, async (req, res) => {
-    try {
-        // Fetch forms from database & populate faculty data
-        const forms = await FeedbackForm.find({})
-            .populate('facultyAssigned', 'name') // Fetch faculty names
-            .lean();
-        
-        // Format the forms for display
-        const formattedForms = forms.map(form => ({
-            _id: form._id,
-            title: form.title,
-            formType: form.formType,
-            startDate: form.deadline, // Using deadline as startDate
-            endDate: form.deadline,   // Using deadline as endDate
-            isActive: form.status === 'active',
-            department: 'Information Technology', // Default department
-            sections: form.sectionsAssigned.map(section => ({ title: section })), // Use actual section names
-            facultyAssignments: form.facultyAssigned.map(faculty => ({ 
-                facultyId: faculty._id, 
-                facultyName: faculty.name // Get actual faculty name 
-            })),
-            classAssignments: [{
-                classes: form.sectionsAssigned || []
-            }],
-            submissionCount: Math.floor(Math.random() * 100) // Random submission count for demo
-        }));
-        
-        // Render the TotalForms page with formatted data
-        res.render('TotalForms', { 
-            forms: formattedForms,
-            adminData: req.session.admin,
-            currentPath: req.path
-        });
+  try {
+    // Fetch all forms
+    const forms = await FeedbackForm.find({})
+      .populate('facultyAssigned', 'name')
+      .lean();
 
-    } catch (error) {
-        console.error('Error fetching forms:', error);
-        res.status(500).send('Error fetching forms');
-    }
+    // Fetch total submission count from FeedbackResponse model
+    const totalSubmissions = await FeedbackResponse.countDocuments(); // 👈 All submissions count
+    const twoDigitTotal = totalSubmissions.toString().padStart(2, '0'); // Ensure two-digit display
+
+    // Format forms (unchanged)
+    const formattedForms = forms.map(form => ({
+      _id: form._id,
+      title: form.title,
+      formType: form.formType,
+      startDate: form.deadline,
+      endDate: form.deadline,
+      isActive: form.status === 'active',
+      department: 'Information Technology',
+      sections: form.sectionsAssigned.map(section => ({ title: section })),
+      facultyAssignments: form.facultyAssigned.map(faculty => ({
+        facultyId: faculty._id,
+        facultyName: faculty.name
+      })),
+      classAssignments: [{
+        classes: form.sectionsAssigned || []
+      }]
+    }));
+
+    res.render('TotalForms', {
+      forms: formattedForms,
+      totalSubmissions: twoDigitTotal, // ✅ pass to EJS
+      adminData: req.session.admin,
+      currentPath: req.path
+    });
+
+  } catch (error) {
+    console.error('Error fetching forms:', error);
+    res.status(500).send('Error fetching forms');
+  }
 });
+
 // DELETE - Delete a form
 router.delete('/forms/:id', validateAdmin, async (req, res) => {
   try {
