@@ -182,14 +182,6 @@
         color: #666;
       }
 
-      .filter-section {
-        background-color: white;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      }
-
       .chart-container {
         position: relative;
         margin: auto;
@@ -259,48 +251,6 @@
           </div>
         </div>
 
-        <!-- Filters Section -->
-        <div class="filter-section mb-4">
-          <div class="row">
-            <div class="col-md-3 mb-3">
-              <label for="semesterFilter" class="form-label">Semester</label>
-              <select class="form-select" id="semesterFilter">
-                <option value="all">All Semesters</option>
-                <option value="Spring2025">Spring 2025</option>
-                <option value="Fall2024">Fall 2024</option>
-                <option value="Spring2024">Spring 2024</option>
-              </select>
-            </div>
-            <div class="col-md-3 mb-3">
-              <label for="sectionFilter" class="form-label">Section</label>
-              <select class="form-select" id="sectionFilter">
-                <option value="all">All Sections</option>
-                <option value="A">Section A</option>
-                <option value="B">Section B</option>
-                <option value="C">Section C</option>
-              </select>
-            </div>
-            <div class="col-md-3 mb-3">
-              <label for="courseFilter" class="form-label">Course</label>
-              <select class="form-select" id="courseFilter">
-                <option value="all">All Courses</option>
-                <option value="CS101">CS101 - Intro to Programming</option>
-                <option value="CS201">CS201 - Data Structures</option>
-                <option value="CS301">CS301 - Database Systems</option>
-              </select>
-            </div>
-            <div class="col-md-3 mb-3">
-              <label for="formFilter" class="form-label">Form Type</label>
-              <select class="form-select" id="formFilter">
-                <option value="all">All Forms</option>
-                <option value="institutional">Institutional</option>
-                <option value="academic">Academic</option>
-                <option value="training">Training</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
         <!-- Statistics Cards -->
         <div class="row mb-4">
           <div class="col-md-3 mb-3">
@@ -310,18 +260,38 @@
               </div>
               <div class="stat-number" id="totalStudentCount">
                 <% let StudentCount = 0; studentsDetails.forEach(student => {
-                if(String(facultyDetails.sections).includes(student.section)) {
-                StudentCount++; } }); %> <%= StudentCount %>
+                  if(String(facultyDetails.sections).includes(student.section)) {
+                    StudentCount++; } }); %> <%= StudentCount %>
+                  </div>
+                  <div class="stat-title">Total Students</div>
+                </div>
               </div>
-              <div class="stat-title">Total Students</div>
-            </div>
-          </div>
+              <div class="col-md-3 mb-3">
+                <div class="stat-card bg-white">
+                  <div class="stat-icon text-info">
+                    <i class="fas fa-clipboard-list"></i>
+                  </div>
+                  <div class="stat-number" id="assignedFormsCount">
+                    <% let assignedFormsCount = 0; forms.forEach((form) => {
+                    assignedFormsCount++; }); %> <%= assignedFormsCount %>
+                  </div>
+                  <div class="stat-title">Assigned Forms</div>
+                </div>
+              </div>
           <div class="col-md-3 mb-3">
             <div class="stat-card bg-white">
               <div class="stat-icon text-success">
                 <i class="fas fa-check-circle"></i>
               </div>
-              <div class="stat-number" id="feedbackSubmittedCount">85</div>
+              <div class="stat-number" id="feedbackSubmittedCount">
+                <% let  SubmittedFormCount = 0; %>
+                  <% feedbackRes.forEach((feedback) => { %>
+                    <% if ( facultyDetails._id.toString() === feedback.facultyID.toString() ) { %>
+                      <% SubmittedFormCount++; %>
+                    <% } %>
+                  <% }); %>
+                  <%= SubmittedFormCount %>
+              </div>
               <div class="stat-title">Feedback Submitted</div>
             </div>
           </div>
@@ -330,24 +300,31 @@
               <div class="stat-icon text-warning">
                 <i class="fas fa-clock"></i>
               </div>
-              <div class="stat-number" id="feedbackPendingCount">35</div>
+              <div class="stat-number" id="feedbackPendingCount">
+                <%= assignedFormsCount - SubmittedFormCount %>
+              </div>
               <div class="stat-title">Feedback Pending</div>
-            </div>
-          </div>
-          <div class="col-md-3 mb-3">
-            <div class="stat-card bg-white">
-              <div class="stat-icon text-info">
-                <i class="fas fa-clipboard-list"></i>
-              </div>
-              <div class="stat-number" id="assignedFormsCount">
-                <% let assignedFormsCount = 0; forms.forEach((form) => {
-                assignedFormsCount++; }); %> <%= assignedFormsCount %>
-              </div>
-              <div class="stat-title">Assigned Forms</div>
             </div>
           </div>
         </div>
 
+        
+        <!-- Feedback Completion Chart -->
+        <div class="row">
+          <div class="col-lg-8 mb-4">
+            <div class="card">
+              <div class="card-header">
+                <span>Student Feedback Completion Status</span>
+              </div>
+              <div class="card-body">
+                <div class="chart-container">
+                  <canvas id="feedbackCompletionChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <!-- forms count cards -->
         <div class="row mb-4">
           <div class="col-12 col-md-4 mb-3">
@@ -390,49 +367,21 @@
             </div>
           </div>
         </div>
-
-        <!-- Feedback Completion Chart -->
-        <div class="row">
-          <div class="col-lg-8 mb-4">
-            <div class="card">
-              <div
-                class="card-header d-flex justify-content-between align-items-center"
-              >
-                <span>Student Feedback Completion Status</span>
-                <select
-                  class="form-select form-select-sm"
-                  style="width: auto"
-                  id="chartViewSelector"
-                >
-                  <option value="overall">Overall</option>
-                  <option value="bySemester">By Semester</option>
-                  <option value="bySection">By Section</option>
-                  <option value="byCourse">By Course</option>
-                </select>
-              </div>
-              <div class="card-body">
-                <div class="chart-container">
-                  <canvas id="feedbackCompletionChart"></canvas>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        
         <!-- Forms Progress Section -->
         <div class="row mt-4">
           <div class="col-12">
             <div class="card shadow-sm border-0 rounded-lg">
               <div class="card-header bg-white py-3 border-bottom">
                 <h5 class="card-title mb-0 fw-bold">
-                  Form Completion Progress
+                  Form's Record 
                 </h5>
               </div>
               <div
                 class="card-body p-0"
                 style="max-height: 430px; overflow-y: auto"
               >
-                <div class="table-responsive">
+              <div class="table-responsive">
                   <table class="table table-hover mb-0">
                     <thead class="table-light">
                       <tr>
@@ -511,77 +460,41 @@
 
     <script>
           // SECTION 1: DATA MODELS AND STATE MANAGEMENT
-
-          // Sample data for different views
-          const feedbackData = {
-            overall: {
-              submitted: 85,
-              pending: 35,
-            },
-            bySemester: {
-              labels: ["Spring 2025", "Fall 2024", "Spring 2024"],
-              submitted: [45, 25, 15],
-              pending: [15, 10, 10],
-            },
-            bySection: {
-              labels: ["Section A", "Section B", "Section C"],
-              submitted: [35, 30, 20],
-              pending: [15, 12, 8],
-            },
-            byCourse: {
-              labels: ["CS101", "CS201", "CS301"],
-              submitted: [30, 25, 30],
-              pending: [10, 15, 10],
-            },
-          };
-
+          
           // DOM Elements
           const sidebarToggle = document.getElementById("sidebarToggle");
           const sidebarClose = document.getElementById("sidebarClose");
           const sidebar = document.getElementById("sidebar");
           const content = document.getElementById("content");
-          const chartViewSelector = document.getElementById("chartViewSelector");
-          const semesterFilter = document.getElementById("semesterFilter");
-          const sectionFilter = document.getElementById("sectionFilter");
-          const courseFilter = document.getElementById("courseFilter");
-          const formFilter = document.getElementById("formFilter");
-          const formsProgressTable = document.getElementById("formsProgressTable");
+          const feedbackSubmittedCount = document.getElementById("feedbackSubmittedCount");
+          const feedbackPendingCount = document.getElementById("feedbackPendingCount");
+          
+          console.log(feedbackSubmittedCount.textContent);
+          console.log(feedbackPendingCount.textContent);
 
-          // Stats elements
-          const totalStudentsEl = document.getElementById("totalStudents");
-          const submittedFeedbackEl = document.getElementById("submittedFeedback");
-          const pendingFeedbackEl = document.getElementById("pendingFeedback");
-          const totalFormsEl = document.getElementById("totalForms");
+          // Sample data for chart
+          const feedbackData = {
+            submitted: feedbackSubmittedCount.textContent,
+            pending: feedbackPendingCount.textContent,
+          };
 
           // Chart
           let feedbackCompletionChart;
-          let currentChartView = "overall";
-
+          
           // SECTION 2: INITIALIZATION AND EVENT HANDLING
           // Initialize the dashboard
           function initDashboard() {
             initCharts();
             setupEventListeners();
-            updateStatistics();
           }
 
           // Setup event listeners
           function setupEventListeners() {
             // Sidebar toggle
             sidebarToggle.addEventListener("click", toggleSidebar);
-            sidebarClose.addEventListener("click", toggleSidebar);
-
-            // Chart view selector
-            chartViewSelector.addEventListener("change", function () {
-              currentChartView = this.value;
-              updateChart();
-            });
-
-            // Filter changes
-            semesterFilter.addEventListener("change", handleFilterChange);
-            sectionFilter.addEventListener("change", handleFilterChange);
-            courseFilter.addEventListener("change", handleFilterChange);
-            formFilter.addEventListener("change", handleFilterChange);
+            if (sidebarClose) {
+              sidebarClose.addEventListener("click", toggleSidebar);
+            }
 
             // Handle click outside sidebar to close it on mobile
             content.addEventListener("click", function (e) {
@@ -600,46 +513,6 @@
             content.classList.toggle("active");
           }
 
-          // Handle filter changes
-          function handleFilterChange() {
-            // In a real app, this would fetch new data based on filters
-            // For demo, we'll simulate a data refresh
-            updateStatistics();
-            updateChart();
-          }
-
-          // Update statistics based on filters
-          function updateStatistics() {
-            // In a real app, these values would be calculated based on filters
-            // For demo purposes, we'll just set them based on sample data
-            const semester = semesterFilter.value;
-            const section = sectionFilter.value;
-
-            // Simulate different counts based on filters
-            let totalStudents = totalStudentsEl.textContent;
-            let submitted = 85;
-            let pending = 35;
-
-            if (semester !== "all") {
-              totalStudents =
-                semester === "Spring2025" ? 80 : semester === "Fall2024" ? 60 : 40;
-              submitted = Math.floor(totalStudents * 0.7);
-              pending = totalStudents - submitted;
-            }
-
-            if (section !== "all") {
-              totalStudents = section === "A" ? 50 : section === "B" ? 42 : 28;
-              submitted = Math.floor(totalStudents * 0.7);
-              pending = totalStudents - submitted;
-            }
-
-            // Update stats display
-            totalStudentsEl.textContent = totalStudents;
-            submittedFeedbackEl.textContent = submitted;
-            pendingFeedbackEl.textContent = pending;
-            totalFormsEl.textContent = sampleForms.length;
-          }
-
           // SECTION 3: CHARTS
           // Initialize charts
           function initCharts() {
@@ -647,7 +520,7 @@
               .getElementById("feedbackCompletionChart")
               .getContext("2d");
 
-            // Initial chart setup with overall data
+            // Initial chart setup with data
             feedbackCompletionChart = new Chart(ctx, {
               type: "bar",
               data: {
@@ -655,14 +528,14 @@
                 datasets: [
                   {
                     label: "Submitted",
-                    data: [feedbackData.overall.submitted],
+                    data: [feedbackData.submitted],
                     backgroundColor: "rgba(76, 175, 80, 0.7)",
                     borderColor: "rgba(76, 175, 80, 1)",
                     borderWidth: 1,
                   },
                   {
                     label: "Pending",
-                    data: [feedbackData.overall.pending],
+                    data: [feedbackData.pending],
                     backgroundColor: "rgba(244, 67, 54, 0.7)",
                     borderColor: "rgba(244, 67, 54, 1)",
                     borderWidth: 1,
@@ -697,96 +570,8 @@
             });
           }
 
-          // Update chart based on selected view
-          function updateChart() {
-            // Clear existing data
-            feedbackCompletionChart.data.labels = [];
-            feedbackCompletionChart.data.datasets[0].data = [];
-            feedbackCompletionChart.data.datasets[1].data = [];
-
-            // Update chart based on selected view
-            switch (currentChartView) {
-              case "overall":
-                feedbackCompletionChart.data.labels = ["Feedback Status"];
-                feedbackCompletionChart.data.datasets[0].data = [
-                  feedbackData.overall.submitted,
-                ];
-                feedbackCompletionChart.data.datasets[1].data = [
-                  feedbackData.overall.pending,
-                ];
-                feedbackCompletionChart.options.scales.x.stacked = true;
-                feedbackCompletionChart.options.scales.y.stacked = true;
-                break;
-              case "bySemester":
-                feedbackCompletionChart.data.labels =
-                  feedbackData.bySemester.labels;
-                feedbackCompletionChart.data.datasets[0].data =
-                  feedbackData.bySemester.submitted;
-                feedbackCompletionChart.data.datasets[1].data =
-                  feedbackData.bySemester.pending;
-                feedbackCompletionChart.options.scales.x.stacked = true;
-                feedbackCompletionChart.options.scales.y.stacked = true;
-                break;
-              case "bySection":
-                feedbackCompletionChart.data.labels = feedbackData.bySection.labels;
-                feedbackCompletionChart.data.datasets[0].data =
-                  feedbackData.bySection.submitted;
-                feedbackCompletionChart.data.datasets[1].data =
-                  feedbackData.bySection.pending;
-                feedbackCompletionChart.options.scales.x.stacked = true;
-                feedbackCompletionChart.options.scales.y.stacked = true;
-                break;
-              case "byCourse":
-                feedbackCompletionChart.data.labels = feedbackData.byCourse.labels;
-                feedbackCompletionChart.data.datasets[0].data =
-                  feedbackData.byCourse.submitted;
-                feedbackCompletionChart.data.datasets[1].data =
-                  feedbackData.byCourse.pending;
-                feedbackCompletionChart.options.scales.x.stacked = true;
-                feedbackCompletionChart.options.scales.y.stacked = true;
-                break;
-            }
-
-            // Update chart title
-            const titleMap = {
-              overall: "Overall Student Feedback Completion Status",
-              bySemester: "Student Feedback Completion Status by Semester",
-              bySection: "Student Feedback Completion Status by Section",
-              byCourse: "Student Feedback Completion Status by Course",
-            };
-
-            feedbackCompletionChart.options.plugins.title.text =
-              titleMap[currentChartView];
-
-            // Apply changes
-            feedbackCompletionChart.update();
-          }
-
           // Initialize the dashboard when the page loads
           document.addEventListener("DOMContentLoaded", initDashboard);
-
-           const allForms = <%- JSON.stringify(forms) %>;
-
-      function filterForms() {
-        const semester = document.getElementById('semesterFilter').value;
-        const section = document.getElementById('sectionFilter').value;
-        const course = document.getElementById('courseFilter').value;
-        const formType = document.getElementById('formFilter').value;
-
-        const filtered = allForms.filter(form => {
-          const matchSemester = semester === 'all' || form.semester === semester;
-          const matchSection = section === 'all' || form.section === section;
-          const matchCourse = course === 'all' || form.courseCode === course;
-          const matchFormType = formType === 'all' || form.formType.toLowerCase() === formType.toLowerCase();
-          return matchSemester && matchSection && matchCourse && matchFormType;
-        });
-      }
-
-      
-
-      ['semesterFilter', 'sectionFilter', 'courseFilter', 'formFilter'].forEach(id => {
-        document.getElementById(id).addEventListener('change', filterForms);
-      });
     </script>
   </body>
 </html>

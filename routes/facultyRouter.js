@@ -361,6 +361,7 @@ router.get("/dashboard", async (req, res) => {
     const studentsDetails = await Student.find({});
     const facultyDetails = await Faculty.findById(faculty.id);
   
+    const feedbackRes = await FeedbackResponse.find({});
     
     // Render dashboard with all data
     res.render("facultyDashboard", {
@@ -369,6 +370,7 @@ router.get("/dashboard", async (req, res) => {
       facultyDetails,
       studentsDetails,
       forms: assignedForms,
+      feedbackRes,
       feedbackData: JSON.stringify(feedbackAnalytics)
     });
     
