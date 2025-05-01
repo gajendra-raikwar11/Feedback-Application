@@ -867,79 +867,120 @@
       });
       
       // Add special handling for grid responses
-      document.querySelectorAll('.grid-radio').forEach(input => {
-        input.addEventListener('change', function() {
-          // Find the parent grid table
-          const questionContainer = this.closest('.question-container');
-          if (!questionContainer) return;
+      // document.querySelectorAll('.grid-radio').forEach(input => {
+      //   input.addEventListener('change', function() {
+      //     // Find the parent grid table
+      //     const questionContainer = this.closest('.question-container');
+      //     if (!questionContainer) return;
           
-          const globalIndex = questionContainer.dataset.globalIndex;
-          const questionId = questionContainer.dataset.questionId;
-          const hiddenInput = document.getElementById(`grid-data-${questionId}-${globalIndex}`);
-          if (!hiddenInput) return;
+      //     const globalIndex = questionContainer.dataset.globalIndex;
+      //     const questionId = questionContainer.dataset.questionId;
+      //     const hiddenInput = document.getElementById(`grid-data-${questionId}-${globalIndex}`);
+      //     if (!hiddenInput) return;
           
-          // Collect all selected grid responses for this question
-          const allSelectedRadios = questionContainer.querySelectorAll('.grid-radio:checked');
-          const gridResponses = {};
+      //     // Collect all selected grid responses for this question
+      //     const allSelectedRadios = questionContainer.querySelectorAll('.grid-radio:checked');
+      //     const gridResponses = {};
           
-          allSelectedRadios.forEach(radio => {
-            const row = radio.dataset.row;
-            // Store only the column value (the selected option text)
-            const columnValue = radio.value;
-            gridResponses[row] = columnValue;
-          });
+      //     allSelectedRadios.forEach(radio => {
+      //       const row = radio.dataset.row;
+      //       // Store only the column value (the selected option text)
+      //       const columnValue = radio.value;
+      //       gridResponses[row] = columnValue;
+      //       console.log("gridResponses[row]" ,gridResponses[row]);
+      //       console.log("columnValue", columnValue);
+            
+      //     });
           
-          // Update the hidden input with clean JSON
-          hiddenInput.value = JSON.stringify(gridResponses);
+      //     // Update the hidden input with clean JSON
+      //     hiddenInput.value = JSON.stringify(gridResponses);
           
-          // Update question status for summary stats
-          const sectionId = input.dataset.sectionId;
-          const section = sectionData[sectionId];
+      //     // Update question status for summary stats
+      //     const sectionId = input.dataset.sectionId;
+      //     const section = sectionData[sectionId];
           
-          if (section) {
-            const question = section.questions.find(q => q.id === questionId);
-            if (question) {
-              question.answered = Object.keys(gridResponses).length > 0;
-              question.value = Object.keys(gridResponses).length > 0 ? 
-                              `Grid: ${Object.keys(gridResponses).length} responses` : null;
+      //     if (section) {
+      //       const question = section.questions.find(q => q.id === questionId);
+      //       if (question) {
+      //         question.answered = Object.keys(gridResponses).length > 0;
+      //         question.value = Object.keys(gridResponses).length > 0 ? 
+      //                         `Grid: ${Object.keys(gridResponses).length} responses` : null;
               
-              // Calculate average numeric value for this grid question
-              if (question.answered) {
-                // Get numeric values from the selected columns
-                const numericValues = [];
+      //         // Calculate average numeric value for this grid question
+      //         if (question.answered) {
+      //           // Get numeric values from the selected columns
+      //           const numericValues = [];
                 
-                for (const row in gridResponses) {
-                  const columnValue = gridResponses[row];
-                  // Convert column text to numeric value using rating maps
-                  const ratingMap = {
-                    "Poor": 1, "Average": 2, "Good": 3, "Very Good": 4, "Excellent": 5,
-                    "Strongly Disagree": 1, "Disagree": 2, "Neutral": 3, "Agree": 4, "Strongly Agree": 5,
-                    "Never": 1, "Rarely": 2, "Sometimes": 3, "Frequently": 4, "Always": 5
-                  };
+      //           for (const row in gridResponses) {
+      //             const columnValue = gridResponses[row];
+      //             // Convert column text to numeric value using rating maps
+      //             const ratingMap = {
+      //               "Poor": 1, "Average": 2, "Good": 3, "Very Good": 4, "Excellent": 5,
+      //               "Strongly Disagree": 1, "Disagree": 2, "Neutral": 3, "Agree": 4, "Strongly Agree": 5,
+      //               "Never": 1, "Rarely": 2, "Sometimes": 3, "Frequently": 4, "Always": 5
+      //             };
                   
-                  const numValue = ratingMap[columnValue] || parseInt(columnValue) || null;
-                  if (numValue !== null) {
-                    numericValues.push(numValue);
-                  }
-                }
+      //             const numValue = ratingMap[columnValue] || parseInt(columnValue) || null;
+      //             if (numValue !== null) {
+      //               numericValues.push(numValue);
+      //             }
+      //           }
                 
-                if (numericValues.length > 0) {
-                  const sum = numericValues.reduce((acc, val) => acc + val, 0);
-                  question.numericValue = sum / numericValues.length;
-                } else {
-                  question.numericValue = null;
-                }
-              } else {
-                question.numericValue = null;
-              }
+      //           if (numericValues.length > 0) {
+      //             const sum = numericValues.reduce((acc, val) => acc + val, 0);
+      //             question.numericValue = sum / numericValues.length;
+      //           } else {
+      //             question.numericValue = null;
+      //           }
+      //         } else {
+      //           question.numericValue = null;
+      //         }
               
-              // Update summary statistics
-              updateSummaryStatistics();
-            }
-          }
-        });
-      });
+      //         // Update summary statistics
+      //         updateSummaryStatistics();
+      //       }
+      //     }
+      //   });
+      // });
       
+      document.querySelectorAll('.grid-radio').forEach(input => {
+  input.addEventListener('change', function() {
+    // Find the parent grid table
+    const questionContainer = this.closest('.question-container');
+    if (!questionContainer) return;
+    
+    const globalIndex = questionContainer.dataset.globalIndex;
+    const questionId = questionContainer.dataset.questionId;
+    const hiddenInput = document.getElementById(`grid-data-${questionId}-${globalIndex}`);
+    if (!hiddenInput) return;
+    
+    // Get the direct column value (option text) without the row label
+    const columnValue = this.value;
+    
+    // Store only the column value as a string, not as an object with row keys
+    hiddenInput.value = JSON.stringify(columnValue);
+    
+    // Update question status for summary stats
+    const sectionId = this.dataset.sectionId;
+    const section = sectionData[sectionId];
+    
+    if (section) {
+      const question = section.questions.find(q => q.id === questionId);
+      if (question) {
+        question.answered = true;
+        question.value = columnValue;
+        
+        // Calculate numeric value for this response
+        question.numericValue = convertResponseToNumeric(columnValue, "mcq");
+        
+        // Update summary statistics
+        updateSummaryStatistics();
+      }
+    }
+  });
+});
+
+
       // Add event listeners to track form inputs
       document.querySelectorAll('input, textarea, select').forEach(input => {
         if (input.type === 'hidden' || input.classList.contains('grid-radio')) return;
@@ -1098,33 +1139,71 @@
         }
         
         // If all required fields are filled, prepare grid data before submitting
-        document.querySelectorAll('.grid-question-table').forEach(table => {
-          const gridId = table.dataset.gridId;
-          const questionContainer = table.closest('.question-container');
-          if (!questionContainer) return;
+        // document.querySelectorAll('.grid-question-table').forEach(table => {
+        //   const gridId = table.dataset.gridId;
+        //   const questionContainer = table.closest('.question-container');
+        //   if (!questionContainer) return;
           
-          const globalIndex = questionContainer.dataset.globalIndex;
-          const hiddenInput = document.getElementById(`grid-data-${gridId}-${globalIndex}`);
+        //   const globalIndex = questionContainer.dataset.globalIndex;
+        //   const hiddenInput = document.getElementById(`grid-data-${gridId}-${globalIndex}`);
           
-          if (!hiddenInput || !hiddenInput.value) {
-            // If no data collected yet, collect it now
-            const gridResponses = {};
-            const selectedRadios = table.querySelectorAll('input[type="radio"]:checked');
+        //   if (!hiddenInput || !hiddenInput.value) {
+        //     // If no data collected yet, collect it now
+        //     const gridResponses = {};
+        //     const selectedRadios = table.querySelectorAll('input[type="radio"]:checked');
             
-            selectedRadios.forEach(radio => {
-              const row = radio.dataset.row;
-              // Store only the column value (the selected option)
-              const columnValue = radio.value;
-              gridResponses[row] = columnValue;
-            });
+        //     selectedRadios.forEach(radio => {
+        //       const row = radio.dataset.row;
+        //       // Store only the column value (the selected option)
+        //       const columnValue = radio.value;
+        //       gridResponses[row] = columnValue;
+        //     });
             
-            // Store clean data
-            if (hiddenInput) {
-              hiddenInput.value = JSON.stringify(gridResponses);
-            }
-          }
-        });
+        //     // Store clean data
+        //     if (hiddenInput) {
+        //       hiddenInput.value = JSON.stringify(gridResponses);
+        //     }
+        //   }
+        // });
+
+        document.querySelectorAll('.grid-radio').forEach(input => {
+  input.addEventListener('change', function() {
+    // Find the parent grid table
+    const questionContainer = this.closest('.question-container');
+    if (!questionContainer) return;
+    
+    const globalIndex = questionContainer.dataset.globalIndex;
+    const questionId = questionContainer.dataset.questionId;
+    const hiddenInput = document.getElementById(`grid-data-${questionId}-${globalIndex}`);
+    if (!hiddenInput) return;
+    
+    // Get the direct column value (option text) without the row label
+    const columnValue = this.value;
+    
+    // Store only the column value as a string, not as an object with row keys
+    hiddenInput.value = JSON.stringify(columnValue);
+    
+    // Update question status for summary stats
+    const sectionId = this.dataset.sectionId;
+    const section = sectionData[sectionId];
+    
+    if (section) {
+      const question = section.questions.find(q => q.id === questionId);
+      if (question) {
+        question.answered = true;
+        question.value = columnValue;
         
+        // Calculate numeric value for this response
+        question.numericValue = convertResponseToNumeric(columnValue, "mcq");
+        
+        // Update summary statistics
+        updateSummaryStatistics();
+      }
+    }
+  });
+});
+
+
         // Show loading state
         const submitButton = form.querySelector('.btn-submit');
         const originalButtonText = submitButton.innerHTML;
