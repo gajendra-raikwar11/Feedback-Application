@@ -2260,4 +2260,66 @@ router.delete('/students/delete/:id', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+// change password routes 
+router.get('/changepassword',  (req,res) => {
+  res.render("admin-otp-send");
+})
+
+router.post('/send-otp',async (req,res)=>{
+  const { email } = req.body;
+  const authorizedAdmin = await adminModel.findOne({ email: email });
+  if (!authorizedAdmin) return res.send("You are not authorized admin");
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  try {
+    req.session.uid = authorizedAdmin._id;
+    req.session.generatedOTP = otp;
+    req.session.otpExpirationTime = Date.now() + 10 * 60 * 1000;
+    req.session.adminEmail = authorizedAdmin.email;
+    await sendOTPByEmail(email, otp);
+    res.render('admin_otp_check');
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+})
+
+router.post('/verify-otp',(req,res) => {
+  const { otp } = req.body;
+    if (req.session.generatedOTP && Date.now() < req.session.otpExpirationTime) {
+      if (parseInt(otp) === parseInt(req.session.generatedOTP))
+        res.render("admin_changePassword");
+      else res.send(`wrong OTP ${otp} ${req.session.generatedOTP}`);
+    }
+})
+
+router.post("/reset-password", async (req, res) => {
+    const { password, confirmPassword } = req.body;
+    console.log(password,confirmPassword);
+    // if(!studentId) return res.send("user not found");
+  
+    // if(!password || !confirmpassword) return res.send("password should not be empty");
+  
+    if (password !== confirmPassword)
+      return res.send(`password did not match ${password} ${confirmPassword}`);
+  
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+  
+    const admin = await adminModel.findOneAndUpdate(
+      { email: req.session.adminEmail },
+      { password: hashedPassword },
+      { new: true }
+    );
+    admin.save();
+    // res.send(hashedPassword === student1.Password);
+    // updateStudentPassword(req.session.studentEmail, password);
+    req.session.destroy();
+    const match = await bcrypt.compare(password, hashedPassword);
+    console.log(match);
+    res.send("password updated successfully");
+    res.clearCookie("token");
+    res.redirect("/");
+  });
+
+
 module.exports = router;

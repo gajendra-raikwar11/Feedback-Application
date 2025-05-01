@@ -197,6 +197,10 @@ router.get("/studentHomepage", studentValidate, async (req, res) => {
       } else if (allSubmitted) {
         completedForms++;
       }
+      // if the form is expired
+      if(new Date() > new Date(form.deadline)) {
+        pendingForms--;
+      }
     }
 
     res.render("studentHomepage", {
@@ -295,11 +299,14 @@ router.get("/studentFormsPage", studentValidate, async (req, res) => {
       form.canSubmit = new Date() <= new Date(form.deadline);
     });
     
+    const fbResponse = await FeedbackResponse.find({});
+
     res.render("student-form-page", {
       student,
       forms: enhancedForms,
       currentPage: req.path,
       facultyData: facultyMembers,
+      fbResponse,
     });
   } catch (error) {
     console.error("Error fetching forms:", error);

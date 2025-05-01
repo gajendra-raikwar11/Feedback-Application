@@ -402,7 +402,7 @@ router.get('/students', async (req, res) => {
 
     const assignedForms = await FeedbackForm.find({
       facultyAssigned: faculty.id,
-    }).select("title formType sectionsAssigned deadline semester status");
+    }).select("title formType sectionsAssigned deadline semesters status");
 
     const feedbackData = await FeedbackResponse.find({})
 
@@ -414,5 +414,11 @@ router.get('/students', async (req, res) => {
     feedbackData,
   });
  });
+
+router.get('/forgot-password', (req, res) => {
+  // Just render the static HTML page
+
+ res.render("facultyChangePassword");
+});
 
 module.exports = router;
