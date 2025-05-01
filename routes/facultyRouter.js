@@ -391,7 +391,6 @@ router.get("/logout", (req, res) => {
   }
 });
 
-
 router.get('/students', async (req, res) => {
 
   const faculty = req.session.faculty;

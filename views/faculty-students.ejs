@@ -288,7 +288,36 @@
         top: 40px;
         color: #777;
       }
+
+      #studentDialog::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+      .student-dialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1000px;
+    height: 1000px;
+    background-color: #3f51b5;
+    z-index: 2000;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: auto;
+  }
+  
+  /* Make sure the dialog is responsive */
+  @media (max-width: 1100px) {
+    .student-dialog {
+      width: 90%;
+      height: 90%;
+    }
+  }
     </style>
+    <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
   </head>
 
   <body>
@@ -465,6 +494,7 @@
                   <tr>
                     <th>Student ID</th>
                     <th>Name</th>
+                    <th>semester</th>
                     <th>Section</th>
                     <th>Institutional</th>
                     <th>Academic</th>
@@ -476,9 +506,10 @@
                   <% studentsDetails.forEach(student => { %> <%
                   if(String(facultyDetails.sections).includes(student.section))
                   { %>
-                  <tr>
+                  <tr id="studentStatus">
                     <td><%= student.enrollmentNumber %></td>
                     <td><%= student.name %></td>
+                    <td><%= student.semester %></td>
                     <td><%= student.section %></td>
                     <td> 
                             <% var institute = 0; %>
@@ -526,7 +557,6 @@
                                         %>
                                         <%= filteredAcademicForm %>
                                     </td>
-
                         <td>
                         <% var training = 0; %>
                         <% feedbackData.forEach((feedback) => { %>
@@ -555,7 +585,6 @@
                             }); 
                         %>
                         <%= filteredTrainingForm %>
-
                         </td>
                   </tr>
                   <% } %> <% }) %>
@@ -563,6 +592,12 @@
               </table>
             </div>
           </div>
+        </div>
+        <div class="overlay ease-in duration-3000" style="display: none; background-color: rgba(255, 255, 255, 0.2); widht: 100vh; height: 100vh; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(5px); padding: 100vh;
+            border-radius: 10px; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; pointer-events: none !important; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        </div>
+        <div id="studentDialog"
+            class="hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[1000px] h-[90%] max-h-[800px] bg-indigo-600 z-[3000] rounded-lg shadow-2xl overflow-auto">
         </div>
       </div>
     </div>
@@ -579,9 +614,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
 
-    <script>
-      // DOM Elements and Variables
-      // DOM Elements and Variables
+    <script>// DOM Elements and Variables
 const sidebarToggle = document.getElementById("sidebarToggle");
 const sidebar = document.getElementById("sidebar");
 const content = document.getElementById("content");
@@ -593,6 +626,9 @@ const applyFiltersBtn = document.getElementById("applyFilters");
 const resetFiltersBtn = document.getElementById("resetFilters");
 const exportExcelBtn = document.getElementById("exportExcel");
 const searchInput = document.getElementById("Search");
+const studentStatus = document.querySelectorAll("#studentTable studentStatus");
+const studentDialog = document.getElementById("studentDialog")
+const overlay = document.querySelector(".overlay")
 
 let dataTable;
 let sampleStudents = []; // Will be populated from table data
@@ -633,13 +669,11 @@ function extractStudentData() {
     const $row = $(this);
     const studentId = $row.find("td:eq(0)").text().trim();
     const name = $row.find("td:eq(1)").text().trim();
-    const section = $row.find("td:eq(2)").text().trim();
-    
-    // Assign a random semester (1-8) for each student
-    const semester = Math.floor(Math.random() * 8) + 1;
+    const semester = parseInt($row.find("td:eq(2)").text().trim()) || 0;
+    const section = $row.find("td:eq(3)").text().trim();
 
     // Parse institutional forms
-    const institutionalText = $row.find("td:eq(3)").text().trim();
+    const institutionalText = $row.find("td:eq(4)").text().trim();
     const institutionalParts = institutionalText.split("/");
     const institutionalSubmitted =
       parseInt(institutionalParts[0].trim()) || 0;
@@ -647,13 +681,13 @@ function extractStudentData() {
       parseInt(institutionalParts[1].trim()) || 0;
 
     // Parse academic forms
-    const academicText = $row.find("td:eq(4)").text().trim();
+    const academicText = $row.find("td:eq(5)").text().trim();
     const academicParts = academicText.split("/");
     const academicSubmitted = parseInt(academicParts[0].trim()) || 0;
     const academicTotal = parseInt(academicParts[1].trim()) || 0;
 
     // Parse training forms
-    const trainingText = $row.find("td:eq(5)").text().trim();
+    const trainingText = $row.find("td:eq(6)").text().trim();
     const trainingParts = trainingText.split("/");
     const trainingSubmitted = parseInt(trainingParts[0].trim()) || 0;
     const trainingTotal = parseInt(trainingParts[1].trim()) || 0;
@@ -686,7 +720,6 @@ function extractStudentData() {
       formsOverdue: formsOverdue,
       attendance: Math.floor(Math.random() * 30) + 70, // Random attendance between 70-100%
       status: "active",
-      email: `${name.toLowerCase().replace(/\s+/g, ".")}@university.edu`, // Generate sample email
     };
 
     sampleStudents.push(student);
@@ -829,7 +862,7 @@ function applyFilters() {
 
   // Apply section filter if not "all"
   if (section !== "all") {
-    dataTable.column(2).search(section).draw();
+    dataTable.column(3).search(section).draw(); // Updated index to 3 for section column
   }
 
   // For semester, type, and submission status, we need custom filtering
@@ -848,24 +881,39 @@ function applyFilters() {
       return false;
     }
 
-    // Filter by form type
+    // Filter by form type - FIXED LOGIC HERE
     if (type !== "all") {
-      if (type === "institutional" && student.institutionalSubmitted === student.institutionalTotal) {
+      if (type === "institutional" && student.institutionalSubmitted >= student.institutionalTotal) {
+        // Filter out students who have completed all institutional forms
         return false;
-      } else if (type === "academic" && student.academicSubmitted === student.academicTotal) {
+      } else if (type === "academic" && student.academicSubmitted >= student.academicTotal) {
+        // Filter out students who have completed all academic forms
         return false;
-      } else if (type === "training" && student.trainingSubmitted === student.trainingTotal) {
+      } else if (type === "training" && student.trainingSubmitted >= student.trainingTotal) {
+        // Filter out students who have completed all training forms
+        return false;
+      } else if (type === "institutional" && student.institutionalTotal === 0) {
+        // Filter out students who don't have any institutional forms assigned
+        return false;
+      } else if (type === "academic" && student.academicTotal === 0) {
+        // Filter out students who don't have any academic forms assigned
+        return false;
+      } else if (type === "training" && student.trainingTotal === 0) {
+        // Filter out students who don't have any training forms assigned
         return false;
       }
     }
 
     // Filter by submission status
     if (submission !== "all") {
-      if (submission === "submitted" && student.formsSubmitted === 0) {
+      if (submission === "submitted" && student.formsSubmitted !== student.formsAssigned) {
+        // Show only students who have submitted all forms
         return false;
       } else if (submission === "pending" && student.formsPending === 0) {
+        // Show only students who have pending forms
         return false;
       } else if (submission === "overdue" && student.formsOverdue === 0) {
+        // Show only students who have overdue forms
         return false;
       }
     }
@@ -1060,6 +1108,210 @@ function initTooltips() {
 document.addEventListener("DOMContentLoaded", function () {
   initTooltips();
 });
-    </script>
+
+$("#studentTable tbody").on("click", "tr", function() {
+  overlay.style.display = "block";
+  overlay.style.padding = "100vh";
+  const $row = $(this);
+  const studentId = $row.find("td:eq(0)").text().trim();
+  const student = sampleStudents.find(s => s.id === studentId);
+  
+  if (student) {
+    showStudentDialog(student);
+  }
+});
+
+// Add function to show student dialog
+function showStudentDialog(student) {
+  // Create dialog content
+  const dialogContent = `
+  <div class="p-3 text-white">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+      <h3 class="text-2xl">Student Details</h3>
+      <button class="btn-close btn-close-white" id="closeDialog" aria-label="Close"></button>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <!-- Personal Info -->
+      <div class="col-12 col-md-6">
+        <div class="card bg-white text-dark p-3 h-100">
+          <h5 class="card-title">Personal Information</h5>
+          <table class="table table-borderless mb-0">
+            <tbody>
+              <tr><th>Student ID:</th><td>${student.id}</td></tr>
+              <tr><th>Name:</th><td>${student.name}</td></tr>
+              <tr><th>Section:</th><td>${student.section}</td></tr>
+              <tr><th>Semester:</th><td>${student.semester}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Form Summary -->
+      <div class="col-12 col-md-6">
+        <div class="card bg-white text-dark p-3 h-100">
+          <h5 class="card-title">Form Submission Summary</h5>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle text-nowrap">
+              <thead class="table-light">
+                <tr>
+                  <th>Form Type</th>
+                  <th>Submitted</th>
+                  <th>Total</th>
+                  <th>Completion</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${['institutional', 'academic', 'training'].map(type => `
+                  <tr>
+                    <td>${capitalize(type)}</td>
+                    <td>${student[type + 'Submitted']}</td>
+                    <td>${student[type + 'Total']}</td>
+                    <td>
+                      <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: ${Math.round((student[type + 'Submitted'] / student[type + 'Total']) * 100) || 0}%"></div>
+                      </div>
+                    </td>
+                  </tr>`).join('')}
+                <tr class="table-active">
+                  <th>Overall</th>
+                  <td>${student.formsSubmitted}</td>
+                  <td>${student.formsAssigned}</td>
+                  <td>
+                    <div class="progress" style="height: 8px;">
+                      <div class="progress-bar bg-primary" role="progressbar" style="width: ${Math.round((student.formsSubmitted / student.formsAssigned) * 100) || 0}%"></div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Forms -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card bg-white card-body text-dark p-3" style="min-height: 250px;">
+          <h5 class="card-title">Pending Forms</h5>
+          <div class="table-responsive">
+            <table class="table table-hover table-sm text-nowrap">
+              <thead class="table-light">
+                <tr>
+                  <th>Form Title</th>
+                  <th>Type</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${generateMockPendingForms(student)}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+// Helper function to capitalize first letter
+function capitalize(word) {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+  
+  // Get the dialog element
+  const $dialog = $("#studentDialog");
+  
+  // Update dialog content and show it
+  $dialog.html(dialogContent).fadeIn(300);
+  
+  // Add event listener to close button
+  $("#closeDialog").on("click", function() {
+    overlay.style.padding = "0px";
+    overlay.style.display = "none";
+    $dialog.fadeOut(300);
+  });
+  
+  // Close dialog if clicked outside
+  $(document).on("mousedown", function(e) {
+    if (!$(e.target).closest("#studentDialog").length && !$(e.target).closest("#studentTable tbody tr").length) {
+      overlay.style.display = "none";
+      $dialog.fadeOut(300);
+    }
+  });
+  
+  // Handle reminder button click
+  $("#sendReminder").on("click", function() {
+    showToast(`Reminder sent to ${student.name}`, "success");
+  });
+}
+
+// Helper function to generate mock pending forms for the dialog
+function generateMockPendingForms(student) {
+  // Create a mock list of forms based on the student's data
+  const mockForms = [];
+  
+  // Calculate how many of each type are pending
+  const institutionalPending = student.institutionalTotal - student.institutionalSubmitted;
+  const academicPending = student.academicTotal - student.academicSubmitted;
+  const trainingPending = student.trainingTotal - student.trainingSubmitted;
+  
+  // Generate institutional forms
+  for (let i = 0; i < institutionalPending; i++) {
+    mockForms.push({
+      title: `Institutional Feedback Form ${i+1}`,
+      type: "Institutional",
+      dueDate: getRandomFutureDate(),
+      status: "Pending"
+    });
+  }
+  
+  // Generate academic forms
+  for (let i = 0; i < academicPending; i++) {
+    mockForms.push({
+      title: `Course Feedback ${i+1}`,
+      type: "Academic",
+      dueDate: getRandomFutureDate(),
+      status: "Pending"
+    });
+  }
+  
+  // Generate training forms
+  for (let i = 0; i < trainingPending; i++) {
+    mockForms.push({
+      title: `Training Assessment ${i+1}`,
+      type: "Training",
+      dueDate: getRandomFutureDate(),
+      status:  "Pending",
+    });
+  }
+  
+  // If no forms are pending, show a message
+  if (mockForms.length === 0) {
+    return `<tr><td colspan="5" class="text-center">No pending forms found</td></tr>`;
+  }
+  
+  // Generate the HTML for the forms
+  return mockForms.map(form => `
+    <tr>
+      <td>${form.title}</td>
+      <td><span class="badge bg-${form.type === 'Institutional' ? 'success' : form.type === 'Academic' ? 'info' : 'warning'}">${form.type}</span></td>
+      <td>${form.dueDate}</td>
+      <td><span class="badge bg-${form.status === 'Pending' ? 'secondary' : 'danger'}">${form.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+// Helper function to generate random future dates
+function getRandomFutureDate() {
+  const today = new Date();
+  const futureDate = new Date();
+  futureDate.setDate(today.getDate() + Math.floor(Math.random() * 14) + 1); // Random date within the next 14 days
+  
+  const options = { month: 'short', day: 'numeric' };
+  return futureDate.toLocaleDateString('en-US', options);
+}</script>
   </body>
 </html>
