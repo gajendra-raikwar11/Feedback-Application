@@ -675,7 +675,7 @@
             <div class="mb-6 flex flex-wrap items-center justify-between gap-4 ">
                 <!-- Form Type Dropdown (moved beside Faculty Select) -->
                 <div class="items-center space-x-4 sm:flex flex-col gap-4 md:flex flex-row">
-                    <label for="formTypeSelect" class="font-medium text-gray-700">Form Type:</label>
+                    <label for="formTypeSelect" class="font-medium text-gray-700 py-4">Form Type:</label>
                     <select id="formTypeSelect" class="border border-gray-300 rounded-md p-2 w-48">
                         <option value="Academic" <%= feedbackData.responseMetadata.currentFormType === 'Academic' ? 'selected' : '' %>>Academic Feedback</option>
                         <option value="Institutional" <%= feedbackData.responseMetadata.currentFormType === 'Institutional' ? 'selected' : '' %>>Institutional Feedback</option>
@@ -684,7 +684,7 @@
                     
                     <!-- Additional filters for Academic feedback -->
                     <% if (feedbackData.responseMetadata.currentFormType === 'Academic') { %>
-                    <div class="flex items-center ml-6 space-x-4" id="academicFilters">
+                    <div class="flex items-center ml-6 space-x-4 px-8" id="academicFilters">
                         <label for="academicTypeSelect" class="font-medium text-gray-700">Type:</label>
                         <select id="academicTypeSelect" class="border border-gray-300 rounded-md p-2 w-40">
                         <option value="all" <%= !academicType || academicType === 'all' ? 'selected' : '' %>>All</option>
@@ -699,7 +699,7 @@
                 <% if (feedbackData.responseMetadata.currentFormType === 'Academic' || feedbackData.responseMetadata.currentFormType === 'Training') { %>
                 <div class="flex items-center space-x-4">
                     <label for="facultySelect" class="font-medium text-gray-700">Select Faculty:</label>
-                    <select id="facultySelect" class="border border-gray-300 rounded-md p-2 w-64">
+                    <select id="facultySelect" class="border border-gray-300 rounded-md p-2 w-56">
                         <option value="">All Faculty</option>
                         <% faculties.forEach(faculty => { %>
                         <option value="<%= faculty._id %>" <%= selectedFaculty === faculty._id.toString() ? 'selected' : '' %>><%= faculty.name %> (<%= faculty.subjects.join(', ') %>)</option>
