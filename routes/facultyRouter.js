@@ -4,10 +4,11 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const path = require("path");
-const { Faculty, validateFacultyLogin } = require("../models/facultySchema");
+const { Faculty, validateFaculty } = require("../models/facultySchema");
 const { FeedbackForm, validateFeedbackForm } = require('../models/feedbackForm');
 const { Student, validateStudent } = require("../models/studentSchema");
 const {FeedbackResponse, validateFeedbackResponse} = require("../models/feedbackResponse");
+const facultyValidate = require("../middlewares/facultyValidate");
 
 // Path to the JSON file with initial faculty data
 const FACULTY_JSON_PATH = path.join(__dirname, "../data/facultyDataFile.json");
@@ -188,7 +189,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/dashboard", async (req, res) => {
+router.get("/dashboard", facultyValidate, async (req, res) => {
   try {
     // Check if faculty is logged in
     if (!req.session || !req.session.faculty) {
@@ -383,7 +384,7 @@ router.get("/dashboard", async (req, res) => {
   }
 });
 // Logout route
-router.get("/logout", (req, res) => {
+router.get("/logout", facultyValidate, (req, res) => {
   if (req.session) {
     req.session.destroy(() => {
       res.redirect("/faculty/login");
@@ -393,7 +394,7 @@ router.get("/logout", (req, res) => {
   }
 });
 
-router.get('/students', async (req, res) => {
+router.get('/students',facultyValidate ,async (req, res) => {
 
   const faculty = req.session.faculty;
   
