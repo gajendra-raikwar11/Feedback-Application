@@ -425,6 +425,7 @@ router.get("/adminHome", validateAdmin, async (req, res) => {
     const facultyFilter = req.query.faculty;
     const academicType = req.query.academicType || 'all';
     const sessionFilter = req.query.session;
+    const semesterFilter = req.query.semester || 'All';
 
     let faculties;
     const students = await Student.find();
@@ -458,6 +459,10 @@ router.get("/adminHome", validateAdmin, async (req, res) => {
       feedbackQuery.session = sessionFilter;
     }
 
+    if (semesterFilter && semesterFilter !== "All") {
+      feedbackQuery.semester = semesterFilter;
+    }
+
     const feedbackResponses = await FeedbackResponse.find(feedbackQuery);
 
     // ✅ Count of responses with current filters
@@ -473,12 +478,21 @@ router.get("/adminHome", validateAdmin, async (req, res) => {
       return yearB - yearA;
     });
 
+    // Get unique semesters for the semester filter
+    const allSemesters = await FeedbackResponse.distinct("semester");
+    const uniqueSemesters = [...new Set(allSemesters)].sort();
+    // Add 'All' if it's not already in the list
+    if (!uniqueSemesters.includes('All')) {
+      uniqueSemesters.unshift('All');
+    }
+
     const feedbackData = processDataForCharts(feedbackResponses, formTypeFilter);
 
     const adminData = req.session.admin;
     const currentPath = req.path;
     const selectedFaculty = facultyFilter || '';
     const selectedSession = sessionFilter || '';
+    const selectedSemester = semesterFilter || 'All';
 
     res.render("adminHome", {
       currentPath,
@@ -494,6 +508,9 @@ router.get("/adminHome", validateAdmin, async (req, res) => {
       academicType,
       uniqueSessions,
       selectedSession,
+      session: selectedSession,  // ← Add this line to fix the error
+      uniqueSemesters,
+      selectedSemester,
       submissionCount,        // 👈 Filtered count
       totalSubmissionCount    // 👈 Total count
     });
@@ -503,9 +520,6 @@ router.get("/adminHome", validateAdmin, async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
-
-
-
 function processDataForCharts(feedbackResponses, formType) {
     // Initialize the section data structure
     const sectionData = {};

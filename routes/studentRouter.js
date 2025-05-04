@@ -10,10 +10,6 @@ const jwt = require("jsonwebtoken");
 const { Student, validateStudent } = require("../models/studentSchema");
 const MongoStore = require("connect-mongo");
 
-// const multer = require("multer");
-// const upload = multer({ dest: "uploads/" });
-// const xlsx = require("xlsx");
-
 const sendOTPByEmail = require("../config/NodeMailer");
 const studentValidate = require("../middlewares/studentValidate");
 const {
@@ -217,6 +213,105 @@ router.get("/studentHomepage", studentValidate, async (req, res) => {
     res.redirect("/studentLogin");
   }
 });
+// router.get("/studentFormsPage", studentValidate, async (req, res) => {
+//   try {
+//     const student = req.student;
+//     const studentSection = student.section;
+//     const studentSemester = student.semester;
+    
+//     // Fetch active feedback forms for the student's section
+//     // And populate the responses to access studentId
+//     const forms = await FeedbackForm.find({
+//       status: "active",
+//       sectionsAssigned: studentSection,
+//     }).populate('responses').lean();
+    
+//     if (!forms.length) {
+//       return res.render("student-form-page", {
+//         student,
+//         forms: [],
+//         currentPage: req.path,
+//         facultyData: [],
+//       });
+//     }
+    
+//     // Filter forms based on common semesters
+//     const filteredForms = forms.filter((form) => {
+//       return form.semesters.some((semester) => semester === studentSemester);
+//     });
+    
+//     if (!filteredForms.length) {
+//       return res.render("student-form-page", {
+//         student,
+//         forms: [],
+//         currentPage: req.path,
+//         facultyData: [],
+//       });
+//     }
+    
+//     // Extract unique faculty IDs from all filtered forms
+//     const facultyIds = [
+//       ...new Set(filteredForms.flatMap((form) => form.facultyAssigned)),
+//     ];
+    
+//     // Fetch faculty details
+//     const facultyMembers = await Faculty.find({
+//       _id: { $in: facultyIds },
+//     }).lean();
+    
+//     // Map faculty ID to their details
+//     const facultyMap = facultyMembers.reduce((map, faculty) => {
+//       map[faculty._id.toString()] = faculty;
+//       return map;
+//     }, {});
+    
+//     // Enhance forms with relevant faculty
+//     const enhancedForms = filteredForms
+//       .map((form) => {
+//         const relevantFaculty = form.facultyAssigned
+//           .map((facultyId) => facultyMap[facultyId.toString()])
+//           .filter(
+//             (faculty) => faculty && faculty.sections?.includes(studentSection)
+//           );
+        
+//         return {
+//           ...form,
+//           assignedFacultyForStudent: relevantFaculty[0] || null,
+//           assignedFacultyName: relevantFaculty[0]?.name || "Not Assigned",
+//           commonSection: relevantFaculty.length ? studentSection : null,
+//           commonSemester: form.semesters.filter(
+//             (semester) => semester === studentSemester
+//           ),
+//         };
+//       })
+//       .filter((form) => form.assignedFacultyForStudent !== null);
+    
+//     // Check submission status - with populated responses
+//     const studentId = student._id.toString();
+//     enhancedForms.forEach((form) => {
+//       form.hasSubmitted = form.responses?.some(
+//         (response) => response.studentId?.toString() === studentId
+//       );
+//       form.canSubmit = new Date() <= new Date(form.deadline);
+//     });
+    
+//     const fbResponse = await FeedbackResponse.find({});
+
+//     res.render("student-form-page", {
+//       student,
+//       forms: enhancedForms,
+//       currentPage: req.path,
+//       facultyData: facultyMembers,
+//       fbResponse,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching forms:", error);
+//     res.redirect("/studentLogin");
+//   }
+// });
+// --------------------------------feedback response
+// Route to preview a form
+
 router.get("/studentFormsPage", studentValidate, async (req, res) => {
   try {
     const student = req.student;
@@ -224,11 +319,13 @@ router.get("/studentFormsPage", studentValidate, async (req, res) => {
     const studentSemester = student.semester;
     
     // Fetch active feedback forms for the student's section
-    // And populate the responses to access studentId
     const forms = await FeedbackForm.find({
       status: "active",
       sectionsAssigned: studentSection,
-    }).populate('responses').lean();
+    }).populate({
+      path: 'responses',
+      select: 'studentId formId' // Only select the fields we need
+    }).lean();
     
     if (!forms.length) {
       return res.render("student-form-page", {
@@ -269,7 +366,19 @@ router.get("/studentFormsPage", studentValidate, async (req, res) => {
       return map;
     }, {});
     
-    // Enhance forms with relevant faculty
+    // Get all feedback responses for this student
+    const studentId = student._id.toString();
+    const studentResponses = await FeedbackResponse.find({ 
+      studentId: studentId 
+    }).lean();
+    
+    // Create a map of formId -> hasSubmitted for quick lookup
+    const submittedFormsMap = studentResponses.reduce((map, response) => {
+      map[response.formId.toString()] = true;
+      return map;
+    }, {});
+    
+    // Enhance forms with relevant faculty and submission status
     const enhancedForms = filteredForms
       .map((form) => {
         const relevantFaculty = form.facultyAssigned
@@ -277,6 +386,13 @@ router.get("/studentFormsPage", studentValidate, async (req, res) => {
           .filter(
             (faculty) => faculty && faculty.sections?.includes(studentSection)
           );
+        
+        // Check if this specific student has submitted this form
+        const formId = form._id.toString();
+        const hasSubmitted = submittedFormsMap[formId] || 
+                            (form.responses && form.responses.some(
+                              response => response.studentId && response.studentId.toString() === studentId
+                            ));
         
         return {
           ...form,
@@ -286,35 +402,24 @@ router.get("/studentFormsPage", studentValidate, async (req, res) => {
           commonSemester: form.semesters.filter(
             (semester) => semester === studentSemester
           ),
+          hasSubmitted: hasSubmitted,
+          canSubmit: !hasSubmitted && new Date() <= new Date(form.deadline)
         };
       })
       .filter((form) => form.assignedFacultyForStudent !== null);
     
-    // Check submission status - with populated responses
-    const studentId = student._id.toString();
-    enhancedForms.forEach((form) => {
-      form.hasSubmitted = form.responses?.some(
-        (response) => response.studentId?.toString() === studentId
-      );
-      form.canSubmit = new Date() <= new Date(form.deadline);
-    });
-    
-    const fbResponse = await FeedbackResponse.find({});
-
     res.render("student-form-page", {
       student,
       forms: enhancedForms,
       currentPage: req.path,
       facultyData: facultyMembers,
-      fbResponse,
     });
   } catch (error) {
     console.error("Error fetching forms:", error);
     res.redirect("/studentLogin");
   }
 });
-// --------------------------------feedback response
-// Route to preview a form
+
 router.get("/previewForm/:id", studentValidate, async (req, res) => {
   try {
     const formId = req.params.id;
@@ -672,16 +777,16 @@ function convertResponseToNumeric(responseText, questionType) {
 
   // For Yes/No: No, Yes, No Opinion
   const yesNoMap = {
-    "No": 0,
+    "No": 5,
     "Yes": 1,
     "No Opinion": null
   };
 
   // For weight scale: Just right, Too light, Too Heavy, No Opinion
   const weightMap = {
-    "Just right": 2,
+    "Just right": 3,
     "Too light": 1,
-    "Too Heavy": 3,
+    "Too Heavy": 5,
     "No Opinion": null
   };
 

@@ -657,7 +657,7 @@
             </div>
         </div>
 
-        <main class="flex-1 overflow-y-auto pb-4 px-10">
+        <main class="flex-1 overflow-y-auto pb-4 px-4 sm:px-8 md:px-10">
             <div class="mb-6 md:mb-8">
                 <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 text-center mt-4 md:mt-6">
                     <%= feedbackData.responseMetadata.currentFormType.toUpperCase() %> FEEDBACK VISUALIZATION
@@ -668,286 +668,373 @@
                     <% if (feedbackData.responseMetadata.currentFormType === 'Academic' && academicType) { %>
                     | <span id="academicTypeLabel"><%= academicType === 'theory' ? 'Theory' : academicType === 'practical' ? 'Practical' : 'All Types' %></span>
                     <% } %>
+                    <% if (session) { %>
+                    | <span id="sessionLabel">Session: <%= session %></span>
+                    <% } %>
                 </p>
             </div>
-            
-            <!-- Faculty Selector and Form Type in the same row -->
-            <div class="mb-6 flex flex-wrap items-center justify-between gap-4 ">
-                <!-- Form Type Dropdown (moved beside Faculty Select) -->
-                <div class="items-center space-x-4 sm:flex flex-col gap-4 md:flex flex-row">
-                    <label for="formTypeSelect" class="font-medium text-gray-700 py-4">Form Type:</label>
-                    <select id="formTypeSelect" class="border border-gray-300 rounded-md p-2 w-48">
-                        <option value="Academic" <%= feedbackData.responseMetadata.currentFormType === 'Academic' ? 'selected' : '' %>>Academic Feedback</option>
-                        <option value="Institutional" <%= feedbackData.responseMetadata.currentFormType === 'Institutional' ? 'selected' : '' %>>Institutional Feedback</option>
-                        <option value="Training" <%= feedbackData.responseMetadata.currentFormType === 'Training' ? 'selected' : '' %>>Training Feedback</option>
-                    </select>
+            <!-- Filter Section with improved layout and added semester filter -->
+            <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Filters</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Form Type Dropdown -->
+                    <div class="flex flex-col">
+                        <label for="formTypeSelect" class="text-sm font-medium text-gray-700 mb-1">Form Type:</label>
+                        <select id="formTypeSelect" name="formType" class="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="Academic" <%= feedbackData.responseMetadata.currentFormType === 'Academic' ? 'selected' : '' %>>Academic Feedback</option>
+                            <option value="Institutional" <%= feedbackData.responseMetadata.currentFormType === 'Institutional' ? 'selected' : '' %>>Institutional Feedback</option>
+                            <option value="Training" <%= feedbackData.responseMetadata.currentFormType === 'Training' ? 'selected' : '' %>>Training Feedback</option>
+                        </select>
+                    </div>
+
+                     <!-- Academic Type Filter (only for Academic form type) -->
+                     <% if (feedbackData.responseMetadata.currentFormType === 'Academic') { %>
+                        <div class="flex flex-col" id="academicFilters">
+                            <label for="academicTypeSelect" class="text-sm font-medium text-gray-700 mb-1">Course Type:</label>
+                            <select id="academicTypeSelect" name="academicType" class="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all" <%= !academicType || academicType === 'all' ? 'selected' : '' %>>All</option>
+                                <option value="theory" <%= academicType === 'theory' ? 'selected' : '' %>>Theory</option>
+                                <option value="practical" <%= academicType === 'practical' ? 'selected' : '' %>>Practical</option>
+                            </select>
+                        </div>
+                        <% } %>
                     
-                    <!-- Additional filters for Academic feedback -->
-                    <% if (feedbackData.responseMetadata.currentFormType === 'Academic') { %>
-                    <div class="flex items-center ml-6 space-x-4 px-8" id="academicFilters">
-                        <label for="academicTypeSelect" class="font-medium text-gray-700">Type:</label>
-                        <select id="academicTypeSelect" class="border border-gray-300 rounded-md p-2 w-40">
-                        <option value="all" <%= !academicType || academicType === 'all' ? 'selected' : '' %>>All</option>
-                        <option value="theory" <%= academicType === 'theory' ? 'selected' : '' %>>Theory</option>
-                        <option value="practical" <%= academicType === 'practical' ? 'selected' : '' %>>Practical</option>
+                    <!-- Semester Filter Dropdown -->
+                    <div class="flex flex-col">
+                        <label for="semesterSelect" class="text-sm font-medium text-gray-700 mb-1">Semester:</label>
+                        <select id="semesterSelect" name="semester" class="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="All" <%= selectedSemester === 'All' ? 'selected' : '' %>>All Semesters</option>
+                            <% uniqueSemesters.forEach(semester => { %>
+                                <% if (semester !== 'All') { %>
+                                    <option value="<%= semester %>" <%= selectedSemester === semester ? 'selected' : '' %>><%= semester %></option>
+                                <% } %>
+                            <% }); %>
+                        </select>
+                    </div>
+                    
+                    <!-- Session Dropdown -->
+                    <div class="flex flex-col">
+                        <label for="sessionSelect" class="text-sm font-medium text-gray-700 mb-1">Session:</label>
+                        <select id="sessionSelect" name="session" class="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="All">All Sessions</option>
+                            <% uniqueSessions.forEach(sessionItem => { %>
+                                <option value="<%= sessionItem %>" <%= selectedSession === sessionItem ? 'selected' : '' %>><%= sessionItem %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+
+                    <% if (feedbackData.responseMetadata.currentFormType === 'Academic' || feedbackData.responseMetadata.currentFormType === 'Training') { %>
+                    <!-- Faculty Selector -->
+                    <div class="flex flex-col">
+                        <label for="facultySelect" class="text-sm font-medium text-gray-700 mb-1">Faculty:</label>
+                        <select id="facultySelect" name="faculty" class="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">All Faculty</option>
+                            <% faculties.forEach(faculty => { %>
+                                <option value="<%= faculty._id %>" <%= selectedFaculty === faculty._id.toString() ? 'selected' : '' %>><%= faculty.name %></option>
+                            <% }); %>
                         </select>
                     </div>
                     <% } %>
+                    
+                    <!-- Subject Filter -->
+                    <div class="flex flex-col">
+                        <label for="subjectSelect" class="text-sm font-medium text-gray-700 mb-1">Subject:</label>
+                        <select id="subjectSelect" name="subject" class="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="All">All Subjects</option>
+                            <% uniqueSubjects.forEach(subject => { %>
+                                <option value="<%= subject %>" <%= subjectFilter === subject ? 'selected' : '' %>><%= subject %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    
+                    <!-- Buttons container -->
+                    <div class="flex items-end space-x-2">
+                        <!-- Apply filters button -->
+                        <button type="submit" id="applyFilters" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                            Apply Filters
+                        </button>
+                        
+                        <!-- Clear filters button -->
+                        <button type="button" id="clearFilters" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded transition duration-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
+                            Clear Filters
+                        </button>
+                    </div>
                 </div>
-                
-                <!-- Faculty Selector (for Academic and Training feedback) -->
-                <% if (feedbackData.responseMetadata.currentFormType === 'Academic' || feedbackData.responseMetadata.currentFormType === 'Training') { %>
-                <div class="flex items-center space-x-4">
-                    <label for="facultySelect" class="font-medium text-gray-700">Select Faculty:</label>
-                    <select id="facultySelect" class="border border-gray-300 rounded-md p-2 w-56">
-                        <option value="">All Faculty</option>
-                        <% faculties.forEach(faculty => { %>
-                        <option value="<%= faculty._id %>" <%= selectedFaculty === faculty._id.toString() ? 'selected' : '' %>><%= faculty.name %> (<%= faculty.subjects.join(', ') %>)</option>
-                        <% }); %>
-                    </select>
-                </div>
-                <% } %>
             </div>
-            
-            <!-- Charts Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
+            <!-- Charts Grid with improved spacing and responsiveness -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <% if (feedbackData.responseMetadata.currentFormType === 'Academic') { %>
                 <!-- Academic Feedback Charts with updated chart types -->
                 <% if (Object.keys(feedbackData.sectionData).includes('Teacher Effectiveness')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Teacher Effectiveness</h3>
-                <canvas id="teacherEffectivenessChart" 
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Teacher Effectiveness'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Teacher Effectiveness'].values) %>"
-                    data-type="polarArea">
-                </canvas>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">Teacher Effectiveness</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <canvas id="teacherEffectivenessChart" 
+                            data-labels="<%= JSON.stringify(feedbackData.sectionData['Teacher Effectiveness'].labels) %>"
+                            data-values="<%= JSON.stringify(feedbackData.sectionData['Teacher Effectiveness'].values) %>"
+                            data-type="radar">
+                        </canvas>
+                    </div>
                 </div>
                 <% } %>
                 
                 <% if (Object.keys(feedbackData.sectionData).includes('Student Learning Experience')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Student Learning Experience</h3>
-                <canvas id="studentExperienceChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Student Learning Experience'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Student Learning Experience'].values) %>"
-                    data-type="polarArea">
-                </canvas>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">Student Learning Experience</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <canvas id="studentExperienceChart"
+                            data-labels="<%= JSON.stringify(feedbackData.sectionData['Student Learning Experience'].labels) %>"
+                            data-values="<%= JSON.stringify(feedbackData.sectionData['Student Learning Experience'].values) %>"
+                            data-type="bar">
+                        </canvas>
+                    </div>
                 </div>
                 <% } %>
                 
                 <% if (Object.keys(feedbackData.sectionData).includes('Exams and Evaluation')) { %>
-                <div class="chart-container chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Exams and Evaluation</h3>
-                <canvas id="examsEvaluationChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Exams and Evaluation'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Exams and Evaluation'].values) %>"
-                    data-type="doughnut">
-                </canvas>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">Exams and Evaluation</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <canvas id="examsEvaluationChart"
+                            data-labels="<%= JSON.stringify(feedbackData.sectionData['Exams and Evaluation'].labels) %>"
+                            data-values="<%= JSON.stringify(feedbackData.sectionData['Exams and Evaluation'].values) %>"
+                            data-type="horizontalBar">
+                        </canvas>
+                    </div>
                 </div>
                 <% } %>
                 
                 <% if (Object.keys(feedbackData.sectionData).includes('Overall Satisfaction')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Overall Satisfaction</h3>
-                <canvas id="overallSatisfactionChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Overall Satisfaction'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Overall Satisfaction'].values) %>"
-                    data-type="doughnut">
-                </canvas>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">Overall Satisfaction</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <canvas id="overallSatisfactionChart"
+                            data-labels="<%= JSON.stringify(feedbackData.sectionData['Overall Satisfaction'].labels) %>"
+                            data-values="<%= JSON.stringify(feedbackData.sectionData['Overall Satisfaction'].values) %>"
+                            data-type="doughnut">
+                        </canvas>
+                    </div>
                 </div>
                 <% } %>
             <% } else if (feedbackData.responseMetadata.currentFormType === 'Institutional') { %>
-                <!-- Institutional Feedback Charts with line charts -->
+                <!-- Institutional Feedback Charts with improved visualization -->
                 <% if (Object.keys(feedbackData.sectionData).includes('Resources and Administration')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Resources and Administration</h3>
-                <canvas id="resourcesAdminChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Resources and Administration'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Resources and Administration'].values) %>"
-                    data-type="line">
-                </canvas>
-                </div>
-                <% } %>
-                
-                <% if (Object.keys(feedbackData.sectionData).includes('Curriculum Aspects')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Curriculum Aspects</h3>
-                <canvas id="curriculumAspectsChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Curriculum Aspects'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Curriculum Aspects'].values) %>"
-                    data-type="line">
-                </canvas>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">Resources and Administration</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <canvas id="resourcesAdminChart"
+                            data-labels="<%= JSON.stringify(feedbackData.sectionData['Resources and Administration'].labels) %>"
+                            data-values="<%= JSON.stringify(feedbackData.sectionData['Resources and Administration'].values) %>"
+                            data-type="radar">
+                        </canvas>
+                    </div>
                 </div>
                 <% } %>
                 
                 <% if (Object.keys(feedbackData.sectionData).includes('Administrative Services')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Administrative Services</h3>
-                <canvas id="adminServicesChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Administrative Services'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Administrative Services'].values) %>"
-                    data-type="line">
-                </canvas>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">Administrative Services</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <canvas id="adminServicesChart"
+                            data-labels="<%= JSON.stringify(feedbackData.sectionData['Administrative Services'].labels) %>"
+                            data-values="<%= JSON.stringify(feedbackData.sectionData['Administrative Services'].values) %>"
+                            data-type="horizontalBar">
+                        </canvas>
+                    </div>
                 </div>
                 <% } %>
                 
                 <% if (Object.keys(feedbackData.sectionData).includes('Student Support')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Student Support</h3>
-                <canvas id="studentSupportChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Student Support'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Student Support'].values) %>"
-                    data-type="line">
-                </canvas>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">Student Support</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <canvas id="studentSupportChart"
+                            data-labels="<%= JSON.stringify(feedbackData.sectionData['Student Support'].labels) %>"
+                            data-values="<%= JSON.stringify(feedbackData.sectionData['Student Support'].values) %>"
+                            data-type="line">
+                        </canvas>
+                    </div>
                 </div>
                 <% } %>
                 
                 <% if (Object.keys(feedbackData.sectionData).includes('Technology Resources')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Technology Resources</h3>
-                <canvas id="techResourcesChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Technology Resources'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Technology Resources'].values) %>"
-                    data-type="line">
-                </canvas>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">Technology Resources</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <canvas id="techResourcesChart"
+                            data-labels="<%= JSON.stringify(feedbackData.sectionData['Technology Resources'].labels) %>"
+                            data-values="<%= JSON.stringify(feedbackData.sectionData['Technology Resources'].values) %>"
+                            data-type="bar">
+                        </canvas>
+                    </div>
                 </div>
                 <% } %>
                 
                 <% if (Object.keys(feedbackData.sectionData).includes('Campus Life')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Campus Life</h3>
-                <canvas id="campusLifeChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Campus Life'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Campus Life'].values) %>"
-                    data-type="line">
-                </canvas>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">Campus Life</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <canvas id="campusLifeChart"
+                            data-labels="<%= JSON.stringify(feedbackData.sectionData['Campus Life'].labels) %>"
+                            data-values="<%= JSON.stringify(feedbackData.sectionData['Campus Life'].values) %>"
+                            data-type="polarArea">
+                        </canvas>
+                    </div>
                 </div>
                 <% } %>
             <% } else if (feedbackData.responseMetadata.currentFormType === 'Training') { %>
-                <!-- Training Feedback Charts with bar charts -->
-                <% if (Object.keys(feedbackData.sectionData).includes('Training Content')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Training Content</h3>
-                <canvas id="trainingContentChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Training Content'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Training Content'].values) %>"
-                    data-type="bar">
-                </canvas>
-                </div>
-                <% } %>
-                
-                <% if (Object.keys(feedbackData.sectionData).includes('Trainer Effectiveness')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Trainer Effectiveness</h3>
-                <canvas id="trainerEffectivenessChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Trainer Effectiveness'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Trainer Effectiveness'].values) %>"
-                    data-type="bar">
-                </canvas>
-                </div>
-                <% } %>
-                
                 <% if (Object.keys(feedbackData.sectionData).includes('Training Materials')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Training Materials</h3>
-                <canvas id="trainingMaterialsChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Training Materials'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Training Materials'].values) %>"
-                    data-type="bar">
-                </canvas>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">Training Materials</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <canvas id="trainingMaterialsChart"
+                            data-labels="<%= JSON.stringify(feedbackData.sectionData['Training Materials'].labels) %>"
+                            data-values="<%= JSON.stringify(feedbackData.sectionData['Training Materials'].values) %>"
+                            data-type="horizontalBar">
+                        </canvas>
+                    </div>
                 </div>
                 <% } %>
                 
                 <% if (Object.keys(feedbackData.sectionData).includes('Workshop Facilities')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Workshop Facilities</h3>
-                <canvas id="workshopFacilitiesChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Workshop Facilities'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Workshop Facilities'].values) %>"
-                    data-type="bar">
-                </canvas>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">Workshop Facilities</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <canvas id="workshopFacilitiesChart"
+                            data-labels="<%= JSON.stringify(feedbackData.sectionData['Workshop Facilities'].labels) %>"
+                            data-values="<%= JSON.stringify(feedbackData.sectionData['Workshop Facilities'].values) %>"
+                            data-type="polarArea">
+                        </canvas>
+                    </div>
                 </div>
                 <% } %>
                 
                 <% if (Object.keys(feedbackData.sectionData).includes('Practical Application')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Practical Application</h3>
-                <canvas id="practicalApplicationChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Practical Application'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Practical Application'].values) %>"
-                    data-type="bar">
-                </canvas>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">Practical Application</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <canvas id="practicalApplicationChart"
+                            data-labels="<%= JSON.stringify(feedbackData.sectionData['Practical Application'].labels) %>"
+                            data-values="<%= JSON.stringify(feedbackData.sectionData['Practical Application'].values) %>"
+                            data-type="line">
+                        </canvas>
+                    </div>
                 </div>
                 <% } %>
                 
                 <% if (Object.keys(feedbackData.sectionData).includes('Overall Value')) { %>
-                <div class="chart-container bg-white p-3 md:p-5 rounded shadow">
-                <h3 class="text-base md:text-lg font-semibold mb-2 md:mb-4">Overall Value</h3>
-                <canvas id="overallValueChart"
-                    data-labels="<%= JSON.stringify(feedbackData.sectionData['Overall Value'].labels) %>"
-                    data-values="<%= JSON.stringify(feedbackData.sectionData['Overall Value'].values) %>"
-                    data-type="bar">
-                </canvas>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">Overall Value</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <canvas id="overallValueChart"
+                            data-labels="<%= JSON.stringify(feedbackData.sectionData['Overall Value'].labels) %>"
+                            data-values="<%= JSON.stringify(feedbackData.sectionData['Overall Value'].values) %>"
+                            data-type="doughnut">
+                        </canvas>
+                    </div>
                 </div>
                 <% } %>
             <% } %>
             </div>
-            
-            <!-- Summary Section -->
-            <div class="mt-8 bg-white p-4 rounded shadow">
-            <h3 class="text-lg font-semibold mb-3">Overall Averages by Section</h3>
-           <!-- Replace the entire table div with this doughnut chart display -->
-<div class="bg-white shadow rounded-lg p-6">
-    <h3 class="text-lg font-medium text-gray-900 mb-4">Section Feedback Analysis</h3>
-    <div class="h-64">
-      <canvas id="sectionDoughnutChart" data-labels="<%= JSON.stringify(feedbackData.sectionAverages.map(section => section.sectionTitle)) %>" data-values="<%= JSON.stringify(feedbackData.sectionAverages.map(section => section.averageScore)) %>"></canvas>
-    </div>
-    <div class="mt-4 pt-3 border-t">
-      <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-        <% feedbackData.sectionAverages.forEach(section => { %>
-          <li class="flex items-center justify-between py-1">
-            <span class="font-medium"><%= section.sectionTitle %></span>
-            <span class="text-gray-600"><%= section.averageScore.toFixed(2) %>/5</span>
-          </li>
-        <% }); %>
-      </ul>
-    </div>
-  </div>
-            </div>
-            
-            <!-- Metadata display -->
-            <div class="mt-8 bg-white p-4 rounded shadow">
-            <h3 class="text-lg font-semibold mb-3">Feedback Information</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-gray-50 p-3 rounded">
-                <p class="text-sm text-gray-500">Form Type</p>
-                <p class="font-medium" id="formType"><%= feedbackData.responseMetadata.currentFormType %></p>
+            <!-- Summary Section with improved design -->
+            <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Overall Feedback Analysis</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Section averages comparison -->
+                    <div class="col-span-1 md:col-span-2 bg-white rounded-lg">
+                        <h4 class="text-lg font-medium text-gray-800 mb-3">Section Performance</h4>
+                        <div class="h-64">
+                            <canvas id="sectionBarChart" data-labels="<%= JSON.stringify(feedbackData.sectionAverages.map(section => section.sectionTitle)) %>" data-values="<%= JSON.stringify(feedbackData.sectionAverages.map(section => section.averageScore)) %>"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Donut chart for overall perspective -->
+                    <div class="col-span-1 bg-white rounded-lg">
+                        <h4 class="text-lg font-medium text-gray-800 mb-3">Overall Rating Distribution</h4>
+                        <div class="h-64">
+                            <canvas id="sectionDoughnutChart" data-labels="<%= JSON.stringify(feedbackData.sectionAverages.map(section => section.sectionTitle)) %>" data-values="<%= JSON.stringify(feedbackData.sectionAverages.map(section => section.averageScore)) %>"></canvas>
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-gray-50 p-3 rounded">
-                <p class="text-sm text-gray-500">Responses</p>
-                <p class="font-medium" id="responseCount"><%= feedbackData.responseMetadata.totalResponses %></p>
+                
+                <!-- Section scores table -->
+                <div class="mt-6 overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="py-3 px-4 text-left font-medium text-gray-700">Section</th>
+                                <th class="py-3 px-4 text-center font-medium text-gray-700">Average Score</th>
+                                <th class="py-3 px-4 text-center font-medium text-gray-700">Response Count</th>
+                                <th class="py-3 px-4 text-right font-medium text-gray-700">Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <% feedbackData.sectionAverages.forEach(section => { %>
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-3 px-4 text-gray-800 font-medium"><%= section.sectionTitle %></td>
+                                <td class="py-3 px-4 text-center"><%= section.averageScore.toFixed(2) %>/5</td>
+                                <td class="py-3 px-4 text-center"><%= feedbackData.responseMetadata.totalResponses || '-' %></td>
+                                <td class="py-3 px-4 text-right">
+                                    <% const performanceClass = section.averageScore >= 4 ? 'bg-green-100 text-green-800' : 
+                                        section.averageScore >= 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'; %>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= performanceClass %>">
+                                        <%= section.averageScore >= 4 ? 'Excellent' : section.averageScore >= 3 ? 'Good' : 'Needs Improvement' %>
+                                    </span>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="bg-gray-50 p-3 rounded">
-                <p class="text-sm text-gray-500">Last Updated</p>
-                <p class="font-medium" id="lastUpdated"><%= feedbackData.responseMetadata.lastUpdated.toLocaleString() %></p>
+            </div>
+            <!-- Metadata display with improved design -->
+            <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Feedback Information</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 mb-1">Form Type</p>
+                        <p class="font-medium text-gray-800" id="formType"><%= feedbackData.responseMetadata.currentFormType %></p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 mb-1">Total Responses</p>
+                        <p class="font-medium text-gray-800" id="responseCount"><%= feedbackData.responseMetadata.totalResponses %></p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 mb-1">Session</p>
+                        <p class="font-medium text-gray-800" id="sessionDisplay"><%= session || 'All Sessions' %></p>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 mb-1">Last Updated</p>
+                        <p class="font-medium text-gray-800" id="lastUpdated"><%= feedbackData.responseMetadata.lastUpdated.toLocaleString() %></p>
+                    </div>
                 </div>
             </div>
+            <!-- Download options -->
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+                <button id="downloadFullExcel"
+                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-download">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" x2="12" y1="15" y2="3"></line>
+                    </svg>
+                    <span>Download Complete Data</span>
+                </button>
+                
+                <button id="downloadFilteredExcel"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-filter">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    <span>Download Filtered Data</span>
+                </button>
             </div>
-            
-            <div class="flex justify-center mt-6 md:mt-8 lg:mt-10">
-            <button id="downloadExcel"
-                class="bg-green-300 hover:bg-green-200 text-green-800 font-semibold py-2 md:py-3 px-4 md:px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center space-x-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="lucide lucide-download">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" x2="12" y1="15" y2="3"></line>
-                </svg>
-                <span>Download Feedback Data</span>
-            </button>
-            </div>
-        </main> 
+        </main>
 
         <!-- Footer -->
         <%- include('partials/adminBottomNavbar') %>
@@ -1027,8 +1114,8 @@
         });
     });
 
-        
-    
+
+    ///
     document.addEventListener('DOMContentLoaded', function() {
   // Save scroll position
   let scrollPosition = 0;
@@ -1038,31 +1125,7 @@
   if (formTypeSelect) {
     formTypeSelect.addEventListener('change', function() {
       scrollPosition = window.scrollY;
-      const formType = this.value;
-      const currentUrl = new URL(window.location.href);
-      
-      // Keep any existing query parameters
-      const academicType = currentUrl.searchParams.get('academicType');
-      const faculty = currentUrl.searchParams.get('faculty');
-      
-      // Build the new URL
-      let newUrl = `/admin/adminHome?formType=${formType}`;
-      
-      // Add the faculty parameter if it exists
-      if (faculty) {
-        newUrl += `&faculty=${faculty}`;
-      }
-      
-      // Add the academicType parameter if appropriate
-      if (formType === 'Academic' && academicType) {
-        newUrl += `&academicType=${academicType}`;
-      }
-      
-      // Save the scroll position in sessionStorage
-      sessionStorage.setItem('scrollPosition', scrollPosition);
-      
-      // Navigate to the new URL
-      window.location.href = newUrl;
+      buildAndNavigateURL('formType');
     });
   }
   
@@ -1071,31 +1134,7 @@
   if (academicTypeSelect) {
     academicTypeSelect.addEventListener('change', function() {
       scrollPosition = window.scrollY;
-      const academicType = this.value;
-      const currentUrl = new URL(window.location.href);
-      
-      // Keep form type and faculty parameters
-      const formType = currentUrl.searchParams.get('formType') || 'Academic';
-      const faculty = currentUrl.searchParams.get('faculty');
-      
-      // Build the new URL
-      let newUrl = `/admin/adminHome?formType=${formType}`;
-      
-      // Add the academicType parameter if not 'all'
-      if (academicType && academicType !== 'all') {
-        newUrl += `&academicType=${academicType}`;
-      }
-      
-      // Add the faculty parameter if it exists
-      if (faculty) {
-        newUrl += `&faculty=${faculty}`;
-      }
-      
-      // Save the scroll position in sessionStorage
-      sessionStorage.setItem('scrollPosition', scrollPosition);
-      
-      // Navigate to the new URL
-      window.location.href = newUrl;
+      buildAndNavigateURL('academicType');
     });
   }
   
@@ -1104,32 +1143,209 @@
   if (facultySelect) {
     facultySelect.addEventListener('change', function() {
       scrollPosition = window.scrollY;
-      const faculty = this.value;
-      const currentUrl = new URL(window.location.href);
-      
-      // Keep form type and academicType parameters
-      const formType = currentUrl.searchParams.get('formType') || 'Academic';
-      const academicType = currentUrl.searchParams.get('academicType');
-      
-      // Build the new URL
-      let newUrl = `/admin/adminHome?formType=${formType}`;
-      
-      // Add the faculty parameter if it exists
-      if (faculty) {
-        newUrl += `&faculty=${faculty}`;
-      }
-      
-      // Add the academicType parameter if it exists
-      if (academicType) {
-        newUrl += `&academicType=${academicType}`;
-      }
-      
-      // Save the scroll position in sessionStorage
-      sessionStorage.setItem('scrollPosition', scrollPosition);
-      
-      // Navigate to the new URL
-      window.location.href = newUrl;
+      buildAndNavigateURL('faculty');
     });
+  }
+  
+  // Semester Select Change Event
+  const semesterSelect = document.getElementById('semesterSelect');
+  if (semesterSelect) {
+    semesterSelect.addEventListener('change', function() {
+      scrollPosition = window.scrollY;
+      buildAndNavigateURL('semester');
+    });
+  }
+  
+  // Session Select Change Event
+  const sessionSelect = document.getElementById('sessionSelect');
+  if (sessionSelect) {
+    sessionSelect.addEventListener('change', function() {
+      scrollPosition = window.scrollY;
+      buildAndNavigateURL('session');
+    });
+  }
+  
+  // Subject Select Change Event
+  const subjectSelect = document.getElementById('subjectSelect');
+  if (subjectSelect) {
+    subjectSelect.addEventListener('change', function() {
+      scrollPosition = window.scrollY;
+      // Only apply subject filter to feedback charts, not faculty table
+      applyFeedbackFiltersOnly();
+    });
+  }
+  
+  // Apply Filters Button Click Event
+  const applyFiltersBtn = document.getElementById('applyFilters');
+  if (applyFiltersBtn) {
+    applyFiltersBtn.addEventListener('click', function() {
+      scrollPosition = window.scrollY;
+      buildAndNavigateURL('all');
+    });
+  }
+  
+  // Clear Filters Button Click Event
+  const clearFiltersBtn = document.getElementById('clearFilters');
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener('click', function() {
+      scrollPosition = window.scrollY;
+      clearAllFilters();
+    });
+  }
+  
+  // Function to clear all filters and reset to defaults
+  function clearAllFilters() {
+    // Reset form type to default (usually Academic)
+    if (formTypeSelect) {
+      formTypeSelect.value = 'Academic';
+    }
+    
+    // Reset semester to "All"
+    if (semesterSelect) {
+      semesterSelect.value = 'All';
+    }
+    
+    // Reset session to "All"
+    if (sessionSelect) {
+      sessionSelect.value = 'All';
+    }
+    
+    // Reset faculty to empty (All Faculty)
+    if (facultySelect) {
+      facultySelect.value = '';
+    }
+    
+    // Reset subject to "All"
+    if (subjectSelect) {
+      subjectSelect.value = 'All';
+    }
+    
+    // Reset academic type to "all" if it exists
+    if (academicTypeSelect) {
+      academicTypeSelect.value = 'all';
+    }
+    
+    // Clear any stored filters in session storage
+    sessionStorage.removeItem('currentSubjectFilter');
+    
+    // Navigate to the base URL with default Academic form type
+    window.location.href = '/admin/adminHome?formType=Academic';
+  }
+  
+  // Function to apply only feedback-related filters without affecting faculty table
+  function applyFeedbackFiltersOnly() {
+    const formType = formTypeSelect ? formTypeSelect.value : 'Academic';
+    const subjectValue = subjectSelect ? subjectSelect.value : 'All';
+    
+    // Instead of navigating to a new URL, filter the charts directly
+    filterFeedbackCharts(subjectValue);
+    
+    // Save current filters in session storage for persistence
+    sessionStorage.setItem('currentSubjectFilter', subjectValue);
+  }
+  
+  // Function to filter feedback charts without affecting faculty table
+  function filterFeedbackCharts(subjectValue) {
+    // Get all chart containers that should be affected by subject filter
+    const chartContainers = document.querySelectorAll('.feedback-chart-container');
+    
+    chartContainers.forEach(container => {
+      const chartSubject = container.getAttribute('data-subject');
+      
+      if (subjectValue === 'All' || !subjectValue) {
+        // Show all charts if 'All' is selected
+        container.style.display = 'block';
+      } else if (chartSubject && chartSubject === subjectValue) {
+        // Show only charts matching the selected subject
+        container.style.display = 'block';
+      } else {
+        // Hide charts not matching the selected subject
+        container.style.display = 'none';
+      }
+    });
+    
+    // Re-initialize visible charts to ensure proper rendering
+    initializeVisibleCharts();
+  }
+  
+  // Function to initialize only visible charts
+  function initializeVisibleCharts() {
+    // Clear existing charts to prevent duplicates
+    Chart.helpers.each(Chart.instances, function(instance) {
+      instance.destroy();
+    });
+    
+    // Get all visible chart canvases
+    const visibleChartCanvases = document.querySelectorAll('.feedback-chart-container[style="display: block;"] canvas[data-type]');
+    
+    // For each visible canvas, initialize the appropriate chart type
+    visibleChartCanvases.forEach(canvas => {
+      if (!canvas.id.includes('sectionBarChart') && !canvas.id.includes('sectionDoughnutChart')) {
+        const chartType = canvas.getAttribute('data-type');
+        const chartLabels = JSON.parse(canvas.getAttribute('data-labels'));
+        const chartValues = JSON.parse(canvas.getAttribute('data-values'));
+        
+        createChart(canvas, chartType, chartLabels, chartValues);
+      }
+    });
+    
+    // Also reinitialize section charts if they're visible
+    const visibleSectionDoughnut = document.querySelector('.feedback-chart-container[style="display: block;"] #sectionDoughnutChart');
+    const visibleSectionBar = document.querySelector('.feedback-chart-container[style="display: block;"] #sectionBarChart');
+    
+    if (visibleSectionDoughnut) {
+      initializeSectionDoughnutChart();
+    }
+    
+    if (visibleSectionBar) {
+      initializeSectionBarChart();
+    }
+  }
+  
+  // Function to build URL with all active filters and navigate to it
+  function buildAndNavigateURL(changedFilter) {
+    const formType = formTypeSelect ? formTypeSelect.value : 'Academic';
+    
+    // Build the base URL
+    let newUrl = `/admin/adminHome?formType=${formType}`;
+    
+    // Add faculty parameter if it exists and has a value
+    if (facultySelect && facultySelect.value) {
+      newUrl += `&faculty=${facultySelect.value}`;
+    }
+    
+    // Add academic type parameter if form type is Academic and it has a value other than 'all'
+    if (formType === 'Academic' && academicTypeSelect && academicTypeSelect.value !== 'all') {
+      newUrl += `&academicType=${academicTypeSelect.value}`;
+    }
+    
+    // Add semester parameter if it exists and is not 'All'
+    if (semesterSelect && semesterSelect.value !== 'All') {
+      newUrl += `&semester=${semesterSelect.value}`;
+    }
+    
+    // Add session parameter if it exists and is not 'All'
+    if (sessionSelect && sessionSelect.value !== 'All') {
+      newUrl += `&session=${sessionSelect.value}`;
+    }
+    
+    // Add subject parameter ONLY if it's not the subject filter that changed
+    // This prevents the subject filter from affecting the faculty table
+    if (changedFilter !== 'subject' && subjectSelect && subjectSelect.value !== 'All') {
+      newUrl += `&subject=${subjectSelect.value}`;
+    }
+    
+    // Save the scroll position in sessionStorage
+    sessionStorage.setItem('scrollPosition', scrollPosition);
+    
+    // If the subject filter changed, apply it locally without navigation
+    if (changedFilter === 'subject') {
+      applyFeedbackFiltersOnly();
+      return;
+    }
+    
+    // Navigate to the new URL for other filter changes
+    window.location.href = newUrl;
   }
   
   // Restore scroll position after page load
@@ -1139,34 +1355,88 @@
     sessionStorage.removeItem('scrollPosition'); // Clear saved position
   }
   
+  // Apply any stored subject filter on page load
+  const storedSubjectFilter = sessionStorage.getItem('currentSubjectFilter');
+  if (storedSubjectFilter && subjectSelect) {
+    subjectSelect.value = storedSubjectFilter;
+    filterFeedbackCharts(storedSubjectFilter);
+  }
+  
   // Initialize charts with their appropriate types
   initializeCharts();
   
   // Initialize the section doughnut chart
   initializeSectionDoughnutChart();
   
-  // Download Excel button
-  const downloadBtn = document.getElementById('downloadExcel');
-  if (downloadBtn) {
-    downloadBtn.addEventListener('click', function() {
+  // Initialize the section bar chart
+  initializeSectionBarChart();
+  
+  // Add class to identify chart containers if not already present
+  document.querySelectorAll('canvas[data-type]').forEach(canvas => {
+    const container = canvas.closest('div');
+    if (container && !container.classList.contains('feedback-chart-container')) {
+      container.classList.add('feedback-chart-container');
+      
+      // Add data-subject attribute if not present
+      if (!container.hasAttribute('data-subject') && canvas.hasAttribute('data-subject')) {
+        container.setAttribute('data-subject', canvas.getAttribute('data-subject'));
+      }
+    }
+  });
+  
+  // Download Full Excel Button
+  const downloadFullExcelBtn = document.getElementById('downloadFullExcel');
+  if (downloadFullExcelBtn) {
+    downloadFullExcelBtn.addEventListener('click', function() {
       const formType = document.getElementById('formType').textContent.trim();
-      const academicType = document.getElementById('academicTypeLabel')?.textContent.trim();
-      const faculty = facultySelect?.value;
+      
+      // Create download URL for complete data
+      let downloadUrl = `/feedback/download/${formType.toLowerCase()}/full`;
+      
+      window.location.href = downloadUrl;
+    });
+  }
+  
+  // Download Filtered Excel Button
+  const downloadFilteredExcelBtn = document.getElementById('downloadFilteredExcel');
+  if (downloadFilteredExcelBtn) {
+    downloadFilteredExcelBtn.addEventListener('click', function() {
+      const formType = document.getElementById('formType').textContent.trim();
+      const academicTypeElem = document.getElementById('academicTypeLabel');
+      const academicType = academicTypeElem ? academicTypeElem.textContent.trim() : null;
       
       // Build download URL with all active filters
-      let downloadUrl = `/feedback/download/${formType.toLowerCase()}`;
+      let downloadUrl = `/feedback/download/${formType.toLowerCase()}/filtered`;
       
       // Add query parameters
       const params = new URLSearchParams();
       
-      if (faculty) {
-        params.append('faculty', faculty);
+      // Add faculty parameter
+      if (facultySelect && facultySelect.value) {
+        params.append('faculty', facultySelect.value);
       }
       
+      // Add academic type parameter if it exists and is not 'All Types'
       if (academicType && academicType !== 'All Types') {
         params.append('academicType', academicType.toLowerCase());
       }
       
+      // Add semester parameter
+      if (semesterSelect && semesterSelect.value !== 'All') {
+        params.append('semester', semesterSelect.value);
+      }
+      
+      // Add session parameter
+      if (sessionSelect && sessionSelect.value !== 'All') {
+        params.append('session', sessionSelect.value);
+      }
+      
+      // Add subject parameter
+      if (subjectSelect && subjectSelect.value !== 'All') {
+        params.append('subject', subjectSelect.value);
+      }
+      
+      // Append parameters to URL if they exist
       if (params.toString()) {
         downloadUrl += `?${params.toString()}`;
       }
@@ -1176,6 +1446,235 @@
   }
 });
 
+// Function to initialize charts based on the data attributes
+function initializeCharts() {
+  // Get all chart canvases
+  const chartCanvases = document.querySelectorAll('canvas[data-type]');
+  
+  // For each canvas, initialize the appropriate chart type
+  chartCanvases.forEach(canvas => {
+    if (!canvas.id.includes('sectionBarChart') && !canvas.id.includes('sectionDoughnutChart')) {
+      const chartType = canvas.getAttribute('data-type');
+      const chartLabels = JSON.parse(canvas.getAttribute('data-labels'));
+      const chartValues = JSON.parse(canvas.getAttribute('data-values'));
+      
+      createChart(canvas, chartType, chartLabels, chartValues);
+    }
+  });
+}
+// Function to create a chart
+function createChart(canvas, type, labels, values) {
+  // Chart.js configuration
+  const chartConfig = {
+    type: type === 'horizontalBar' ? 'bar' : type, // 'horizontalBar' is deprecated in Chart.js v3+
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Average Rating',
+        data: values,
+        backgroundColor: getBackgroundColors(type, values.length),
+        borderColor: getBorderColors(type, values.length),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      indexAxis: type === 'horizontalBar' ? 'y' : 'x', // For horizontal bar charts in Chart.js v3+
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 5, // Rating scale is 1-5
+          ticks: {
+            stepSize: 1
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: ['doughnut', 'pie', 'polarArea'].includes(type)
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `Rating: ${context.raw}/5`;
+            }
+          }
+        }
+      }
+    }
+  };
+  
+  // Adjust options based on chart type
+  if (type === 'radar') {
+    chartConfig.options.scales = {
+      r: {
+        beginAtZero: true,
+        max: 5,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    };
+  } else if (['doughnut', 'pie', 'polarArea'].includes(type)) {
+    chartConfig.options.scales = {}; // No scales for these chart types
+  }
+  
+  // Create the chart
+  new Chart(canvas, chartConfig);
+}
+
+// Function to initialize the section doughnut chart
+function initializeSectionDoughnutChart() {
+  const canvas = document.getElementById('sectionDoughnutChart');
+  if (canvas) {
+    const labels = JSON.parse(canvas.getAttribute('data-labels'));
+    const values = JSON.parse(canvas.getAttribute('data-values'));
+    
+    new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: values,
+          backgroundColor: getBackgroundColors('doughnut', values.length),
+          borderColor: getBorderColors('doughnut', values.length),
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              boxWidth: 12,
+              font: {
+                size: 10
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `${context.label}: ${context.raw.toFixed(2)}/5`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+}
+
+// Function to initialize the section bar chart
+function initializeSectionBarChart() {
+  const barCanvas = document.getElementById('sectionBarChart');
+  if (barCanvas) {
+    const labels = JSON.parse(barCanvas.getAttribute('data-labels'));
+    const values = JSON.parse(barCanvas.getAttribute('data-values'));
+    
+    new Chart(barCanvas, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Section Average',
+          data: values,
+          backgroundColor: getBackgroundColors('bar', values.length),
+          borderColor: getBorderColors('bar', values.length),
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 5,
+            ticks: {
+              stepSize: 1
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `Average: ${context.raw.toFixed(2)}/5`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+}
+
+// Function to get background colors for charts
+function getBackgroundColors(type, count) {
+  // Base colors for charts
+  const colors = [
+    'rgba(54, 162, 235, 0.6)',  // Blue
+    'rgba(255, 99, 132, 0.6)',   // Red
+    'rgba(75, 192, 192, 0.6)',   // Green
+    'rgba(255, 206, 86, 0.6)',   // Yellow
+    'rgba(153, 102, 255, 0.6)',  // Purple
+    'rgba(255, 159, 64, 0.6)',   // Orange
+    'rgba(199, 199, 199, 0.6)',  // Gray
+    'rgba(83, 102, 255, 0.6)',   // Indigo
+    'rgba(255, 99, 255, 0.6)',   // Pink
+    'rgba(159, 159, 64, 0.6)'    // Olive
+  ];
+  
+  // For radar, bar, line, and horizontalBar charts, return a single color
+  if (['radar', 'line', 'bar', 'horizontalBar'].includes(type)) {
+    return 'rgba(54, 162, 235, 0.6)';
+  }
+  
+  // For other charts, return an array of colors
+  let result = [];
+  for (let i = 0; i < count; i++) {
+    result.push(colors[i % colors.length]);
+  }
+  
+  return result;
+}
+
+// Function to get border colors for charts
+function getBorderColors(type, count) {
+  // Base colors for chart borders
+  const colors = [
+    'rgba(54, 162, 235, 1)',   // Blue
+    'rgba(255, 99, 132, 1)',    // Red
+    'rgba(75, 192, 192, 1)',    // Green
+    'rgba(255, 206, 86, 1)',    // Yellow
+    'rgba(153, 102, 255, 1)',   // Purple
+    'rgba(255, 159, 64, 1)',    // Orange
+    'rgba(199, 199, 199, 1)',   // Gray
+    'rgba(83, 102, 255, 1)',    // Indigo
+    'rgba(255, 99, 255, 1)',    // Pink
+    'rgba(159, 159, 64, 1)'     // Olive
+  ];
+  
+  // For radar, bar, line, and horizontalBar charts, return a single color
+  if (['radar', 'line', 'bar', 'horizontalBar'].includes(type)) {
+    return 'rgba(54, 162, 235, 1)';
+  }
+  
+  // For other charts, return an array of colors
+  let result = [];
+  for (let i = 0; i < count; i++) {
+    result.push(colors[i % colors.length]);
+  }
+  
+  return result;
+}
 // Initialize charts with their specific types
 function initializeCharts() {
   const chartContainers = document.querySelectorAll('.chart-container canvas');
@@ -1206,7 +1705,6 @@ function initializeCharts() {
 }
 
 // Function to initialize the section doughnut chart
-// Update this function in your JavaScript file
 function initializeSectionDoughnutChart() {
   const sectionDoughnutCanvas = document.getElementById('sectionDoughnutChart');
   
