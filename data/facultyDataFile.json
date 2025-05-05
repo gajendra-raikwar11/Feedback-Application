@@ -1,8 +1,8 @@
 [
   {
-    "name": " RDr.ajesh Sharma",
+    "name": " Dr. Amit Mishra",
     "idNumber": "FAC1001",
-    "email": "rajesh.sharma@example.com",
+    "email": "amit@example.com",
     "branch": "CSE",
     "subjects": ["DBMS", "OS"],
     "sections": ["CSE-A", "CSE-B"],
@@ -11,9 +11,9 @@
     "password": "111111"
   },
   {
-    "name": "Prof. Swati Mishra",
+    "name": "Dr. Bhavana Gupta",
     "idNumber": "FAC1002",
-    "email": "swati.mishra@example.com",
+    "email": "bhavana@example.com",
     "branch": "CSE",
     "subjects": ["Data Structures", "Algorithms"],
     "sections": ["CSE-A"],
@@ -22,9 +22,9 @@
     "password": "111111"
   },
   {
-    "name": "Dr. Neeraj Bansal",
+    "name": "Dr. Komal Tahiliani",
     "idNumber": "FAC1003",
-    "email": "neeraj.bansal@example.com",
+    "email": "komal@example.com",
     "branch": "CSE",
     "subjects": ["DBMS", "SQL"],
     "sections": ["CSE-B", "CSE-C"],
@@ -33,9 +33,9 @@
     "password": "111111"
   },
   {
-    "name": "Prof. Rina Kaur",
+    "name": "Dr. Shweta Singh",
     "idNumber": "FAC1004",
-    "email": "rina.kaur@example.com",
+    "email": "shweta@example.com",
     "branch": "CSE",
     "subjects": ["Java", "Python"],
     "sections": ["CSE-C"],
@@ -44,9 +44,9 @@
     "password": "111111"
   },
   {
-    "name": "Dr. Mohit Sinha",
+    "name": "Prof. Amit Swami",
     "idNumber": "FAC1005",
-    "email": "mohit.sinha@example.com",
+    "email": "amit@example.com",
     "branch": "CSE",
     "subjects": ["CN", "TOC"],
     "sections": ["CSE-A", "CSE-B"],
@@ -55,9 +55,9 @@
     "password": "111111"
   },
   {
-    "name": "Prof. Anamika Das",
+    "name": "Prof. Jai Mungi",
     "idNumber": "FAC1006",
-    "email": "anamika.das@example.com",
+    "email": "jai@example.com",
     "branch": "CSE",
     "subjects": ["Operating Systems", "AI"],
     "sections": ["CSE-B", "CSE-C"],
@@ -66,9 +66,9 @@
     "password": "111111"
   },
   {
-    "name": "Dr. Nilesh Jain",
+    "name": "Prof. Deepti Jain",
     "idNumber": "FAC1007",
-    "email": "nilesh.jain@example.com",
+    "email": "deepti@example.com",
     "branch": "CSE",
     "subjects": ["Software Engineering", "ML"],
     "sections": ["CSE-A"],
@@ -77,9 +77,9 @@
     "password": "111111"
   },
   {
-    "name": "Prof. Sneha Kapoor",
+    "name": "Prof. Bhavna Soni",
     "idNumber": "FAC1008",
-    "email": "sneha.kapoor@example.com",
+    "email": "bhavna@example.com",
     "branch": "CSE",
     "subjects": ["Web Tech", "JavaScript"],
     "sections": ["CSE-C"],
@@ -88,9 +88,9 @@
     "password": "111111"
   },
   {
-    "name": "Dr. Abhishek Yadav",
+    "name": "Prof. Nargigh Gupta",
     "idNumber": "FAC1009",
-    "email": "abhishek.yadav@example.com",
+    "email": "nargish@example.com",
     "branch": "CSE",
     "subjects": ["Python", "AI"],
     "sections": ["CSE-A", "CSE-C"],
@@ -99,9 +99,9 @@
     "password": "111111"
   },
   {
-    "name": "Prof. Kavita Jain",
+    "name": "Prof. Ansul Sarawagi",
     "idNumber": "FAC1010",
-    "email": "kavita.jain@example.com",
+    "email": "ansul@example.com",
     "branch": "CSE",
     "subjects": ["ML", "Cloud Computing"],
     "sections": ["CSE-B"],
@@ -110,9 +110,9 @@
     "password": "111111"
   },
   {
-    "name": "Dr. Aman Tiwari",
+    "name": "Prof. Shumali Gupta",
     "idNumber": "FAC1011",
-    "email": "aman.tiwari@example.com",
+    "email": "shumali@example.com",
     "branch": "CSE",
     "subjects": ["CN", "Cyber Security"],
     "sections": ["CSE-A", "CSE-B"],
@@ -121,12 +121,34 @@
     "password": "111111"
   },
   {
-    "name": "Prof. Isha Bhargav",
+    "name": "Prof. Abizer Hakimuddin",
     "idNumber": "FAC1012",
-    "email": "isha.bhargav@example.com",
+    "email": "abizer@example.com",
     "branch": "CSE",
     "subjects": ["Ethical Hacking", "Web Dev"],
     "sections": ["CSE-C"],
+    "feedbackForms": [],
+    "role": "faculty",
+    "password": "111111"
+  },
+  {
+    "name": "Prof. Ankit Gupta",
+    "idNumber": "FAC1013",
+    "email": "ankit@example.com",
+    "branch": "CSE",
+    "subjects": ["Ethical Hacking", "Web Dev"],
+    "sections": ["CSE-B"],
+    "feedbackForms": [],
+    "role": "faculty",
+    "password": "111111"
+  },
+  {
+    "name": "Prof. Pankaj Kumar Sawita",
+    "idNumber": "FAC1014",
+    "email": "pankaj@example.com",
+    "branch": "CSE",
+    "subjects": ["Ethical Hacking", "Web Dev"],
+    "sections": ["CSE-A"],
     "feedbackForms": [],
     "role": "faculty",
     "password": "111111"
