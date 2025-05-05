@@ -1,8 +1,8 @@
 [
   {
-    "name": " Dr. Amit Mishra",
+    "name": "Dr. Amit Mishra",
     "idNumber": "FAC1001",
-    "email": "amit@example.com",
+    "email": "amit.mishra@example.com",
     "branch": "CSE",
     "subjects": ["DBMS", "OS"],
     "sections": ["CSE-A", "CSE-B"],
@@ -46,7 +46,7 @@
   {
     "name": "Prof. Amit Swami",
     "idNumber": "FAC1005",
-    "email": "amit@example.com",
+    "email": "amit.swami@example.com",
     "branch": "CSE",
     "subjects": ["CN", "TOC"],
     "sections": ["CSE-A", "CSE-B"],
@@ -88,7 +88,7 @@
     "password": "111111"
   },
   {
-    "name": "Prof. Nargigh Gupta",
+    "name": "Prof. Nargish Gupta",
     "idNumber": "FAC1009",
     "email": "nargish@example.com",
     "branch": "CSE",
