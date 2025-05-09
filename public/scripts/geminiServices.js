@@ -24,6 +24,10 @@ document.addEventListener("DOMContentLoaded", function () {
     "generateMoreQuestions"
   );
 
+  // At the top of the file, after your imports
+  const { craftEnhancedPrompts, parseAndStructureResponse } =
+    window.promptUtils;
+
   // Show/hide MCQ options based on question type
   questionTypeSelect.addEventListener("change", function () {
     if (this.value === "multiple-choice" || this.value === "mixed") {
@@ -74,10 +78,22 @@ document.addEventListener("DOMContentLoaded", function () {
         // Hide loading indicator
         loadingIndicator.classList.add("hidden");
 
-        // Show error
+        // Show error with retry button if it's a 503
         errorContainer.classList.remove("hidden");
-        errorMessage.textContent =
-          error.message || "Failed to generate feedback questions";
+        if (
+          error.message.includes("503") ||
+          error.message.includes("unavailable")
+        ) {
+          errorMessage.innerHTML = `
+                ${error.message}
+                <button class="ml-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="retryGeneration()">
+                    Retry
+                </button>
+            `;
+        } else {
+          errorMessage.textContent =
+            error.message || "Failed to generate feedback questions";
+        }
         console.error("Error generating questions:", error);
       });
   });
@@ -160,8 +176,22 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(`API error: ${errorData.message || "Unknown error"}`);
+          const errorText = await response.text();
+          console.error("API Response:", errorText);
+
+          try {
+            const errorData = JSON.parse(errorText);
+            if (errorData.error?.code === 503) {
+              throw new Error(
+                "The Gemini API is temporarily unavailable. Please try again in a few minutes."
+              );
+            }
+            throw new Error(`API error: ${JSON.stringify(errorData)}`);
+          } catch (e) {
+            throw new Error(
+              `API error: ${response.statusText} (${response.status})`
+            );
+          }
         }
 
         return await response.json();
@@ -205,10 +235,22 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            `Gemini API error: ${errorData.error?.message || "Unknown error"}`
-          );
+          const errorText = await response.text();
+          console.error("API Response:", errorText);
+
+          try {
+            const errorData = JSON.parse(errorText);
+            if (errorData.error?.code === 503) {
+              throw new Error(
+                "The Gemini API is temporarily unavailable. Please try again in a few minutes."
+              );
+            }
+            throw new Error(`API error: ${JSON.stringify(errorData)}`);
+          } catch (e) {
+            throw new Error(
+              `API error: ${response.statusText} (${response.status})`
+            );
+          }
         }
 
         const data = await response.json();
@@ -220,236 +262,6 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (error) {
       console.error("Error generating feedback questions:", error);
       throw error;
-    }
-  }
-
-  /**
-   * Create enhanced prompts for Gemini
-   * @param {string} topic - Main topic for feedback questions
-   * @param {Object} options - Configuration options
-   * @returns {string} - Structured prompt for Gemini
-   */
-  function craftEnhancedPrompts(topic, options = {}) {
-    // Default options
-    const config = {
-      numQuestions: options.numQuestions || 5,
-      audience: options.audience || "relevant stakeholders",
-      questionDepth: options.questionDepth || "moderate",
-      goal:
-        options.goal ||
-        "gather actionable insights and identify improvement areas",
-      questionType: options.questionType || "open-ended",
-      mcqOptions: options.mcqOptions || "4",
-    };
-
-    // System instructions and user prompt combined for Gemini
-    const prompt = `You are an expert feedback question designer with deep experience in creating questions that generate meaningful insights and actionable feedback.
-
-CONTEXT:
-- Topic for feedback: ${topic}
-- Target audience: ${config.audience}
-- Primary goal: ${config.goal}
-- Question format: ${config.questionType}
-
-REQUIREMENTS:
-1. Generate exactly ${config.numQuestions} high-quality feedback questions 
-2. Questions should be ${config.questionDepth} in depth
-3. Question format should be: ${config.questionType}
-${
-  config.questionType === "open-ended"
-    ? `4. Include a diverse mix of question types:
-   - Reflective questions that explore experiences
-   - Comparative questions that benchmark against alternatives
-   - Evaluative questions that assess specific aspects
-   - Future-oriented questions that look for improvement ideas
-   - Specific questions that target known pain points`
-    : ""
-}
-${
-  config.questionType === "multiple-choice"
-    ? `4. Create multiple-choice questions with exactly ${config.mcqOptions} options per question
-   - Each option should be distinct and reasonable
-   - Include a mix of positive, neutral, and critical options
-   - Options should cover the full range of likely responses
-   - Format each option with a clear letter/number identifier (e.g., A, B, C or 1, 2, 3)`
-    : ""
-}
-${
-  config.questionType === "likert-scale"
-    ? `4. Create Likert scale questions with a 1-5 scale
-   - Clearly indicate what each end of the scale represents (e.g., 1=Strongly Disagree, 5=Strongly Agree)
-   - Ensure statements are clear and directly measurable
-   - Avoid double-barreled questions (asking about two things at once)`
-    : ""
-}
-${
-  config.questionType === "mixed"
-    ? `4. Create a mix of question formats:
-   - At least one open-ended question for detailed feedback
-   - At least one multiple-choice question with ${config.mcqOptions} options
-   - At least one Likert scale question (1-5 rating)
-   - Remaining questions in any appropriate format that suits the topic`
-    : ""
-}
-
-QUESTION QUALITY GUIDELINES:
-- Each question must be open-ended (not answerable with yes/no)
-- Use clear, concise, and accessible language
-- Focus on a single concept per question
-- Avoid leading or biased phrasing
-- Sequence questions logically from general to specific
-- Ensure questions address both strengths and weaknesses
-- Each question should reveal actionable insights
-
-OUTPUT FORMAT:
-Return a JSON array containing exactly ${
-      config.numQuestions
-    } question objects, each with:
-1. "question": The complete question text
-2. "intent": Brief explanation of what insights this question aims to uncover
-3. "category": The question type (reflective, comparative, evaluative, etc.)
-4. "followUp": One potential follow-up prompt if the initial answer needs more depth
-${
-  config.questionType === "multiple-choice" || config.questionType === "mixed"
-    ? '5. "options": Array of possible answers if the question is multiple choice'
-    : ""
-}
-${
-  config.questionType === "likert-scale" || config.questionType === "mixed"
-    ? '6. "scale": Scale description if the question uses a Likert scale (e.g., {"1": "Strongly Disagree", "5": "Strongly Agree"})'
-    : ""
-}
-
-Please generate ${
-      config.numQuestions
-    } outstanding feedback questions about: "${topic}"
-
-Here are examples of the quality and style I need:
-
-${
-  config.questionType === "open-ended" || config.questionType === "mixed"
-    ? `Example 1 - OPEN-ENDED QUESTION:
-❌ INEFFECTIVE: "Did you like using our video conferencing software?" 
-   (Problem: Yes/no question, too vague, doesn't target specific insights)
-   
-✅ EFFECTIVE: "Which specific features of our video conferencing software were most valuable during your remote collaboration, and which created obstacles to your productivity?"
-   (Good because: Open-ended, targets specific experience, contrasts positives and negatives)
-
-Example 2 - OPEN-ENDED QUESTION:
-❌ INEFFECTIVE: "How was our customer support?" 
-   (Problem: Too general, doesn't guide toward specific insights)
-   
-✅ EFFECTIVE: "Thinking about your most recent interaction with our support team, what aspects of the resolution process exceeded your expectations, and where did you feel the experience fell short?"
-   (Good because: Anchors to specific experience, explores both positives and areas for improvement)`
-    : ""
-}
-
-${
-  config.questionType === "multiple-choice" || config.questionType === "mixed"
-    ? `Example 3 - MULTIPLE CHOICE QUESTION:
-❌ INEFFECTIVE: "Did you like the product?" with options: "Yes, No, Maybe"
-   (Problem: Overly simplistic, doesn't provide actionable insights)
-   
-✅ EFFECTIVE: "Which aspect of the onboarding process had the greatest impact on your ability to use the product effectively?" with options:
-   A. The interactive tutorial that highlighted key features
-   B. The personalized recommendations based on my stated goals
-   C. The documentation and knowledge base resources
-   D. The availability of customer support during setup
-   (Good because: Specific focus, meaningful options, actionable insights)`
-    : ""
-}
-
-${
-  config.questionType === "likert-scale" || config.questionType === "mixed"
-    ? `Example 4 - LIKERT SCALE QUESTION:
-❌ INEFFECTIVE: "Rate our product." (1-5)
-   (Problem: Too vague, no context for what the ratings mean)
-   
-✅ EFFECTIVE: "The checkout process was efficient and straightforward." (1 = Strongly Disagree, 2 = Disagree, 3 = Neutral, 4 = Agree, 5 = Strongly Agree)
-   (Good because: Clear statement, defined scale, measures specific aspect)`
-    : ""
-}
-
-Remember to format your response as a JSON array of question objects as specified. Please generate ${
-      config.numQuestions
-    } questions of similar quality for the topic: "${topic}"
-
-FORMAT YOUR RESPONSE AS VALID JSON WITH NO ADDITIONAL TEXT.`;
-
-    return prompt;
-  }
-
-  /**
-   * Parse and structure the Gemini response
-   * @param {string} content - Raw content from Gemini response
-   * @param {number} requestedCount - Number of questions requested
-   * @returns {object} - Structured array of questions
-   */
-  function parseAndStructureResponse(content, requestedCount) {
-    // First try to parse as JSON
-    try {
-      // Extract JSON if there are text markers around it
-      let jsonContent = content;
-      const jsonMatch =
-        content.match(/```json\n([\s\S]*?)\n```/) ||
-        content.match(/```\n([\\s\S]*?)\n```/) ||
-        content.match(/\{[\\s\S]*\}/) ||
-        content.match(/\[[\s\S]*\]/);
-
-      if (jsonMatch) {
-        jsonContent = jsonMatch[0].replace(/```json\n|```\n|```/g, "");
-      }
-
-      // Check if the content is already in JSON format
-      const parsedContent = JSON.parse(jsonContent);
-
-      // If it's an array with questions property, return it
-      if (Array.isArray(parsedContent)) {
-        return { suggestions: parsedContent };
-      }
-
-      // If it has a questions property as an array
-      if (parsedContent.questions && Array.isArray(parsedContent.questions)) {
-        return { suggestions: parsedContent.questions };
-      }
-
-      // Otherwise return the whole parsed content
-      return { suggestions: parsedContent };
-    } catch (e) {
-      console.error("Error parsing JSON:", e);
-
-      // Not valid JSON, so process as text
-
-      // Try to identify numbered questions (1., 2., etc.)
-      const numberedQuestionsRegex = /\d+\.\s+(.+?)(?=\n\d+\.|\n\n|$)/gs;
-      const numberedMatches = [...content.matchAll(numberedQuestionsRegex)];
-
-      if (numberedMatches.length >= requestedCount) {
-        return {
-          suggestions: numberedMatches.map((match) => ({
-            question: match[1].trim(),
-            intent: "To gather feedback on this specific aspect",
-          })),
-        };
-      }
-
-      // Fall back to splitting by newlines and filtering empty lines
-      const lines = content
-        .split("\n")
-        .map((line) => line.trim())
-        .filter(
-          (line) =>
-            line.length > 0 &&
-            !line.startsWith("#") &&
-            !line.match(/^Question \d+:/i)
-        );
-
-      return {
-        suggestions: lines.map((line) => ({
-          question: line.replace(/^\d+\.\s*/, ""), // Remove leading numbers if any
-          intent: "To gather specific feedback",
-        })),
-      };
     }
   }
 
