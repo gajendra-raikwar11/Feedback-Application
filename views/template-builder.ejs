@@ -1,591 +1,1033 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Form Template Builder</title>
-     <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- FontAwesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- DataTables CSS -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
-  <!-- Responsive DataTables CSS -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css">
-  <!-- DataTables Buttons CSS -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- FontAwesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- DataTables CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css"
+    />
+    <!-- Responsive DataTables CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css"
+    />
+    <!-- DataTables Buttons CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
     <style>
-        :root {
-            --sidebar-width: 250px;
-            --topbar-height: 60px;
-        }
-        
-        body {
-            min-height: 100vh;
-            background-color: #f5f7fb;
-        }
-        
+      :root {
+        --sidebar-width: 250px;
+        --topbar-height: 60px;
+      }
+
+      body {
+        min-height: 100vh;
+        background-color: #f5f7fb;
+      }
+
+      .main-content {
+        margin-left: var(--sidebar-width);
+        padding-top: var(--topbar-height);
+        transition: margin-left 0.3s;
+        min-height: 100vh;
+      }
+
+      @media (max-width: 992px) {
         .main-content {
-            margin-left: var(--sidebar-width);
-            padding-top: var(--topbar-height);
-            transition: margin-left 0.3s;
-            min-height: 100vh;
+          margin-left: 0;
         }
-        
-        @media (max-width: 992px) {
-            .main-content {
-                margin-left: 0;
-            }
-        }
-        
-        .section-card {
-            margin-bottom: 1.5rem;
-            border: 1px solid #dee2e6;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            background-color: #f8f9fa;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            transition: all 0.3s ease;
-        }
-        
-        .section-card:hover {
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-        }
-        
-        .question-card {
-            margin-bottom: 1rem;
-            border: 1px solid #e9ecef;
-            border-radius: 0.5rem;
-            padding: 1.25rem;
-            background-color: #ffffff;
-            transition: all 0.3s ease;
-        }
-        
-        .question-card:hover {
-            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
-        }
-        
-        .options-container {
-            margin-top: 15px;
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 0.375rem;
-        }
-        
-        .option-item {
-            margin-bottom: 8px;
-        }
-        
-        .grid-options {
-            margin-top: 15px;
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 0.375rem;
-        }
-        
-        .btn-remove {
-            color: #dc3545;
-            cursor: pointer;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
+      }
+
+      .section-card {
+        margin-bottom: 1.5rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        transition: all 0.3s ease;
+      }
+
+      .section-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+      }
+
+      .question-card {
+        margin-bottom: 1rem;
+        border: 1px solid #e9ecef;
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        background-color: #ffffff;
+        transition: all 0.3s ease;
+      }
+
+      .question-card:hover {
+        box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+      }
+
+      .options-container {
+        margin-top: 15px;
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 0.375rem;
+      }
+
+      .option-item {
+        margin-bottom: 8px;
+      }
+
+      .grid-options {
+        margin-top: 15px;
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 0.375rem;
+      }
+
+      .btn-remove {
+        color: #dc3545;
+        cursor: pointer;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .form-header {
+        background: linear-gradient(to right, #4e73df, #36b9cc);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+      }
+
+      .form-header h1 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 600;
+      }
+
+      .form-container {
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .btn-add-section {
+        background-color: #4e73df;
+        color: white;
+        border: none;
+        border-radius: 0.25rem;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s;
+      }
+
+      .btn-add-section:hover {
+        background-color: #375cbf;
+        box-shadow: 0 0.25rem 0.5rem rgba(78, 115, 223, 0.1);
+      }
+
+      .toast-container {
+        position: fixed;
+        top: 70px;
+        right: 20px;
+        z-index: 1060;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
         .form-header {
-            background: linear-gradient(to right, #4e73df, #36b9cc);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+          padding: 1rem;
         }
-        
-        .form-header h1 {
-            margin: 0;
-            font-size: 1.75rem;
-            font-weight: 600;
-        }
-        
+
         .form-container {
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+          padding: 1rem;
         }
-        
-        .btn-add-section {
-            background-color: #4e73df;
-            color: white;
-            border: none;
-            border-radius: 0.25rem;
-            padding: 0.5rem 1rem;
-            font-weight: 500;
-            transition: all 0.3s;
+
+        .section-card,
+        .question-card {
+          padding: 1rem;
         }
-        
-        .btn-add-section:hover {
-            background-color: #375cbf;
-            box-shadow: 0 0.25rem 0.5rem rgba(78, 115, 223, 0.1);
-        }
-        
-        .toast-container {
-            position: fixed;
-            top: 70px;
-            right: 20px;
-            z-index: 1060;
-        }
-        
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .form-header {
-                padding: 1rem;
-            }
-            
-            .form-container {
-                padding: 1rem;
-            }
-            
-            .section-card, .question-card {
-                padding: 1rem;
-            }
-        }
+      }
     </style>
-</head>
-<body>
-   <!-- Topbar -->
-   <%- include('partials/adminTopNavbar', { admin: adminData }) %>
-   <!-- Sidebar -->
-   <%- include('./partials/adminSideNavbar', { path: currentPath ,admin: adminData  }) %>
+  </head>
+
+  <body>
+    <!-- Topbar -->
+    <%- include('partials/adminTopNavbar', { admin: adminData }) %>
+    <!-- Sidebar -->
+    <%- include('./partials/adminSideNavbar', { path: currentPath ,admin:
+    adminData }) %>
     <!-- Main Content -->
     <div class="main-content">
-        <div class="container-fluid px-4">
-    <div class="form-header p-4 rounded-3 mb-4"
-        style="background: linear-gradient(to right, #4e73df, #36b9cc); color: #fff;">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-    
+      <div class="container-fluid px-4">
+        <div
+          class="form-header p-4 rounded-3 mb-4"
+          style="
+            background: linear-gradient(to right, #4e73df, #36b9cc);
+            color: #fff;
+          "
+        >
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3"
+          >
             <h1 class="h3 m-0 d-flex align-items-center text-white">
-                <i class="bi bi-file-earmark-text me-2 fs-4 text-white"></i>
-                <span class="fw-semibold">Form Template Builder</span>
+              <i class="bi bi-file-earmark-text me-2 fs-4 text-white"></i>
+              <span class="fw-semibold">Form Template Builder</span>
             </h1>
-    
-            <a href="/admin/template/form-templates" class="btn btn-light d-flex align-items-center px-3 py-2 shadow-sm">
-                <i class="bi bi-collection me-2"></i>
-                <span>Available Templates</span>
+
+            <a
+              href="/admin/template/form-templates"
+              class="btn btn-light d-flex align-items-center px-3 py-2 shadow-sm"
+            >
+              <i class="bi bi-collection me-2"></i>
+              <span>Available Templates</span>
             </a>
-    
+          </div>
         </div>
-    </div>
 
-
-            
-            <div class="form-container">
-                <form id="templateForm" action="/admin/template/form-templates" method="POST">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label for="templateName" class="form-label">Template Name</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-fonts"></i></span>
-                                <input type="text" class="form-control" id="templateName" name="name" placeholder="Enter template name" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="formType" class="form-label">Form Type</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-tag"></i></span>
-                                <select class="form-select" id="formType" name="formType" required>
-                                    <option value="" disabled selected>Select a form type</option>
-                                    <option value="Academic">Academic</option>
-                                    <option value="Institutional">Institutional</option>
-                                    <option value="Training">Training</option>
-                                </select>
-                            </div>
-                        </div>
-                        <!-- Add this right after the form type dropdown in the row mb-4 div -->
-                        <div class="col-md-6 academic-type-container" style="display: none;">
-                            <label for="academicType" class="form-label">Academic Type</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-book"></i></span>
-                                <select class="form-select" id="academicType" name="academicType">
-                                    <option value="Theory" selected>Theory</option>
-                                    <option value="Practical">Practical</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <input type="hidden" id="createdBy" name="createdBy" value="<%= userId %>">
-                    
-                    <div id="sections-container">
-                        <!-- Sections will be added here -->
-                    </div>
-                    
-                    <button type="button" class="btn btn-add-section mb-4" id="addSectionBtn">
-                        <i class="bi bi-plus-circle me-1"></i> Add Section
-                    </button>
-                    
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="button" class="btn btn-secondary me-2" id="cancelBtn">Cancel</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-save me-1"></i> Save Template
-                        </button>
-                    </div>
-                </form>
+        <div class="form-container">
+          <form
+            id="templateForm"
+            action="/admin/template/form-templates"
+            method="POST"
+          >
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <label for="templateName" class="form-label"
+                  >Template Name</label
+                >
+                <div class="input-group">
+                  <span class="input-group-text"
+                    ><i class="bi bi-fonts"></i
+                  ></span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="templateName"
+                    name="name"
+                    placeholder="Enter template name"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="formType" class="form-label">Form Type</label>
+                <div class="input-group">
+                  <span class="input-group-text"
+                    ><i class="bi bi-tag"></i
+                  ></span>
+                  <select
+                    class="form-select"
+                    id="formType"
+                    name="formType"
+                    required
+                  >
+                    <option value="" disabled selected>
+                      Select a form type
+                    </option>
+                    <option value="Academic">Academic</option>
+                    <option value="Institutional">Institutional</option>
+                    <option value="Training">Training</option>
+                  </select>
+                </div>
+              </div>
+              <!-- Add this right after the form type dropdown in the row mb-4 div -->
+              <div
+                class="col-md-6 academic-type-container"
+                style="display: none"
+              >
+                <label for="academicType" class="form-label"
+                  >Academic Type</label
+                >
+                <div class="input-group">
+                  <span class="input-group-text"
+                    ><i class="bi bi-book"></i
+                  ></span>
+                  <select
+                    class="form-select"
+                    id="academicType"
+                    name="academicType"
+                  >
+                    <option value="Theory" selected>Theory</option>
+                    <option value="Practical">Practical</option>
+                  </select>
+                </div>
+              </div>
             </div>
+
+            <input
+              type="hidden"
+              id="createdBy"
+              name="createdBy"
+              value="<%= userId %>"
+            />
+
+            <div id="sections-container">
+              <!-- Sections will be added here -->
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-add-section mb-4"
+              id="addSectionBtn"
+            >
+              <i class="bi bi-plus-circle me-1"></i> Add Section
+            </button>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button
+                type="button"
+                class="btn btn-secondary me-2"
+                id="cancelBtn"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save me-1"></i> Save Template
+              </button>
+            </div>
+          </form>
         </div>
+      </div>
     </div>
-    
     <!-- Toast Container for Notifications -->
     <div class="toast-container">
-        <div id="formToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <i class="bi bi-info-circle me-2"></i>
-                <strong class="me-auto" id="toastTitle">Notification</strong>
-                <small id="toastTime">Just now</small>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body" id="toastMessage">
-                Form template operation completed.
-            </div>
+      <div
+        id="formToast"
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header">
+          <i class="bi bi-info-circle me-2"></i>
+          <strong class="me-auto" id="toastTitle">Notification</strong>
+          <small id="toastTime">Just now</small>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
         </div>
+        <div class="toast-body" id="toastMessage">
+          Form template operation completed.
+        </div>
+      </div>
     </div>
-    
+
     <!-- Section Template (hidden) -->
     <template id="section-template">
-        <div class="section-card">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <h4><i class="bi bi-collection me-2"></i>Section</h4>
-                <button type="button" class="btn-close remove-section" aria-label="Remove section"></button>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Section Title</label>
-                <input type="text" class="form-control section-title" name="sections[][title]" placeholder="Enter section title" required>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Section Description (Optional)</label>
-                <textarea class="form-control section-description" name="sections[][description]" rows="2" placeholder="Enter section description"></textarea>
-            </div>
-            
-            <div class="questions-container">
-                <!-- Questions will be added here -->
-            </div>
-            
-            <button type="button" class="btn btn-outline-primary btn-sm add-question-btn mt-3">
-                <i class="bi bi-plus-circle me-1"></i> Add Question
-            </button>
+      <div class="section-card">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <h4><i class="bi bi-collection me-2"></i>Section</h4>
+          <button
+            type="button"
+            class="btn-close remove-section"
+            aria-label="Remove section"
+          ></button>
         </div>
+
+        <div class="mb-3">
+          <label class="form-label">Section Title</label>
+          <input
+            type="text"
+            class="form-control section-title"
+            name="sections[][title]"
+            placeholder="Enter section title"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Section Description (Optional)</label>
+          <textarea
+            class="form-control section-description"
+            name="sections[][description]"
+            rows="2"
+            placeholder="Enter section description"
+          ></textarea>
+        </div>
+
+        <div class="questions-container">
+          <!-- Questions will be added here -->
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-outline-primary btn-sm add-question-btn mt-3"
+        >
+          <i class="bi bi-plus-circle me-1"></i> Add Question
+        </button>
+      </div>
     </template>
-    
+    <div class="mt-8 p-6 bg-white rounded-lg shadow-md">
+      <h3 class="text-xl font-semibold mb-4">
+        AI-Powered Feedback Question Generator
+      </h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Gemini Input Form -->
+        <div class="bg-gray-50 p-4 rounded-md">
+          <div class="mb-4">
+            <label
+              for="feedbackTopic"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Topic for Feedback Questions</label
+            >
+            <input
+              type="text"
+              id="feedbackTopic"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="e.g., Customer Satisfaction with New Product"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label
+                for="audience"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Target Audience</label
+              >
+              <input
+                type="text"
+                id="audience"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="e.g., Existing Customers"
+              />
+            </div>
+
+            <div>
+              <label
+                for="numQuestions"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Number of Questions</label
+              >
+              <select
+                id="numQuestions"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="3">3 Questions</option>
+                <option value="5" selected>5 Questions</option>
+                <option value="7">7 Questions</option>
+                <option value="10">10 Questions</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label
+                for="questionType"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Question Type</label
+              >
+              <select
+                id="questionType"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="open-ended">Open-Ended</option>
+                <option value="multiple-choice">Multiple Choice</option>
+                <option value="likert-scale">Likert Scale</option>
+                <option value="mixed">Mixed Format</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                for="questionDepth"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Question Depth</label
+              >
+              <select
+                id="questionDepth"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="basic">Basic</option>
+                <option value="moderate" selected>Moderate</option>
+                <option value="in-depth">In-Depth</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="mcqOptionsContainer" class="mb-4 hidden">
+            <label
+              for="mcqOptions"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Multiple Choice Options</label
+            >
+            <select
+              id="mcqOptions"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="3">3 Options</option>
+              <option value="4" selected>4 Options</option>
+              <option value="5">5 Options</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label
+              for="goal"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Feedback Goal</label
+            >
+            <textarea
+              id="goal"
+              rows="2"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="e.g., Identify product improvement areas and customer satisfaction levels"
+            ></textarea>
+          </div>
+
+          <div class="mb-4">
+            <label
+              for="model"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >AI Model</label
+            >
+            <select
+              id="model"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="gemini-1.5-pro" selected>Gemini 1.5 Pro</option>
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+            </select>
+          </div>
+
+          <button
+            id="generateQuestions"
+            class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Generate Feedback Questions
+          </button>
+        </div>
+
+        <!-- Generated Questions Display -->
+        <div class="bg-gray-50 p-4 rounded-md">
+          <div id="loadingIndicator" class="hidden">
+            <div class="flex items-center justify-center h-40">
+              <div
+                class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"
+              ></div>
+            </div>
+            <p class="text-center text-gray-600">
+              Generating high-quality feedback questions...
+            </p>
+          </div>
+
+          <div id="errorContainer" class="hidden">
+            <div class="bg-red-50 border-l-4 border-red-400 p-4">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg
+                    class="h-5 w-5 text-red-400"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <p class="text-sm text-red-700" id="errorMessage">
+                    An error occurred while generating questions.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="resultsContainer" class="hidden">
+            <h4 class="font-medium text-lg mb-2">Generated Questions</h4>
+            <div id="questionsContainer" class="space-y-4">
+              <!-- Questions will be inserted here -->
+            </div>
+
+            <div class="mt-6 flex justify-between">
+              <button
+                id="useAllQuestions"
+                class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                Use All Questions
+              </button>
+              <button
+                id="generateMoreQuestions"
+                class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Generate More
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Question Template (hidden) -->
     <template id="question-template">
-        <div class="question-card">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <h5><i class="bi bi-question-circle me-2"></i>Question</h5>
-                <button type="button" class="btn-close remove-question" aria-label="Remove question"></button>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Question Text</label>
-                <input type="text" class="form-control question-text" name="sections[][questions][][questionText]" placeholder="Enter your question" required>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Question Type</label>
-                <select class="form-select question-type" name="sections[][questions][][questionType]" required>
-                    <option value="" disabled selected>Select a question type</option>
-                    <option value="text">Text Input</option>
-                    <option value="mcq">Multiple Choice</option>
-                    <option value="yes_no">Yes/No</option>
-                    <option value="rating">Rating</option>
-                    <option value="grid">Grid</option>
-                    <option value="dropdown">Dropdown</option>
-                    <option value="date">Date</option>
-                </select>
-            </div>
-            
-            <div class="options-container hidden">
-                <label class="form-label"><i class="bi bi-list-check me-1"></i>Options (comma separated)</label>
-                <div class="mb-3">
-                    <textarea class="form-control options-textarea" name="sections[][questions][][optionsText]" rows="3" placeholder="Enter options separated by commas (e.g. Option 1, Option 2, Option 3)"></textarea>
-                    <small class="form-text text-muted">Each option should be separated by a comma</small>
-                </div>
-            </div>
-            
-            <div class="grid-options hidden">
-                <div class="row">
-                    <div class="col-md-6">
-                        <label class="form-label"><i class="bi bi-grid-3x3-gap me-1"></i>Rows</label>
-                        <div class="grid-rows-container">
-                            <div class="input-group mb-2">
-                                <span class="input-group-text"><i class="bi bi-arrow-right"></i></span>
-                                <input type="text" class="form-control grid-row-input" name="sections[][questions][][gridOptions][rows][]" placeholder="Row label">
-                                <button type="button" class="btn btn-outline-danger remove-grid-row">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-outline-secondary btn-sm add-grid-row-btn mt-2">
-                            <i class="bi bi-plus-circle me-1"></i> Add Row
-                        </button>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label"><i class="bi bi-grid-3x3-gap me-1"></i>Columns</label>
-                        <div class="grid-cols-container">
-                            <div class="input-group mb-2">
-                                <span class="input-group-text"><i class="bi bi-arrow-down"></i></span>
-                                <input type="text" class="form-control grid-col-input" name="sections[][questions][][gridOptions][columns][]" placeholder="Column label">
-                                <button type="button" class="btn btn-outline-danger remove-grid-col">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-outline-secondary btn-sm add-grid-col-btn mt-2">
-                            <i class="bi bi-plus-circle me-1"></i> Add Column
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="form-check mt-3">
-                <input class="form-check-input question-required" type="checkbox" value="true" name="sections[][questions][][required]" checked>
-                <label class="form-check-label">Required</label>
-            </div>
+      <div class="question-card">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <h5><i class="bi bi-question-circle me-2"></i>Question</h5>
+          <button
+            type="button"
+            class="btn-close remove-question"
+            aria-label="Remove question"
+          ></button>
         </div>
+
+        <div class="mb-3">
+          <label class="form-label">Question Text</label>
+          <input
+            type="text"
+            class="form-control question-text"
+            name="sections[][questions][][questionText]"
+            placeholder="Enter your question"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Question Type</label>
+          <select
+            class="form-select question-type"
+            name="sections[][questions][][questionType]"
+            required
+          >
+            <option value="" disabled selected>Select a question type</option>
+            <option value="text">Text Input</option>
+            <option value="mcq">Multiple Choice</option>
+            <option value="yes_no">Yes/No</option>
+            <option value="rating">Rating</option>
+            <option value="grid">Grid</option>
+            <option value="dropdown">Dropdown</option>
+            <option value="date">Date</option>
+          </select>
+        </div>
+
+        <div class="options-container hidden">
+          <label class="form-label"
+            ><i class="bi bi-list-check me-1"></i>Options (comma
+            separated)</label
+          >
+          <div class="mb-3">
+            <textarea
+              class="form-control options-textarea"
+              name="sections[][questions][][optionsText]"
+              rows="3"
+              placeholder="Enter options separated by commas (e.g. Option 1, Option 2, Option 3)"
+            ></textarea>
+            <small class="form-text text-muted"
+              >Each option should be separated by a comma</small
+            >
+          </div>
+        </div>
+
+        <div class="grid-options hidden">
+          <div class="row">
+            <div class="col-md-6">
+              <label class="form-label"
+                ><i class="bi bi-grid-3x3-gap me-1"></i>Rows</label
+              >
+              <div class="grid-rows-container">
+                <div class="input-group mb-2">
+                  <span class="input-group-text"
+                    ><i class="bi bi-arrow-right"></i
+                  ></span>
+                  <input
+                    type="text"
+                    class="form-control grid-row-input"
+                    name="sections[][questions][][gridOptions][rows][]"
+                    placeholder="Row label"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger remove-grid-row"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-sm add-grid-row-btn mt-2"
+              >
+                <i class="bi bi-plus-circle me-1"></i> Add Row
+              </button>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label"
+                ><i class="bi bi-grid-3x3-gap me-1"></i>Columns</label
+              >
+              <div class="grid-cols-container">
+                <div class="input-group mb-2">
+                  <span class="input-group-text"
+                    ><i class="bi bi-arrow-down"></i
+                  ></span>
+                  <input
+                    type="text"
+                    class="form-control grid-col-input"
+                    name="sections[][questions][][gridOptions][columns][]"
+                    placeholder="Column label"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger remove-grid-col"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-sm add-grid-col-btn mt-2"
+              >
+                <i class="bi bi-plus-circle me-1"></i> Add Column
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-check mt-3">
+          <input
+            class="form-check-input question-required"
+            type="checkbox"
+            value="true"
+            name="sections[][questions][][required]"
+            checked
+          />
+          <label class="form-check-label">Required</label>
+        </div>
+      </div>
     </template>
-    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/scripts/geminiServices.js"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    const sectionsContainer = document.getElementById('sections-container');
-    const addSectionBtn = document.getElementById('addSectionBtn');
-    const sectionTemplate = document.getElementById('section-template');
-    const questionTemplate = document.getElementById('question-template');
-    const cancelBtn = document.getElementById('cancelBtn');
-    
-    // Toast initialization
-    const formToast = document.getElementById('formToast');
-    const toast = new bootstrap.Toast(formToast, {
-        delay: 3000
-    });
-    
-    // Function to show toast message
-    function showToast(title, message, type = 'success') {
-        const toastElement = document.getElementById('formToast');
-        const toastTitle = document.getElementById('toastTitle');
-        const toastMessage = document.getElementById('toastMessage');
-        const toastTime = document.getElementById('toastTime');
-        
-        // Set toast content
-        toastTitle.textContent = title;
-        toastMessage.textContent = message;
-        toastTime.textContent = new Date().toLocaleTimeString();
-        
-        // Set toast color based on type
-        toastElement.className = 'toast';
-        if (type === 'success') {
-            toastElement.classList.add('text-bg-success');
-        } else if (type === 'error') {
-            toastElement.classList.add('text-bg-danger');
-        } else if (type === 'warning') {
-            toastElement.classList.add('text-bg-warning');
-        } else if (type === 'info') {
-            toastElement.classList.add('text-bg-info');
-        }
-        
-        // Show toast
-        const bsToast = new bootstrap.Toast(toastElement);
-        bsToast.show();
-    }
-    
-    // Counter to keep track of section indices
-    let sectionCounter = 0;
-    
-    // Add section
-    addSectionBtn.addEventListener('click', function() {
-        addSection();
-        showToast('Section Added', 'New section has been added to the form template', 'info');
-    });
-    
-    // Cancel button functionality
-    cancelBtn.addEventListener('click', function() {
-        if (confirm('Are you sure you want to cancel? All changes will be lost.')) {
-            window.location.href = '/admin/adminHome';
-        }
-    });
-    
-    // Show/hide Academic Type dropdown based on Form Type
-    document.getElementById('formType').addEventListener('change', function() {
-        const academicTypeContainer = document.querySelector('.academic-type-container');
-        if (this.value === 'Academic') {
-            academicTypeContainer.style.display = 'block';
-        } else {
-            academicTypeContainer.style.display = 'none';
-            // Reset to default value when hidden
-            document.getElementById('academicType').value = 'Theory';
-        }
-    });
+      document.addEventListener("DOMContentLoaded", function () {
+        const sectionsContainer = document.getElementById("sections-container");
+        const addSectionBtn = document.getElementById("addSectionBtn");
+        const sectionTemplate = document.getElementById("section-template");
+        const questionTemplate = document.getElementById("question-template");
+        const cancelBtn = document.getElementById("cancelBtn");
 
-    // Initialize the academicType visibility based on initial form type
-    if (document.getElementById('formType').value === 'Academic') {
-        document.querySelector('.academic-type-container').style.display = 'block';
-    }
+        // Toast initialization
+        const formToast = document.getElementById("formToast");
+        const toast = new bootstrap.Toast(formToast, {
+          delay: 3000,
+        });
 
-    // Function to add a new section
-    function addSection() {
-        const sectionIndex = sectionCounter++;
-        const sectionClone = document.importNode(sectionTemplate.content, true);
-        
-        // Update name attributes with correct indices
-        const inputs = sectionClone.querySelectorAll('input, textarea, select');
-        inputs.forEach(input => {
+        // Function to show toast message
+        function showToast(title, message, type = "success") {
+          const toastElement = document.getElementById("formToast");
+          const toastTitle = document.getElementById("toastTitle");
+          const toastMessage = document.getElementById("toastMessage");
+          const toastTime = document.getElementById("toastTime");
+
+          // Set toast content
+          toastTitle.textContent = title;
+          toastMessage.textContent = message;
+          toastTime.textContent = new Date().toLocaleTimeString();
+
+          // Set toast color based on type
+          toastElement.className = "toast";
+          if (type === "success") {
+            toastElement.classList.add("text-bg-success");
+          } else if (type === "error") {
+            toastElement.classList.add("text-bg-danger");
+          } else if (type === "warning") {
+            toastElement.classList.add("text-bg-warning");
+          } else if (type === "info") {
+            toastElement.classList.add("text-bg-info");
+          }
+
+          // Show toast
+          const bsToast = new bootstrap.Toast(toastElement);
+          bsToast.show();
+        }
+
+        // Counter to keep track of section indices
+        let sectionCounter = 0;
+
+        // Add section
+        addSectionBtn.addEventListener("click", function () {
+          addSection();
+          showToast(
+            "Section Added",
+            "New section has been added to the form template",
+            "info"
+          );
+        });
+
+        // Cancel button functionality
+        cancelBtn.addEventListener("click", function () {
+          if (
+            confirm(
+              "Are you sure you want to cancel? All changes will be lost."
+            )
+          ) {
+            window.location.href = "/admin/adminHome";
+          }
+        });
+
+        // Show/hide Academic Type dropdown based on Form Type
+        document
+          .getElementById("formType")
+          .addEventListener("change", function () {
+            const academicTypeContainer = document.querySelector(
+              ".academic-type-container"
+            );
+            if (this.value === "Academic") {
+              academicTypeContainer.style.display = "block";
+            } else {
+              academicTypeContainer.style.display = "none";
+              // Reset to default value when hidden
+              document.getElementById("academicType").value = "Theory";
+            }
+          });
+
+        // Initialize the academicType visibility based on initial form type
+        if (document.getElementById("formType").value === "Academic") {
+          document.querySelector(".academic-type-container").style.display =
+            "block";
+        }
+
+        // Function to add a new section
+        function addSection() {
+          const sectionIndex = sectionCounter++;
+          const sectionClone = document.importNode(
+            sectionTemplate.content,
+            true
+          );
+
+          // Update name attributes with correct indices
+          const inputs = sectionClone.querySelectorAll(
+            "input, textarea, select"
+          );
+          inputs.forEach((input) => {
             if (input.name) {
-                input.name = input.name.replace('sections[]', `sections[${sectionIndex}]`);
+              input.name = input.name.replace(
+                "sections[]",
+                `sections[${sectionIndex}]`
+              );
             }
-        });
-        
-        // Add question button functionality
-        const addQuestionBtn = sectionClone.querySelector('.add-question-btn');
-        addQuestionBtn.addEventListener('click', function() {
-            addQuestion(this.closest('.section-card').querySelector('.questions-container'), sectionIndex);
-            showToast('Question Added', 'New question has been added to the section', 'info');
-        });
-        
-        // Remove section functionality
-        const removeBtn = sectionClone.querySelector('.remove-section');
-        removeBtn.addEventListener('click', function() {
-            if (confirm('Are you sure you want to remove this section?')) {
-                this.closest('.section-card').remove();
-                showToast('Section Removed', 'Section has been removed from the form template', 'warning');
+          });
+
+          // Add question button functionality
+          const addQuestionBtn =
+            sectionClone.querySelector(".add-question-btn");
+          addQuestionBtn.addEventListener("click", function () {
+            addQuestion(
+              this.closest(".section-card").querySelector(
+                ".questions-container"
+              ),
+              sectionIndex
+            );
+            showToast(
+              "Question Added",
+              "New question has been added to the section",
+              "info"
+            );
+          });
+
+          // Remove section functionality
+          const removeBtn = sectionClone.querySelector(".remove-section");
+          removeBtn.addEventListener("click", function () {
+            if (confirm("Are you sure you want to remove this section?")) {
+              this.closest(".section-card").remove();
+              showToast(
+                "Section Removed",
+                "Section has been removed from the form template",
+                "warning"
+              );
             }
-        });
-        
-        sectionsContainer.appendChild(sectionClone);
-        
-        // Add an initial question to this section
-        const questionsContainer = sectionsContainer.lastElementChild.querySelector('.questions-container');
-        addQuestion(questionsContainer, sectionIndex);
-    }
-    
-    // Function to add a new question to a section
-    function addQuestion(container, sectionIndex) {
-        // Find the number of existing questions in this section to determine the question index
-        const questionIndex = container.children.length;
-        const questionClone = document.importNode(questionTemplate.content, true);
-        
-        // Update name attributes with correct indices
-        const inputs = questionClone.querySelectorAll('input, textarea, select');
-        inputs.forEach(input => {
+          });
+
+          sectionsContainer.appendChild(sectionClone);
+
+          // Add an initial question to this section
+          const questionsContainer =
+            sectionsContainer.lastElementChild.querySelector(
+              ".questions-container"
+            );
+          addQuestion(questionsContainer, sectionIndex);
+        }
+
+        // Function to add a new question to a section
+        function addQuestion(container, sectionIndex) {
+          // Find the number of existing questions in this section to determine the question index
+          const questionIndex = container.children.length;
+          const questionClone = document.importNode(
+            questionTemplate.content,
+            true
+          );
+
+          // Update name attributes with correct indices
+          const inputs = questionClone.querySelectorAll(
+            "input, textarea, select"
+          );
+          inputs.forEach((input) => {
             if (input.name) {
-                input.name = input.name
-                    .replace('sections[]', `sections[${sectionIndex}]`)
-                    .replace('questions[]', `questions[${questionIndex}]`);
+              input.name = input.name
+                .replace("sections[]", `sections[${sectionIndex}]`)
+                .replace("questions[]", `questions[${questionIndex}]`);
             }
-        });
-        
-        // Question type change handler
-        const questionTypeSelect = questionClone.querySelector('.question-type');
-        questionTypeSelect.addEventListener('change', function() {
-            const questionCard = this.closest('.question-card');
-            const optionsContainer = questionCard.querySelector('.options-container');
-            const gridOptions = questionCard.querySelector('.grid-options');
-            
+          });
+
+          // Question type change handler
+          const questionTypeSelect =
+            questionClone.querySelector(".question-type");
+          questionTypeSelect.addEventListener("change", function () {
+            const questionCard = this.closest(".question-card");
+            const optionsContainer =
+              questionCard.querySelector(".options-container");
+            const gridOptions = questionCard.querySelector(".grid-options");
+
             // Hide both by default
-            optionsContainer.classList.add('hidden');
-            gridOptions.classList.add('hidden');
-            
+            optionsContainer.classList.add("hidden");
+            gridOptions.classList.add("hidden");
+
             // Show relevant container based on question type
-            if (['mcq', 'rating', 'dropdown', 'yes_no'].includes(this.value)) {
-                optionsContainer.classList.remove('hidden');
-                const optionsTextarea = optionsContainer.querySelector('.options-textarea');
-                
-                // For rating, add numeric options (1-5) by default
-                if (this.value === 'rating') {
-                    optionsTextarea.value = "1,2,3,4,5";
+            if (["mcq", "rating", "dropdown", "yes_no"].includes(this.value)) {
+              optionsContainer.classList.remove("hidden");
+              const optionsTextarea =
+                optionsContainer.querySelector(".options-textarea");
+
+              // For rating, add numeric options (1-5) by default
+              if (this.value === "rating") {
+                optionsTextarea.value = "1,2,3,4,5";
+              }
+
+              // For yes/no, add yes and no options by default
+              if (this.value === "yes_no") {
+                optionsTextarea.value = "Yes,No";
+              }
+
+              // For MCQ and dropdown, add default options
+              if (this.value === "mcq" || this.value === "dropdown") {
+                if (optionsTextarea.value.trim() === "") {
+                  optionsTextarea.value = "Option 1,Option 2";
                 }
-                
-                // For yes/no, add yes and no options by default
-                if (this.value === 'yes_no') {
-                    optionsTextarea.value = "Yes,No";
-                }
-                
-                // For MCQ and dropdown, add default options
-                if (this.value === 'mcq' || this.value === 'dropdown') {
-                    if (optionsTextarea.value.trim() === '') {
-                        optionsTextarea.value = "Option 1,Option 2";
-                    }
-                }
-            } else if (this.value === 'grid') {
-                gridOptions.classList.remove('hidden');
-                
-                // Add default grid rows and columns if empty
-                const rowsContainer = gridOptions.querySelector('.grid-rows-container');
-                const colsContainer = gridOptions.querySelector('.grid-cols-container');
-                
-                if (rowsContainer.querySelectorAll('.input-group').length === 0) {
-                    // Add two default rows
-                    for (let i = 0; i < 2; i++) {
-                        const rowItem = document.createElement('div');
-                        rowItem.className = 'input-group mb-2';
-                        rowItem.innerHTML = `
+              }
+            } else if (this.value === "grid") {
+              gridOptions.classList.remove("hidden");
+
+              // Add default grid rows and columns if empty
+              const rowsContainer = gridOptions.querySelector(
+                ".grid-rows-container"
+              );
+              const colsContainer = gridOptions.querySelector(
+                ".grid-cols-container"
+              );
+
+              if (rowsContainer.querySelectorAll(".input-group").length === 0) {
+                // Add two default rows
+                for (let i = 0; i < 2; i++) {
+                  const rowItem = document.createElement("div");
+                  rowItem.className = "input-group mb-2";
+                  rowItem.innerHTML = `
                             <span class="input-group-text"><i class="bi bi-arrow-right"></i></span>
-                            <input type="text" class="form-control grid-row-input" name="sections[${sectionIndex}][questions][${questionIndex}][gridOptions][rows][]" placeholder="Row ${i+1}">
+                            <input type="text" class="form-control grid-row-input" name="sections[${sectionIndex}][questions][${questionIndex}][gridOptions][rows][]" placeholder="Row ${
+                    i + 1
+                  }">
                             <button type="button" class="btn btn-outline-danger remove-grid-row">
                                 <i class="bi bi-trash"></i>
                             </button>
                         `;
-                        rowsContainer.appendChild(rowItem);
-                        
-                        // Add event listener to remove button
-                        const removeBtn = rowItem.querySelector('.remove-grid-row');
-                        removeBtn.addEventListener('click', function() {
-                            if (rowsContainer.querySelectorAll('.input-group').length > 1) {
-                                this.closest('.input-group').remove();
-                            } else {
-                                showToast('Cannot Remove', 'At least one row must remain', 'warning');
-                            }
-                        });
+                  rowsContainer.appendChild(rowItem);
+
+                  // Add event listener to remove button
+                  const removeBtn = rowItem.querySelector(".remove-grid-row");
+                  removeBtn.addEventListener("click", function () {
+                    if (
+                      rowsContainer.querySelectorAll(".input-group").length > 1
+                    ) {
+                      this.closest(".input-group").remove();
+                    } else {
+                      showToast(
+                        "Cannot Remove",
+                        "At least one row must remain",
+                        "warning"
+                      );
                     }
+                  });
                 }
-                
-                if (colsContainer.querySelectorAll('.input-group').length === 0) {
-                    // Add two default columns
-                    for (let i = 0; i < 2; i++) {
-                        const colItem = document.createElement('div');
-                        colItem.className = 'input-group mb-2';
-                        colItem.innerHTML = `
+              }
+
+              if (colsContainer.querySelectorAll(".input-group").length === 0) {
+                // Add two default columns
+                for (let i = 0; i < 2; i++) {
+                  const colItem = document.createElement("div");
+                  colItem.className = "input-group mb-2";
+                  colItem.innerHTML = `
                             <span class="input-group-text"><i class="bi bi-arrow-down"></i></span>
-                            <input type="text" class="form-control grid-col-input" name="sections[${sectionIndex}][questions][${questionIndex}][gridOptions][columns][]" placeholder="Column ${i+1}">
+                            <input type="text" class="form-control grid-col-input" name="sections[${sectionIndex}][questions][${questionIndex}][gridOptions][columns][]" placeholder="Column ${
+                    i + 1
+                  }">
                             <button type="button" class="btn btn-outline-danger remove-grid-col">
                                 <i class="bi bi-trash"></i>
                             </button>
                         `;
-                        colsContainer.appendChild(colItem);
-                        
-                        // Add event listener to remove button
-                        const removeBtn = colItem.querySelector('.remove-grid-col');
-                        removeBtn.addEventListener('click', function() {
-                            if (colsContainer.querySelectorAll('.input-group').length > 1) {
-                                this.closest('.input-group').remove();
-                            } else {
-                                showToast('Cannot Remove', 'At least one column must remain', 'warning');
-                            }
-                        });
-                    }
-                }
-            }
-        });
+                  colsContainer.appendChild(colItem);
 
-        // Add grid row and column button functionality
-        const addGridRowBtn = questionClone.querySelector('.add-grid-row-btn');
-        addGridRowBtn.addEventListener('click', function() {
-            const rowsContainer = this.closest('.col-md-6').querySelector('.grid-rows-container');
-            const rowItem = document.createElement('div');
-            rowItem.className = 'input-group mb-2';
+                  // Add event listener to remove button
+                  const removeBtn = colItem.querySelector(".remove-grid-col");
+                  removeBtn.addEventListener("click", function () {
+                    if (
+                      colsContainer.querySelectorAll(".input-group").length > 1
+                    ) {
+                      this.closest(".input-group").remove();
+                    } else {
+                      showToast(
+                        "Cannot Remove",
+                        "At least one column must remain",
+                        "warning"
+                      );
+                    }
+                  });
+                }
+              }
+            }
+          });
+
+          // Add grid row and column button functionality
+          const addGridRowBtn =
+            questionClone.querySelector(".add-grid-row-btn");
+          addGridRowBtn.addEventListener("click", function () {
+            const rowsContainer = this.closest(".col-md-6").querySelector(
+              ".grid-rows-container"
+            );
+            const rowItem = document.createElement("div");
+            rowItem.className = "input-group mb-2";
             rowItem.innerHTML = `
                 <span class="input-group-text"><i class="bi bi-arrow-right"></i></span>
                 <input type="text" class="form-control grid-row-input" name="sections[${sectionIndex}][questions][${questionIndex}][gridOptions][rows][]" placeholder="Row label">
@@ -594,23 +1036,30 @@
                 </button>
             `;
             rowsContainer.appendChild(rowItem);
-            
+
             // Add event listener to remove button
-            const removeBtn = rowItem.querySelector('.remove-grid-row');
-            removeBtn.addEventListener('click', function() {
-                if (rowsContainer.querySelectorAll('.input-group').length > 1) {
-                    this.closest('.input-group').remove();
-                } else {
-                    showToast('Cannot Remove', 'At least one row must remain', 'warning');
-                }
+            const removeBtn = rowItem.querySelector(".remove-grid-row");
+            removeBtn.addEventListener("click", function () {
+              if (rowsContainer.querySelectorAll(".input-group").length > 1) {
+                this.closest(".input-group").remove();
+              } else {
+                showToast(
+                  "Cannot Remove",
+                  "At least one row must remain",
+                  "warning"
+                );
+              }
             });
-        });
-        
-        const addGridColBtn = questionClone.querySelector('.add-grid-col-btn');
-        addGridColBtn.addEventListener('click', function() {
-            const colsContainer = this.closest('.col-md-6').querySelector('.grid-cols-container');
-            const colItem = document.createElement('div');
-            colItem.className = 'input-group mb-2';
+          });
+
+          const addGridColBtn =
+            questionClone.querySelector(".add-grid-col-btn");
+          addGridColBtn.addEventListener("click", function () {
+            const colsContainer = this.closest(".col-md-6").querySelector(
+              ".grid-cols-container"
+            );
+            const colItem = document.createElement("div");
+            colItem.className = "input-group mb-2";
             colItem.innerHTML = `
                 <span class="input-group-text"><i class="bi bi-arrow-down"></i></span>
                 <input type="text" class="form-control grid-col-input" name="sections[${sectionIndex}][questions][${questionIndex}][gridOptions][columns][]" placeholder="Column label">
@@ -619,346 +1068,463 @@
                 </button>
             `;
             colsContainer.appendChild(colItem);
-            
+
             // Add event listener to remove button
-            const removeBtn = colItem.querySelector('.remove-grid-col');
-            removeBtn.addEventListener('click', function() {
-                if (colsContainer.querySelectorAll('.input-group').length > 1) {
-                    this.closest('.input-group').remove();
-                } else {
-                    showToast('Cannot Remove', 'At least one column must remain', 'warning');
-                }
+            const removeBtn = colItem.querySelector(".remove-grid-col");
+            removeBtn.addEventListener("click", function () {
+              if (colsContainer.querySelectorAll(".input-group").length > 1) {
+                this.closest(".input-group").remove();
+              } else {
+                showToast(
+                  "Cannot Remove",
+                  "At least one column must remain",
+                  "warning"
+                );
+              }
             });
-        });
+          });
 
-        // Remove question functionality
-        const removeQuestionBtn = questionClone.querySelector('.remove-question');
-        removeQuestionBtn.addEventListener('click', function() {
-            const questionsContainer = this.closest('.questions-container');
-            if (questionsContainer.querySelectorAll('.question-card').length > 1) {
-                if (confirm('Are you sure you want to remove this question?')) {
-                    this.closest('.question-card').remove();
-                    showToast('Question Removed', 'Question has been removed from the section', 'warning');
-                }
+          // Remove question functionality
+          const removeQuestionBtn =
+            questionClone.querySelector(".remove-question");
+          removeQuestionBtn.addEventListener("click", function () {
+            const questionsContainer = this.closest(".questions-container");
+            if (
+              questionsContainer.querySelectorAll(".question-card").length > 1
+            ) {
+              if (confirm("Are you sure you want to remove this question?")) {
+                this.closest(".question-card").remove();
+                showToast(
+                  "Question Removed",
+                  "Question has been removed from the section",
+                  "warning"
+                );
+              }
             } else {
-                showToast('Cannot Remove', 'Each section must contain at least one question', 'warning');
+              showToast(
+                "Cannot Remove",
+                "Each section must contain at least one question",
+                "warning"
+              );
             }
-        });
-        
-        // Add remove grid row/col functionality to initial grid options
-        const removeGridRowBtns = questionClone.querySelectorAll('.remove-grid-row');
-        removeGridRowBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const rowsContainer = this.closest('.grid-rows-container');
-                if (rowsContainer.querySelectorAll('.input-group').length > 1) {
-                    this.closest('.input-group').remove();
-                } else {
-                    showToast('Cannot Remove', 'At least one row must remain', 'warning');
-                }
+          });
+
+          // Add remove grid row/col functionality to initial grid options
+          const removeGridRowBtns =
+            questionClone.querySelectorAll(".remove-grid-row");
+          removeGridRowBtns.forEach((btn) => {
+            btn.addEventListener("click", function () {
+              const rowsContainer = this.closest(".grid-rows-container");
+              if (rowsContainer.querySelectorAll(".input-group").length > 1) {
+                this.closest(".input-group").remove();
+              } else {
+                showToast(
+                  "Cannot Remove",
+                  "At least one row must remain",
+                  "warning"
+                );
+              }
             });
-        });
+          });
 
-        const removeGridColBtns = questionClone.querySelectorAll('.remove-grid-col');
-        removeGridColBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const colsContainer = this.closest('.grid-cols-container');
-                if (colsContainer.querySelectorAll('.input-group').length > 1) {
-                    this.closest('.input-group').remove();
-                } else {
-                    showToast('Cannot Remove', 'At least one column must remain', 'warning');
-                }
+          const removeGridColBtns =
+            questionClone.querySelectorAll(".remove-grid-col");
+          removeGridColBtns.forEach((btn) => {
+            btn.addEventListener("click", function () {
+              const colsContainer = this.closest(".grid-cols-container");
+              if (colsContainer.querySelectorAll(".input-group").length > 1) {
+                this.closest(".input-group").remove();
+              } else {
+                showToast(
+                  "Cannot Remove",
+                  "At least one column must remain",
+                  "warning"
+                );
+              }
             });
-        });
+          });
 
-        container.appendChild(questionClone);
-    }
-
-    // Form submission handling
-    document.getElementById('templateForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Validate form
-        if (!validateForm()) {
-            return;
+          container.appendChild(questionClone);
         }
-        
-        // Show loading state
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalBtnText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Saving...';
-        submitBtn.disabled = true;
-        
-        try {
-            // Serialize form data to JSON
-            const formData = new FormData(this);
-            const jsonData = formDataToJson(formData);
-            
-            // ENHANCED LOGGING - log the exact structure being sent
-            console.log('Submitting form data (stringified):', JSON.stringify(jsonData, null, 2));
-            
-            // Send AJAX request
-            fetch('/admin/template/form-templates', {
-                method: 'POST',
+
+        // Form submission handling
+        document
+          .getElementById("templateForm")
+          .addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            // Validate form
+            if (!validateForm()) {
+              return;
+            }
+
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML =
+              '<i class="bi bi-hourglass-split me-1"></i> Saving...';
+            submitBtn.disabled = true;
+
+            try {
+              // Serialize form data to JSON
+              const formData = new FormData(this);
+              const jsonData = formDataToJson(formData);
+
+              // ENHANCED LOGGING - log the exact structure being sent
+              console.log(
+                "Submitting form data (stringified):",
+                JSON.stringify(jsonData, null, 2)
+              );
+
+              // Send AJAX request
+              fetch("/admin/template/form-templates", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json'
+                  "Content-Type": "application/json",
                 },
-                body: JSON.stringify(jsonData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        throw new Error(`Server error: ${response.status} - ${text}`);
+                body: JSON.stringify(jsonData),
+              })
+                .then((response) => {
+                  if (!response.ok) {
+                    return response.text().then((text) => {
+                      throw new Error(
+                        `Server error: ${response.status} - ${text}`
+                      );
                     });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Success response from server:', data);
-                showToast('Success', 'Form template saved successfully!', 'success');
-                setTimeout(() => {
-                    window.location.href = '/admin/template/form-templates';
-                }, 1500);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('Error', `Failed to save form template: ${error.message}`, 'error');
-                
-                // Reset button state
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-            });
-        } catch (error) {
-            console.error('Client-side error:', error);
-            showToast('Error', `Form processing error: ${error.message}`, 'error');
-            
-            // Reset button state
-            submitBtn.innerHTML = originalBtnText;
-            submitBtn.disabled = false;
-        }
-    });
+                  }
+                  return response.json();
+                })
+                .then((data) => {
+                  console.log("Success response from server:", data);
+                  showToast(
+                    "Success",
+                    "Form template saved successfully!",
+                    "success"
+                  );
+                  setTimeout(() => {
+                    window.location.href = "/admin/template/form-templates";
+                  }, 1500);
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                  showToast(
+                    "Error",
+                    `Failed to save form template: ${error.message}`,
+                    "error"
+                  );
 
-    // Function to validate form
-    function validateForm() {
-        let valid = true;
-        let firstError = null;
-        
-        // Check template name
-        const templateName = document.getElementById('templateName').value.trim();
-        if (!templateName) {
-            document.getElementById('templateName').focus();
-            showToast('Validation Error', 'Please enter a template name', 'error');
+                  // Reset button state
+                  submitBtn.innerHTML = originalBtnText;
+                  submitBtn.disabled = false;
+                });
+            } catch (error) {
+              console.error("Client-side error:", error);
+              showToast(
+                "Error",
+                `Form processing error: ${error.message}`,
+                "error"
+              );
+
+              // Reset button state
+              submitBtn.innerHTML = originalBtnText;
+              submitBtn.disabled = false;
+            }
+          });
+
+        // Function to validate form
+        function validateForm() {
+          let valid = true;
+          let firstError = null;
+
+          // Check template name
+          const templateName = document
+            .getElementById("templateName")
+            .value.trim();
+          if (!templateName) {
+            document.getElementById("templateName").focus();
+            showToast(
+              "Validation Error",
+              "Please enter a template name",
+              "error"
+            );
             return false;
-        }
-        
-        // Check form type
-        const formType = document.getElementById('formType').value;
-        if (!formType) {
-            document.getElementById('formType').focus();
-            showToast('Validation Error', 'Please select a form type', 'error');
+          }
+
+          // Check form type
+          const formType = document.getElementById("formType").value;
+          if (!formType) {
+            document.getElementById("formType").focus();
+            showToast("Validation Error", "Please select a form type", "error");
             return false;
-        }
-        
-        // Check if at least one section exists
-        const sections = document.querySelectorAll('.section-card');
-        if (sections.length === 0) {
-            showToast('Validation Error', 'Please add at least one section to the form', 'error');
+          }
+
+          // Check if at least one section exists
+          const sections = document.querySelectorAll(".section-card");
+          if (sections.length === 0) {
+            showToast(
+              "Validation Error",
+              "Please add at least one section to the form",
+              "error"
+            );
             return false;
-        }
-        
-        // Check each section
-        sections.forEach((section, sectionIndex) => {
+          }
+
+          // Check each section
+          sections.forEach((section, sectionIndex) => {
             // Check section title
-            const sectionTitle = section.querySelector('.section-title').value.trim();
+            const sectionTitle = section
+              .querySelector(".section-title")
+              .value.trim();
             if (!sectionTitle) {
-                if (!firstError) firstError = section.querySelector('.section-title');
-                valid = false;
-                console.error(`Section ${sectionIndex + 1} is missing a title`);
+              if (!firstError)
+                firstError = section.querySelector(".section-title");
+              valid = false;
+              console.error(`Section ${sectionIndex + 1} is missing a title`);
             }
-            
+
             // Check each question
-            const questions = section.querySelectorAll('.question-card');
+            const questions = section.querySelectorAll(".question-card");
             if (questions.length === 0) {
-                valid = false;
-                console.error(`Section ${sectionIndex + 1} has no questions`);
+              valid = false;
+              console.error(`Section ${sectionIndex + 1} has no questions`);
             }
-            
+
             questions.forEach((question, questionIndex) => {
-                // Check question text - this is critical
-                const questionText = question.querySelector('.question-text').value.trim();
-                if (!questionText) {
-                    if (!firstError) firstError = question.querySelector('.question-text');
+              // Check question text - this is critical
+              const questionText = question
+                .querySelector(".question-text")
+                .value.trim();
+              if (!questionText) {
+                if (!firstError)
+                  firstError = question.querySelector(".question-text");
+                valid = false;
+                console.error(
+                  `Question ${questionIndex + 1} in section ${
+                    sectionIndex + 1
+                  } is missing text`
+                );
+              }
+
+              // Check question type
+              const questionType =
+                question.querySelector(".question-type").value;
+              if (!questionType) {
+                if (!firstError)
+                  firstError = question.querySelector(".question-type");
+                valid = false;
+                console.error(
+                  `Question ${questionIndex + 1} in section ${
+                    sectionIndex + 1
+                  } is missing a type`
+                );
+              }
+
+              // Check options for multiple choice, rating, or dropdown questions
+              if (
+                ["mcq", "rating", "dropdown", "yes_no"].includes(questionType)
+              ) {
+                const optionsTextarea =
+                  question.querySelector(".options-textarea");
+                const optionsText = optionsTextarea.value.trim();
+
+                if (!optionsText) {
+                  if (!firstError) firstError = optionsTextarea;
+                  valid = false;
+                  console.error(
+                    `Question ${questionIndex + 1} in section ${
+                      sectionIndex + 1
+                    } has no options`
+                  );
+                } else {
+                  // Make sure at least one option is provided
+                  const options = optionsText
+                    .split(",")
+                    .filter((opt) => opt.trim() !== "");
+                  if (options.length === 0) {
+                    if (!firstError) firstError = optionsTextarea;
                     valid = false;
-                    console.error(`Question ${questionIndex + 1} in section ${sectionIndex + 1} is missing text`);
+                    console.error(
+                      `Question ${questionIndex + 1} in section ${
+                        sectionIndex + 1
+                      } has no valid options`
+                    );
+                  }
                 }
-                
-                // Check question type
-                const questionType = question.querySelector('.question-type').value;
-                if (!questionType) {
-                    if (!firstError) firstError = question.querySelector('.question-type');
-                    valid = false;
-                    console.error(`Question ${questionIndex + 1} in section ${sectionIndex + 1} is missing a type`);
+              }
+
+              // Check grid options
+              if (questionType === "grid") {
+                const rows = question.querySelectorAll(".grid-row-input");
+                const cols = question.querySelectorAll(".grid-col-input");
+                let hasValidRow = false;
+                let hasValidCol = false;
+
+                rows.forEach((row, rowIndex) => {
+                  if (row.value.trim()) {
+                    hasValidRow = true;
+                  } else {
+                    if (!firstError) firstError = row;
+                    console.error(
+                      `Row ${rowIndex + 1} for grid question ${
+                        questionIndex + 1
+                      } in section ${sectionIndex + 1} is empty`
+                    );
+                  }
+                });
+
+                cols.forEach((col, colIndex) => {
+                  if (col.value.trim()) {
+                    hasValidCol = true;
+                  } else {
+                    if (!firstError) firstError = col;
+                    console.error(
+                      `Column ${colIndex + 1} for grid question ${
+                        questionIndex + 1
+                      } in section ${sectionIndex + 1} is empty`
+                    );
+                  }
+                });
+
+                if (!hasValidRow || !hasValidCol) {
+                  valid = false;
+                  console.error(
+                    `Grid question ${questionIndex + 1} in section ${
+                      sectionIndex + 1
+                    } has empty rows or columns`
+                  );
                 }
-                
-                // Check options for multiple choice, rating, or dropdown questions
-                if (['mcq', 'rating', 'dropdown', 'yes_no'].includes(questionType)) {
-                    const optionsTextarea = question.querySelector('.options-textarea');
-                    const optionsText = optionsTextarea.value.trim();
-                    
-                    if (!optionsText) {
-                        if (!firstError) firstError = optionsTextarea;
-                        valid = false;
-                        console.error(`Question ${questionIndex + 1} in section ${sectionIndex + 1} has no options`);
-                    } else {
-                        // Make sure at least one option is provided
-                        const options = optionsText.split(',').filter(opt => opt.trim() !== '');
-                        if (options.length === 0) {
-                            if (!firstError) firstError = optionsTextarea;
-                            valid = false;
-                            console.error(`Question ${questionIndex + 1} in section ${sectionIndex + 1} has no valid options`);
-                        }
-                    }
-                }
-                
-                // Check grid options
-                if (questionType === 'grid') {
-                    const rows = question.querySelectorAll('.grid-row-input');
-                    const cols = question.querySelectorAll('.grid-col-input');
-                    let hasValidRow = false;
-                    let hasValidCol = false;
-                    
-                    rows.forEach((row, rowIndex) => {
-                        if (row.value.trim()) {
-                            hasValidRow = true;
-                        } else {
-                            if (!firstError) firstError = row;
-                            console.error(`Row ${rowIndex + 1} for grid question ${questionIndex + 1} in section ${sectionIndex + 1} is empty`);
-                        }
-                    });
-                    
-                    cols.forEach((col, colIndex) => {
-                        if (col.value.trim()) {
-                            hasValidCol = true;
-                        } else {
-                            if (!firstError) firstError = col;
-                            console.error(`Column ${colIndex + 1} for grid question ${questionIndex + 1} in section ${sectionIndex + 1} is empty`);
-                        }
-                    });
-                    
-                    if (!hasValidRow || !hasValidCol) {
-                        valid = false;
-                        console.error(`Grid question ${questionIndex + 1} in section ${sectionIndex + 1} has empty rows or columns`);
-                    }
-                }
+              }
             });
-        });
-        
-        // Focus on the first error field
-        if (firstError) {
+          });
+
+          // Focus on the first error field
+          if (firstError) {
             firstError.focus();
-        }
-        
-        if (!valid) {
-            showToast('Validation Error', 'Please fill in all required fields', 'error');
-        }
-        
-        return valid;
-    }
+          }
 
-    // Function to convert form data to JSON
-    function formDataToJson(formData) {
-        // Create template object
-        const template = {
-            name: formData.get('name'),
-            formType: formData.get('formType'),
-            createdBy: formData.get('createdBy') || '000000000000000000000000', // Provide a fallback value
-            sections: []
-        };
-        
-        // Add academicType ONLY if form type is Academic
-        if (formData.get('formType') === 'Academic') {
-            template.academicType = formData.get('academicType') || 'Theory'; // Ensure it has a default
+          if (!valid) {
+            showToast(
+              "Validation Error",
+              "Please fill in all required fields",
+              "error"
+            );
+          }
+
+          return valid;
         }
-        
-        // Get all sections
-        const sectionCards = document.querySelectorAll('.section-card');
-        
-        console.log(`Found ${sectionCards.length} sections to process`);
-        
-        sectionCards.forEach((sectionCard, sectionIndex) => {
+
+        // Function to convert form data to JSON
+        function formDataToJson(formData) {
+          // Create template object
+          const template = {
+            name: formData.get("name"),
+            formType: formData.get("formType"),
+            createdBy: formData.get("createdBy") || "000000000000000000000000", // Provide a fallback value
+            sections: [],
+          };
+
+          // Add academicType ONLY if form type is Academic
+          if (formData.get("formType") === "Academic") {
+            template.academicType = formData.get("academicType") || "Theory"; // Ensure it has a default
+          }
+
+          // Get all sections
+          const sectionCards = document.querySelectorAll(".section-card");
+
+          console.log(`Found ${sectionCards.length} sections to process`);
+
+          sectionCards.forEach((sectionCard, sectionIndex) => {
             const section = {
-                title: sectionCard.querySelector('.section-title').value || "",
-                description: sectionCard.querySelector('.section-description').value || "",
-                questions: []
+              title: sectionCard.querySelector(".section-title").value || "",
+              description:
+                sectionCard.querySelector(".section-description").value || "",
+              questions: [],
             };
-            
-            console.log(`Processing section ${sectionIndex}: "${section.title}"`);
-            
-            // Get all questions in this section
-            const questionCards = sectionCard.querySelectorAll('.question-card');
-            console.log(`Found ${questionCards.length} questions in section ${sectionIndex}`);
-            
-            questionCards.forEach((questionCard, questionIndex) => {
-                const questionType = questionCard.querySelector('.question-type').value;
-                const questionText = questionCard.querySelector('.question-text').value;
-                const isRequired = questionCard.querySelector('.question-required').checked;
-                
-                console.log(`Processing question ${questionIndex}: "${questionText}" (${questionType})`);
-                
-                const question = {
-                    questionText: questionText || "",
-                    questionType: questionType || "text",
-                    required: isRequired
-                };
-                
-                // Add options for applicable question types
-                if (['mcq', 'rating', 'dropdown', 'yes_no'].includes(questionType)) {
-                    const optionsTextarea = questionCard.querySelector('.options-textarea');
-                    const optionsText = optionsTextarea.value.trim();
-                    
-                    // Split the comma-separated text into individual options
-                    question.options = optionsText.split(',')
-                        .map(option => option.trim())
-                        .filter(option => option !== '');
-                        
-                    console.log(`Processed ${question.options.length} options for question ${questionIndex}`);
-                }
-                
-                // Add grid options for grid question type
-                if (questionType === 'grid') {
-                    question.gridOptions = {
-                        rows: [],
-                        columns: []
-                    };
-                    
-                    // Get all rows for this grid
-                    const rows = questionCard.querySelectorAll('.grid-row-input');
-                    rows.forEach(row => {
-                        if (row.value.trim()) {
-                            question.gridOptions.rows.push(row.value.trim());
-                        }
-                    });
-                    
-                    // Get all columns for this grid
-                    const cols = questionCard.querySelectorAll('.grid-col-input');
-                    cols.forEach(col => {
-                        if (col.value.trim()) {
-                            question.gridOptions.columns.push(col.value.trim());
-                        }
-                    });
-                }
-                
-                section.questions.push(question);
-            });
-            
-            template.sections.push(section);
-        });
-        
-        return template;
-    }
 
-    // Add initial section when page loads
-    addSection();
-});  
+            console.log(
+              `Processing section ${sectionIndex}: "${section.title}"`
+            );
+
+            // Get all questions in this section
+            const questionCards =
+              sectionCard.querySelectorAll(".question-card");
+            console.log(
+              `Found ${questionCards.length} questions in section ${sectionIndex}`
+            );
+
+            questionCards.forEach((questionCard, questionIndex) => {
+              const questionType =
+                questionCard.querySelector(".question-type").value;
+              const questionText =
+                questionCard.querySelector(".question-text").value;
+              const isRequired =
+                questionCard.querySelector(".question-required").checked;
+
+              console.log(
+                `Processing question ${questionIndex}: "${questionText}" (${questionType})`
+              );
+
+              const question = {
+                questionText: questionText || "",
+                questionType: questionType || "text",
+                required: isRequired,
+              };
+
+              // Add options for applicable question types
+              if (
+                ["mcq", "rating", "dropdown", "yes_no"].includes(questionType)
+              ) {
+                const optionsTextarea =
+                  questionCard.querySelector(".options-textarea");
+                const optionsText = optionsTextarea.value.trim();
+
+                // Split the comma-separated text into individual options
+                question.options = optionsText
+                  .split(",")
+                  .map((option) => option.trim())
+                  .filter((option) => option !== "");
+
+                console.log(
+                  `Processed ${question.options.length} options for question ${questionIndex}`
+                );
+              }
+
+              // Add grid options for grid question type
+              if (questionType === "grid") {
+                question.gridOptions = {
+                  rows: [],
+                  columns: [],
+                };
+
+                // Get all rows for this grid
+                const rows = questionCard.querySelectorAll(".grid-row-input");
+                rows.forEach((row) => {
+                  if (row.value.trim()) {
+                    question.gridOptions.rows.push(row.value.trim());
+                  }
+                });
+
+                // Get all columns for this grid
+                const cols = questionCard.querySelectorAll(".grid-col-input");
+                cols.forEach((col) => {
+                  if (col.value.trim()) {
+                    question.gridOptions.columns.push(col.value.trim());
+                  }
+                });
+              }
+
+              section.questions.push(question);
+            });
+
+            template.sections.push(section);
+          });
+
+          return template;
+        }
+
+        // Add initial section when page loads
+        addSection();
+      });
     </script>
-</body>
+  </body>
 </html>
