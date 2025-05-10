@@ -417,6 +417,63 @@
                 padding: 0.875rem;
             }
         }
+
+        .custom-checkbox {
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+    margin-bottom: 6px;
+}
+
+.custom-checkbox:hover {
+    background-color: rgba(0, 123, 255, 0.08);
+}
+
+.semester-checkbox-container, .section-checkbox-container {
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 15px;
+}
+
+.assigned-item {
+    display: inline-block;
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.assigned-item:hover {
+    background-color: #dee2e6;
+}
+
+.assigned-item .remove-assigned-item {
+    background: none;
+    border: none;
+    padding: 0 0 0 5px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.empty-container {
+    text-align: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    color: #6c757d;
+}
+
+.empty-container i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
     </style>
 </head>
 <body>
@@ -467,24 +524,41 @@
                             </div>
     
                             <!-- Semesters Selection -->
-                            <div class="mb-3">
-                                <label for="semesters" class="form-label">Semesters</label>
-                                <select class="form-select" id="semesterSelect">
-                                    <option value="">-- Select Semester --</option>
-                                    <% semesterCategories.forEach(function(semester) { %>
-                                        <option value="<%= semester %>"><%= semester %></option>
-                                    <% }); %>
-                                </select>
-                                <div class="mt-2">
-                                    <button type="button" class="btn btn-sm btn-outline-primary" id="addSemesterBtn">
-                                        <i class="fas fa-plus"></i> Add Semester
+                            <div class="mb-4">
+                                <div class="form-section-subtitle">
+                                    <span class="form-section-icon"><i class="fas fa-graduation-cap"></i></span>
+                                    Semesters Selection
+                                </div>
+                                
+                                <div class="semester-checkbox-container">
+                                    <div class="row">
+                                        <% semesterCategories.forEach(function(semester, index) { %>
+                                            <div class="col-md-4 col-sm-6 mb-2">
+                                                <div class="form-check custom-checkbox">
+                                                    <input class="form-check-input semester-checkbox" type="checkbox" id="semester-<%= index %>" value="<%= semester %>">
+                                                    <label class="form-check-label" for="semester-<%= index %>">
+                                                        <%= semester %>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="selectAllSemestersBtn">
+                                        <i class="fas fa-check-square"></i> Select All
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="clearAllSemestersBtn">
+                                        <i class="fas fa-square"></i> Clear All
                                     </button>
                                 </div>
-                                <div id="assignedSemesters" class="mt-2">
-                                    <!-- Assigned semesters will appear here -->
+                                
+                                <div id="assignedSemesters" class="mt-3">
+                                    <!-- Selected semesters will appear here as tags -->
                                     <div class="empty-container" id="emptySemestersMessage">
                                         <i class="fas fa-graduation-cap"></i>
-                                        <p>No semesters have been assigned to this form yet.</p>
+                                        <p>No semesters have been selected yet. Please check the boxes above.</p>
                                     </div>
                                 </div>
                             </div>
@@ -577,39 +651,46 @@
                     </div>
     
                     <!-- Section Assignment -->
-                    <div class="form-section">
-                        <div class="form-section-title">
-                            <span class="form-section-icon"><i class="fas fa-layer-group"></i></span>
-                            Section Assignment
-                        </div>
-    
-                        <div class="row align-items-end">
-                            <div class="col-md-8 mb-3 mb-md-0">
-                                <label for="sectionSelect" class="form-label">Select Sections</label>
-                                <select class="form-select" id="sectionSelect">
-                                    <option value="">-- Select Section --</option>
-                                    <% sectionCategories.forEach(function(section) { %>
-                                        <option value="<%= section %>">
-                                            <%= section %>
-                                        </option>
-                                    <% }); %>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <button type="button" class="btn btn-outline-primary w-100" id="addSectionBtn">
-                                    <i class="fas fa-plus me-2"></i> Assign Section
-                                </button>
-                            </div>
-                        </div>
-    
-                        <div id="assignedSections" class="mt-3">
-                            <div class="empty-container" id="emptySectionsMessage">
-                                <i class="fas fa-layer-group"></i>
-                                <p>No sections have been assigned to this form yet.</p>
-                            </div>
-                            <!-- Assigned sections will appear here -->
-                        </div>
+                    <!-- Section Assignment with Checkboxes -->
+<div class="form-section">
+    <div class="form-section-title">
+        <span class="form-section-icon"><i class="fas fa-layer-group"></i></span>
+        Section Assignment
+    </div>
+
+    <div class="section-checkbox-container">
+        <div class="row">
+            <% sectionCategories.forEach(function(section, index) { %>
+                <div class="col-md-4 col-sm-6 mb-2">
+                    <div class="form-check custom-checkbox">
+                        <input class="form-check-input section-checkbox" type="checkbox" id="section-<%= index %>" value="<%= section %>">
+                        <label class="form-check-label" for="section-<%= index %>">
+                            <%= section %>
+                        </label>
                     </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <button type="button" class="btn btn-sm btn-outline-primary" id="selectAllSectionsBtn">
+            <i class="fas fa-check-square"></i> Select All
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="clearAllSectionsBtn">
+            <i class="fas fa-square"></i> Clear All
+        </button>
+    </div>
+
+    <div id="assignedSections" class="mt-3">
+        <!-- Selected sections will appear here as tags -->
+        <div class="empty-container" id="emptySectionsMessage">
+            <i class="fas fa-layer-group"></i>
+            <p>No sections have been selected yet. Please check the boxes above.</p>
+        </div>
+    </div>
+</div>
+
     
                     <!-- Subjects Section (for Academic forms) -->
                     <% if (formType === 'Academic') { %>
@@ -807,6 +888,128 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     
     <script>
+        $(document).ready(function() {
+    // Semester checkbox handling
+    $('.semester-checkbox').change(function() {
+        updateSemesterTags();
+    });
+    
+    $('#selectAllSemestersBtn').click(function() {
+        $('.semester-checkbox').prop('checked', true);
+        updateSemesterTags();
+    });
+    
+    $('#clearAllSemestersBtn').click(function() {
+        $('.semester-checkbox').prop('checked', false);
+        updateSemesterTags();
+    });
+    
+    function updateSemesterTags() {
+        // Clear current tags
+        $('#assignedSemesters').empty();
+        
+        let selectedCount = 0;
+        
+        // Create tags for each selected semester
+        $('.semester-checkbox:checked').each(function() {
+            selectedCount++;
+            const semesterValue = $(this).val();
+            
+            const semesterHtml = `
+            <div class="assigned-item" data-semester="${semesterValue}">
+                <i class="fas fa-graduation-cap me-1"></i>
+                ${semesterValue}
+                <button type="button" class="btn btn-sm text-danger remove-assigned-item" data-semester="${semesterValue}">
+                    <i class="fas fa-times"></i>
+                </button>
+                <input type="hidden" name="semesters[]" value="${semesterValue}">
+            </div>
+            `;
+            
+            $('#assignedSemesters').append(semesterHtml);
+        });
+        
+        // Show empty message if no semesters selected
+        if (selectedCount === 0) {
+            $('#assignedSemesters').html(`
+                <div class="empty-container" id="emptySemestersMessage">
+                    <i class="fas fa-graduation-cap"></i>
+                    <p>No semesters have been selected yet. Please check the boxes above.</p>
+                </div>
+            `);
+        }
+    }
+    
+    // Section checkbox handling
+    $('.section-checkbox').change(function() {
+        updateSectionTags();
+    });
+    
+    $('#selectAllSectionsBtn').click(function() {
+        $('.section-checkbox').prop('checked', true);
+        updateSectionTags();
+    });
+    
+    $('#clearAllSectionsBtn').click(function() {
+        $('.section-checkbox').prop('checked', false);
+        updateSectionTags();
+    });
+    
+    function updateSectionTags() {
+        // Clear current tags
+        $('#assignedSections').empty();
+        
+        let selectedCount = 0;
+        
+        // Create tags for each selected section
+        $('.section-checkbox:checked').each(function() {
+            selectedCount++;
+            const sectionValue = $(this).val();
+            
+            const sectionHtml = `
+            <div class="assigned-item" data-section="${sectionValue}">
+                <i class="fas fa-layer-group me-1"></i>
+                ${sectionValue}
+                <button type="button" class="btn btn-sm text-danger remove-assigned-item" data-section="${sectionValue}">
+                    <i class="fas fa-times"></i>
+                </button>
+                <input type="hidden" name="sectionsAssigned[]" value="${sectionValue}">
+            </div>
+            `;
+            
+            $('#assignedSections').append(sectionHtml);
+        });
+        
+        // Show empty message if no sections selected
+        if (selectedCount === 0) {
+            $('#assignedSections').html(`
+                <div class="empty-container" id="emptySectionsMessage">
+                    <i class="fas fa-layer-group"></i>
+                    <p>No sections have been selected yet. Please check the boxes above.</p>
+                </div>
+            `);
+        }
+    }
+    
+    // Handle removing assigned items (from tags)
+    $(document).on('click', '.remove-assigned-item', function() {
+        const $item = $(this).closest('.assigned-item');
+        
+        // If it's a semester item, uncheck the corresponding checkbox
+        if ($item.data('semester')) {
+            const semesterValue = $item.data('semester');
+            $(`.semester-checkbox[value="${semesterValue}"]`).prop('checked', false);
+            updateSemesterTags();
+        }
+        
+        // If it's a section item, uncheck the corresponding checkbox
+        if ($item.data('section')) {
+            const sectionValue = $item.data('section');
+            $(`.section-checkbox[value="${sectionValue}"]`).prop('checked', false);
+            updateSectionTags();
+        }
+    });
+});
     $(document).ready(function () {
     // Initialize variables
     let sectionCounter = 0;

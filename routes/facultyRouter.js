@@ -108,18 +108,49 @@ router.post("/login", async (req, res) => {
           return res.redirect("/faculty/login");
         }
 
-        // Create new faculty in MongoDB
+        // Create new faculty in MongoDB using the updated schema
         faculty = new Faculty({
           idNumber: jsonFaculty.idNumber,
           name: jsonFaculty.name,
           branch: jsonFaculty.branch,
           email: jsonFaculty.email,
-          subjects: jsonFaculty.subjects,
-          sections: jsonFaculty.sections,
+          subjects: jsonFaculty.subjects || [],
+          sections: jsonFaculty.sections || [],
+          semesters: jsonFaculty.semesters || [],
+          teachingAssignments: jsonFaculty.teachingAssignments || [],
           feedbackForms: jsonFaculty.feedbackForms || [],
           role: jsonFaculty.role,
           password: password, // This will be hashed by the pre-save hook
         });
+
+        // If teachingAssignments is missing in the JSON, create it from the subjects, sections and semesters
+        if (!jsonFaculty.teachingAssignments || jsonFaculty.teachingAssignments.length === 0) {
+          // Default to semester "5" if not specified
+          const semester = jsonFaculty.semesters && jsonFaculty.semesters.length > 0 
+            ? jsonFaculty.semesters[0] 
+            : "5";
+            
+          // Create default teachingAssignments if not provided
+          // This is a simple mapping - you may want a more sophisticated approach
+          if (jsonFaculty.subjects && jsonFaculty.subjects.length > 0 && 
+              jsonFaculty.sections && jsonFaculty.sections.length > 0) {
+            
+            faculty.teachingAssignments = [];
+            
+            // Simple assignment: distribute subjects across sections
+            for (let i = 0; i < jsonFaculty.subjects.length; i++) {
+              const subject = jsonFaculty.subjects[i];
+              // Use modulo to cycle through available sections
+              const section = jsonFaculty.sections[i % jsonFaculty.sections.length];
+              
+              faculty.teachingAssignments.push({
+                semester: semester,
+                section: section,
+                subject: subject
+              });
+            }
+          }
+        }
 
         await faculty.save();
 

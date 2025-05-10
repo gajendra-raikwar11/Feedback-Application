@@ -684,6 +684,163 @@ function processDataForCharts(feedbackResponses, formType) {
     };
 }
 
+
+//faculty management routes
+// Faculty Management Page
+router.get('/faculty-management/:id', async (req, res) => {
+  try {
+    const faculty = await Faculty.findById(req.params.id);
+    
+    if (!faculty) {
+      req.flash('error', 'Faculty not found');
+      return res.redirect('/admin/dashboard');
+    }
+    
+    res.render('faculty-management', { 
+      faculty,
+      title: 'Faculty Management',
+      user: req.session.user
+    });
+  } catch (error) {
+    console.error('Error fetching faculty:', error);
+    req.flash('error', 'Something went wrong');
+    res.redirect('/admin/dashboard');
+  }
+});
+
+// Add Teaching Assignment
+router.post('/faculty/add-assignment', async (req, res) => {
+  try {
+    const { facultyId, semester, section, subject } = req.body;
+    
+    const faculty = await Faculty.findById(facultyId);
+    
+    if (!faculty) {
+      req.flash('error', 'Faculty not found');
+      return res.redirect('/admin/dashboard');
+    }
+    
+    // Create new teaching assignment
+    const newAssignment = {
+      semester,
+      section,
+      subject
+    };
+    
+    // Add to teaching assignments array
+    faculty.teachingAssignments.push(newAssignment);
+    
+    // Update sections, subjects, and semesters arrays if needed
+    if (!faculty.sections.includes(section)) {
+      faculty.sections.push(section);
+    }
+    
+    if (!faculty.subjects.includes(subject)) {
+      faculty.subjects.push(subject);
+    }
+    
+    if (!faculty.semesters.includes(semester)) {
+      faculty.semesters.push(semester);
+    }
+    
+    await faculty.save();
+    
+    req.flash('success', 'Teaching assignment added successfully');
+    res.redirect(`/admin/faculty-management/${facultyId}`);
+  } catch (error) {
+    console.error('Error adding assignment:', error);
+    req.flash('error', 'Failed to add teaching assignment');
+    res.redirect(`/admin/faculty-management/${req.body.facultyId}`);
+  }
+});
+
+// Edit Teaching Assignment
+router.post('/faculty/edit-assignment', async (req, res) => {
+  try {
+    const { facultyId, assignmentIndex, semester, section, subject } = req.body;
+    
+    const faculty = await Faculty.findById(facultyId);
+    
+    if (!faculty || !faculty.teachingAssignments[assignmentIndex]) {
+      req.flash('error', 'Faculty or assignment not found');
+      return res.redirect('/admin/dashboard');
+    }
+    
+    // Update the assignment
+    faculty.teachingAssignments[assignmentIndex] = {
+      semester,
+      section,
+      subject
+    };
+    
+    // Recalculate sections, subjects, and semesters arrays
+    const usedSections = new Set();
+    const usedSubjects = new Set();
+    const usedSemesters = new Set();
+    
+    faculty.teachingAssignments.forEach(assignment => {
+      usedSections.add(assignment.section);
+      usedSubjects.add(assignment.subject);
+      usedSemesters.add(assignment.semester);
+    });
+    
+    faculty.sections = Array.from(usedSections);
+    faculty.subjects = Array.from(usedSubjects);
+    faculty.semesters = Array.from(usedSemesters);
+    
+    await faculty.save();
+    
+    req.flash('success', 'Teaching assignment updated successfully');
+    res.redirect(`/admin/faculty-management/${facultyId}`);
+  } catch (error) {
+    console.error('Error updating assignment:', error);
+    req.flash('error', 'Failed to update teaching assignment');
+    res.redirect(`/admin/faculty-management/${req.body.facultyId}`);
+  }
+});
+
+// Delete Teaching Assignment
+router.post('/faculty/delete-assignment', async (req, res) => {
+  try {
+    const { facultyId, assignmentIndex } = req.body;
+    
+    const faculty = await Faculty.findById(facultyId);
+    
+    if (!faculty || !faculty.teachingAssignments[assignmentIndex]) {
+      req.flash('error', 'Faculty or assignment not found');
+      return res.redirect('/admin/dashboard');
+    }
+    
+    // Remove the assignment
+    faculty.teachingAssignments.splice(assignmentIndex, 1);
+    
+    // Recalculate sections, subjects, and semesters arrays
+    const usedSections = new Set();
+    const usedSubjects = new Set();
+    const usedSemesters = new Set();
+    
+    faculty.teachingAssignments.forEach(assignment => {
+      usedSections.add(assignment.section);
+      usedSubjects.add(assignment.subject);
+      usedSemesters.add(assignment.semester);
+    });
+    
+    faculty.sections = Array.from(usedSections);
+    faculty.subjects = Array.from(usedSubjects);
+    faculty.semesters = Array.from(usedSemesters);
+    
+    await faculty.save();
+    
+    req.flash('success', 'Teaching assignment deleted successfully');
+    res.redirect(`/admin/faculty-management/${facultyId}`);
+  } catch (error) {
+    console.error('Error deleting assignment:', error);
+    req.flash('error', 'Failed to delete teaching assignment');
+    res.redirect(`/admin/faculty-management/${req.body.facultyId}`);
+  }
+});
+//
+
 router.get("/adminStudentPage", validateAdmin, async (req, res) => {
     try {
       // Fetch all students from database
