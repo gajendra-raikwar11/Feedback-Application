@@ -2306,7 +2306,6 @@ router.post('/verify-otp',(req,res) => {
     if (req.session.generatedOTP && Date.now() < req.session.otpExpirationTime) {
       if (parseInt(otp) === parseInt(req.session.generatedOTP))
         res.render("admin_changePassword");
-      else res.send(`wrong OTP ${otp} ${req.session.generatedOTP}`);
     }
 })
 
@@ -2329,14 +2328,8 @@ router.post("/reset-password", async (req, res) => {
       { new: true }
     );
     admin.save();
-    // res.send(hashedPassword === student1.Password);
-    // updateStudentPassword(req.session.studentEmail, password);
-    req.session.destroy();
-    const match = await bcrypt.compare(password, hashedPassword);
-    console.log(match);
-    res.send("password updated successfully");
     res.clearCookie("token");
-    res.redirect("/");
+    res.redirect("/adminLogin");
   });
 
 
