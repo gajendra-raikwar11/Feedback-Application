@@ -1,7 +1,0 @@
-.env
-node_modules
-.gitignore
-/ToBeDone.yaml
-/.gitignore
-package-lock.json
-.package-lock.json
