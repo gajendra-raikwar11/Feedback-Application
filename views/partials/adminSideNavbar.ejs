@@ -23,6 +23,9 @@
     <div class="nav-item" id="template-nav">
         <a href="/admin/template/template-builder" style="text-decoration: none; color: white;"><i class="fas fa-cog me-2"></i> Template Builder</a>
     </div>
+    <div class="nav-item" id="faculty-nav">
+        <a href="/admin/faculty-page" style="text-decoration: none; color: white;"><i class="fas fa-chalkboard-teacher me-2"></i> Faculty</a>
+    </div>
     <div class="nav-item">
         <a href="/admin/logout" style="text-decoration: none; color: white;"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
     </div>
@@ -327,6 +330,8 @@
         document.getElementById('students-nav').classList.add('active');
     } else if (currentPath.includes('/admin/adminHome')) {
         document.getElementById('dashboard-nav').classList.add('active');
+    } else if (currentPath.includes('/admin/faculty-page')) {
+        document.getElementById('faculty-nav').classList.add('active');
     }
     
     // Function to toggle sidebar
@@ -356,29 +361,29 @@
         });
     });
     // Dynamic session update
-if (
-    sessionValueElement &&
-    sessionValueElement.textContent.trim() === 'Spring 2025' ||
-    sessionValueElement.textContent.includes('admin.currentSession')
-) {
-    // Get current date
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
-    const currentYear = currentDate.getFullYear();
+    if (
+        sessionValueElement &&
+        sessionValueElement.textContent.trim() === 'Spring 2025' ||
+        sessionValueElement.textContent.includes('admin.currentSession')
+    ) {
+        // Get current date
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+        const currentYear = currentDate.getFullYear();
 
-    let sessionText;
+        let sessionText;
 
-    if (currentMonth >= 0 && currentMonth <= 7) {
-        // Jan to July -> Session starts previous year
-        sessionText = `${currentYear - 1}-${currentYear.toString().slice(-2)} (Jan - July)`;
-    } else {
-        // Aug to Dec -> Session starts current year
-        sessionText = `${currentYear}-${(currentYear + 1).toString().slice(-2)} (Aug - Dec)`;
+        if (currentMonth >= 0 && currentMonth <= 7) {
+            // Jan to July -> Session starts previous year
+            sessionText = `${currentYear - 1}-${currentYear.toString().slice(-2)} (Jan - July)`;
+        } else {
+            // Aug to Dec -> Session starts current year
+            sessionText = `${currentYear}-${(currentYear + 1).toString().slice(-2)} (Aug - Dec)`;
+        }
+
+        // Update the session value
+        sessionValueElement.textContent = sessionText;
     }
-
-    // Update the session value
-    sessionValueElement.textContent = sessionText;
-}
 
 });
 </script>

@@ -682,165 +682,7 @@ function processDataForCharts(feedbackResponses, formType) {
       overallAverage,
       responseMetadata
     };
-}
-
-
-//faculty management routes
-// Faculty Management Page
-router.get('/faculty-management/:id', async (req, res) => {
-  try {
-    const faculty = await Faculty.findById(req.params.id);
-    
-    if (!faculty) {
-      req.flash('error', 'Faculty not found');
-      return res.redirect('/admin/dashboard');
-    }
-    
-    res.render('faculty-management', { 
-      faculty,
-      title: 'Faculty Management',
-      user: req.session.user
-    });
-  } catch (error) {
-    console.error('Error fetching faculty:', error);
-    req.flash('error', 'Something went wrong');
-    res.redirect('/admin/dashboard');
-  }
-});
-
-// Add Teaching Assignment
-router.post('/faculty/add-assignment', async (req, res) => {
-  try {
-    const { facultyId, semester, section, subject } = req.body;
-    
-    const faculty = await Faculty.findById(facultyId);
-    
-    if (!faculty) {
-      req.flash('error', 'Faculty not found');
-      return res.redirect('/admin/dashboard');
-    }
-    
-    // Create new teaching assignment
-    const newAssignment = {
-      semester,
-      section,
-      subject
-    };
-    
-    // Add to teaching assignments array
-    faculty.teachingAssignments.push(newAssignment);
-    
-    // Update sections, subjects, and semesters arrays if needed
-    if (!faculty.sections.includes(section)) {
-      faculty.sections.push(section);
-    }
-    
-    if (!faculty.subjects.includes(subject)) {
-      faculty.subjects.push(subject);
-    }
-    
-    if (!faculty.semesters.includes(semester)) {
-      faculty.semesters.push(semester);
-    }
-    
-    await faculty.save();
-    
-    req.flash('success', 'Teaching assignment added successfully');
-    res.redirect(`/admin/faculty-management/${facultyId}`);
-  } catch (error) {
-    console.error('Error adding assignment:', error);
-    req.flash('error', 'Failed to add teaching assignment');
-    res.redirect(`/admin/faculty-management/${req.body.facultyId}`);
-  }
-});
-
-// Edit Teaching Assignment
-router.post('/faculty/edit-assignment', async (req, res) => {
-  try {
-    const { facultyId, assignmentIndex, semester, section, subject } = req.body;
-    
-    const faculty = await Faculty.findById(facultyId);
-    
-    if (!faculty || !faculty.teachingAssignments[assignmentIndex]) {
-      req.flash('error', 'Faculty or assignment not found');
-      return res.redirect('/admin/dashboard');
-    }
-    
-    // Update the assignment
-    faculty.teachingAssignments[assignmentIndex] = {
-      semester,
-      section,
-      subject
-    };
-    
-    // Recalculate sections, subjects, and semesters arrays
-    const usedSections = new Set();
-    const usedSubjects = new Set();
-    const usedSemesters = new Set();
-    
-    faculty.teachingAssignments.forEach(assignment => {
-      usedSections.add(assignment.section);
-      usedSubjects.add(assignment.subject);
-      usedSemesters.add(assignment.semester);
-    });
-    
-    faculty.sections = Array.from(usedSections);
-    faculty.subjects = Array.from(usedSubjects);
-    faculty.semesters = Array.from(usedSemesters);
-    
-    await faculty.save();
-    
-    req.flash('success', 'Teaching assignment updated successfully');
-    res.redirect(`/admin/faculty-management/${facultyId}`);
-  } catch (error) {
-    console.error('Error updating assignment:', error);
-    req.flash('error', 'Failed to update teaching assignment');
-    res.redirect(`/admin/faculty-management/${req.body.facultyId}`);
-  }
-});
-
-// Delete Teaching Assignment
-router.post('/faculty/delete-assignment', async (req, res) => {
-  try {
-    const { facultyId, assignmentIndex } = req.body;
-    
-    const faculty = await Faculty.findById(facultyId);
-    
-    if (!faculty || !faculty.teachingAssignments[assignmentIndex]) {
-      req.flash('error', 'Faculty or assignment not found');
-      return res.redirect('/admin/dashboard');
-    }
-    
-    // Remove the assignment
-    faculty.teachingAssignments.splice(assignmentIndex, 1);
-    
-    // Recalculate sections, subjects, and semesters arrays
-    const usedSections = new Set();
-    const usedSubjects = new Set();
-    const usedSemesters = new Set();
-    
-    faculty.teachingAssignments.forEach(assignment => {
-      usedSections.add(assignment.section);
-      usedSubjects.add(assignment.subject);
-      usedSemesters.add(assignment.semester);
-    });
-    
-    faculty.sections = Array.from(usedSections);
-    faculty.subjects = Array.from(usedSubjects);
-    faculty.semesters = Array.from(usedSemesters);
-    
-    await faculty.save();
-    
-    req.flash('success', 'Teaching assignment deleted successfully');
-    res.redirect(`/admin/faculty-management/${facultyId}`);
-  } catch (error) {
-    console.error('Error deleting assignment:', error);
-    req.flash('error', 'Failed to delete teaching assignment');
-    res.redirect(`/admin/faculty-management/${req.body.facultyId}`);
-  }
-});
-//
-
+};
 router.get("/adminStudentPage", validateAdmin, async (req, res) => {
     try {
       // Fetch all students from database
@@ -886,6 +728,8 @@ router.get("/adminStudentPage", validateAdmin, async (req, res) => {
       res.status(500).send("Server Error");
     }
 });
+
+
 //---------------------------------------------Admin Home Form Realted all routes--------------------------------------------------------------------
 //form related all routes
 router.get('/adminHome/forms/create/:formType', validateAdmin, async (req, res) => {
@@ -1200,7 +1044,6 @@ router.get('/Total-Forms', validateAdmin, async (req, res) => {
     res.status(500).send('Error fetching forms');
   }
 });
-
 // DELETE - Delete a form
 router.delete('/forms/:id', validateAdmin, async (req, res) => {
   try {
@@ -1954,6 +1797,9 @@ router.post('/template/form-templates/:id/delete',validateAdmin, async (req, res
     res.redirect('/admin/template/form-templates?message=Failed to delete template&status=error');
   }
 });
+
+
+
 //---------------------------------------------Admin Home Manage Faculty Member routes--------------------------------------------------------------------
 // Route to assign a form to a faculty member
 router.post('/assign-form-to-faculty',validateAdmin, async (req, res) => {
@@ -2493,5 +2339,95 @@ router.post("/reset-password", async (req, res) => {
     res.redirect("/");
   });
 
+
+//------------------------------------------faculty management routes------------------------------------------
+// Faculty management page route
+router.get("/faculty-page", async (req, res) => {
+  try {
+    const adminData = req.session.admin;
+    const currentPath = req.path;
+    
+    // Fetch all faculty members from the database
+    const facultyData = await Faculty.find({});
+    
+    res.render("adminFaculty", {
+      currentPath,
+      adminData,
+      facultyData: JSON.stringify(facultyData) // Pass faculty data to the template
+    });
+  } catch (error) {
+    console.error("Error fetching faculty data:", error);
+    res.status(500).send("Server error while loading faculty data");
+  }
+});
+
+// API endpoint to get all faculty data
+router.get("/api/faculty", async (req, res) => {
+  try {
+    const facultyData = await Faculty.find({});
+    res.json(facultyData);
+  } catch (error) {
+    console.error("Error fetching faculty data:", error);
+    res.status(500).json({ error: "Server error while fetching faculty data" });
+  }
+});
+
+// API endpoint to add/update faculty
+router.post("/api/faculty", async (req, res) => {
+  try {
+    const facultyData = req.body;
+    console.log("Received faculty data:", JSON.stringify(facultyData, null, 2)); // Logging for debugging
+    
+    // Check if faculty already exists (update) or is new (create)
+    if (facultyData._id) {
+      // Update existing faculty
+      const updatedFaculty = await Faculty.findByIdAndUpdate(
+        facultyData._id,
+        {
+          name: facultyData.name,
+          idNumber: facultyData.idNumber,
+          email: facultyData.email,
+          branch: facultyData.branch,
+          subjects: facultyData.subjects,
+          sections: facultyData.sections,
+          semesters: facultyData.semesters,
+          teachingAssignments: facultyData.teachingAssignments, // Make sure this is explicitly included
+          role: facultyData.role || 'faculty',
+          password: facultyData.password || '111111'
+        },
+        { new: true }
+      );
+      console.log("Updated faculty:", JSON.stringify(updatedFaculty, null, 2)); // Logging after update
+      res.json(updatedFaculty);
+    } else {
+      // Create new faculty
+      delete facultyData._id; // Remove empty ID if present
+      const newFaculty = new Faculty(facultyData);
+      const savedFaculty = await newFaculty.save();
+      console.log("Saved new faculty:", JSON.stringify(savedFaculty, null, 2)); // Logging after save
+      res.json(savedFaculty);
+    }
+  } catch (error) {
+    console.error("Error saving faculty data:", error);
+    res.status(500).json({ error: "Server error while saving faculty data", details: error.message });
+  }
+});
+
+// API endpoint to delete faculty
+router.delete("/api/faculty/:id", async (req, res) => {
+  try {
+    const deletedFaculty = await Faculty.findByIdAndDelete(req.params.id);
+    if (!deletedFaculty) {
+      return res.status(404).json({ error: "Faculty not found" });
+    }
+    res.json({ message: "Faculty deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting faculty:", error);
+    res.status(500).json({ error: "Server error while deleting faculty" });
+  }
+});
+
+
+//
 
 module.exports = router;
