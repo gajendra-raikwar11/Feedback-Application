@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +15,7 @@
             height: 100vh;
             padding: 20px;
         }
+
         .login-container {
             background: white;
             border-radius: 12px;
@@ -23,81 +25,122 @@
             width: 100%;
             text-align: center;
         }
+
         .input-field {
             background: #f9fafb;
             border: 1px solid #d1d5db;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
+
         .input-field:focus {
             border-color: #6366f1;
             outline: none;
             box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
         }
+
         .university-logo {
             width: 100px;
             margin-bottom: 16px;
         }
+
         .login-heading {
             font-size: 24px;
             font-weight: 600;
             color: #1f2937;
         }
+
         .forgot-password {
             font-size: 14px;
             color: #3b82f6;
             transition: color 0.3s;
         }
+
         .forgot-password:hover {
             color: #9333ea;
         }
+
         .login-button {
             background: #3b82f6;
             transition: background 0.3s ease;
         }
+
         .login-button:hover {
             background: #2563eb;
         }
-        .login-container .alert{
+
+        .login-container .alert {
             color: red;
+        }
+
+        .back {
+            background: #9333ea;
+            transition: all 0.3s ease;
+            color: white;
+            padding: 12px 24px;
+            font-weight: 500;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 20px;
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(147, 51, 234, 0.2);
+        }
+
+        .back:hover {
+            background: #7e22ce;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(147, 51, 234, 0.3);
+        }
+
+        .back:active {
+            transform: translateY(0);
         }
     </style>
 </head>
+
 <body>
     <div class="login-container">
         <% if (messages.error) { %>
             <div class="alert alert-danger">
                 <%= messages.error[0] %>
             </div>
-        <% } %>
-        
-        <% if (messages.success) { %>
-            <div class="alert alert-success">
-                <%= messages.success[0] %>
-            </div>
-        <% } %>        
-        <!-- <img src="/images/university-logo.png" alt="University Logo" class="university-logo"> -->
-        <h2 class="login-heading mb-2">Admin Login</h2>
-        <p class="text-gray-600 mb-6 text-sm">Sign in with your email and password</p>
-        <form class="space-y-4" action="/admin/login" method="post">
-            <div>
-                <input type="email" name="email" placeholder="Email"
-                    class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" required>
-            </div>
-            <div>
-                <input type="password" name="password" placeholder="Password"
-                    class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" required>
-            </div>
-            <div class="text-right">
-                <a href="/admin/changepassword" class="forgot-password">Forgot password?</a>
-            </div>
-            <button type="submit"
-                class="w-full text-white font-semibold py-3 rounded-lg login-button">
-                LOGIN TO DASHBOARD
-            </button>
-            <p class="text-center text-xs text-gray-500 mt-6">
-                Unauthorized access is prohibited. This system is monitored.
-            </p>
-        </form>
+            <% } %>
+
+                <% if (messages.success) { %>
+                    <div class="alert alert-success">
+                        <%= messages.success[0] %>
+                    </div>
+                    <% } %>
+                        <!-- <img src="/images/university-logo.png" alt="University Logo" class="university-logo"> -->
+                        <h2 class="login-heading mb-2">Admin Login</h2>
+                        <p class="text-gray-600 mb-6 text-sm">Sign in with your email and password</p>
+                        <form class="space-y-4" action="/admin/login" method="post">
+                            <div>
+                                <input type="email" name="email" placeholder="Email"
+                                    class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" required>
+                            </div>
+                            <div>
+                                <input type="password" name="password" placeholder="Password"
+                                    class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" required>
+                            </div>
+                            <div class="text-right">
+                                <a href="/admin/changepassword" class="forgot-password">Forgot password?</a>
+                            </div>
+                            <button type="submit" class="w-full text-white font-semibold py-3 rounded-lg login-button">
+                                LOGIN TO DASHBOARD
+                            </button>
+                            <p class="text-center text-xs text-gray-500 mt-6 mb-4">
+                                Unauthorized access is prohibited. This system is monitored.
+                            </p>
+                        </form>
+                        <div class="mt-2">
+                            <a href="/" class="back">
+                                <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                            </a>
+                        </div>
+
     </div>
 </body>
+
 </html>

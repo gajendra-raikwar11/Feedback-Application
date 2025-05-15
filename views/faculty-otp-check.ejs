@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Email Verification</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    input[type="text"] {
+      appearance: none;
+    }   
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center px-4">
+
+  <div class="bg-white shadow-lg rounded-lg p-6 w-full max-w-md">
+    <div class="mb-6 text-center">
+      <h2 class="text-xl md:text-2xl font-semibold text-purple-700">Faculty Email Verification</h2>
+      <p class="text-sm text-gray-500 mt-2">Enter the 6-digit OTP sent to your admin email.</p>
+    </div>
+
+    <form action="/faculty/verify-otp" method="POST" class="text-center">
+      <div class="mb-4">
+        <label for="otp" class="block text-sm font-medium text-gray-700 mb-2">OTP Code</label>
+        <input 
+          type="text" 
+          id="otp" 
+          name="otp" 
+          maxlength="6"
+          class="w-full h-12 text-xl text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+          placeholder="Enter 6-digit code"
+          required />
+      </div>
+
+      <button type="submit" class="w-full bg-purple-700 text-white font-semibold py-3 mt-4 rounded-lg hover:bg-purple-800 transition">
+        Verify and Proceed
+      </button>
+    </form>
+
+    <!-- Optional Resend Link -->
+    <!-- <p class="text-sm text-gray-500 mt-4 text-center">
+      Didn't receive it? <a href="/admin/resend-otp" class="text-purple-700 hover:underline">Resend OTP</a>
+    </p> -->
+  </div>
+
+</body>
+</html>
