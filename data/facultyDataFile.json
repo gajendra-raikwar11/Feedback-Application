@@ -8,8 +8,8 @@
     "sections": ["CSE-A", "CSE-B"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-A", "subject": "DBMS" },
-      { "semester": "5", "section": "CSE-B", "subject": "OS" }
+      { "semester": "5", "section": "CSE-A", "subject": "DBMS", "type": "Theory" },
+      { "semester": "5", "section": "CSE-B", "subject": "OS", "type": "Theory" }
     ],
     "feedbackForms": [],
     "role": "faculty",
@@ -24,8 +24,8 @@
     "sections": ["CSE-A"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-A", "subject": "Data Structures" },
-      { "semester": "5", "section": "CSE-A", "subject": "Algorithms" }
+      { "semester": "5", "section": "CSE-A", "subject": "Data Structures", "type": "Theory" },
+      { "semester": "5", "section": "CSE-A", "subject": "Algorithms", "type": "Practical" }
     ],
     "feedbackForms": [],
     "role": "faculty",
@@ -40,8 +40,8 @@
     "sections": ["CSE-B", "CSE-C"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-B", "subject": "DBMS" },
-      { "semester": "5", "section": "CSE-C", "subject": "SQL" }
+      { "semester": "5", "section": "CSE-B", "subject": "DBMS", "type": "Theory" },
+      { "semester": "5", "section": "CSE-C", "subject": "SQL", "type": "Practical" }
     ],
     "feedbackForms": [],
     "role": "faculty",
@@ -56,8 +56,8 @@
     "sections": ["CSE-C"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-C", "subject": "Java" },
-      { "semester": "5", "section": "CSE-C", "subject": "Python" }
+      { "semester": "5", "section": "CSE-C", "subject": "Java", "type": "Theory" },
+      { "semester": "5", "section": "CSE-C", "subject": "Python", "type": "Practical" }
     ],
     "feedbackForms": [],
     "role": "faculty",
@@ -72,8 +72,8 @@
     "sections": ["CSE-A", "CSE-B"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-A", "subject": "CN" },
-      { "semester": "5", "section": "CSE-B", "subject": "TOC" }
+      { "semester": "5", "section": "CSE-A", "subject": "CN", "type": "Theory" },
+      { "semester": "5", "section": "CSE-B", "subject": "TOC", "type": "Theory" }
     ],
     "feedbackForms": [],
     "role": "faculty",
@@ -88,8 +88,8 @@
     "sections": ["CSE-B", "CSE-C"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-B", "subject": "Operating Systems" },
-      { "semester": "5", "section": "CSE-C", "subject": "AI" }
+      { "semester": "5", "section": "CSE-B", "subject": "Operating Systems", "type": "Theory" },
+      { "semester": "5", "section": "CSE-C", "subject": "AI", "type": "Theory" }
     ],
     "feedbackForms": [],
     "role": "faculty",
@@ -104,8 +104,8 @@
     "sections": ["CSE-A"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-A", "subject": "Software Engineering" },
-      { "semester": "5", "section": "CSE-A", "subject": "ML" }
+      { "semester": "5", "section": "CSE-A", "subject": "Software Engineering", "type": "Theory" },
+      { "semester": "5", "section": "CSE-A", "subject": "ML", "type": "Practical" }
     ],
     "feedbackForms": [],
     "role": "faculty",
@@ -120,8 +120,8 @@
     "sections": ["CSE-C"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-C", "subject": "Web Tech" },
-      { "semester": "5", "section": "CSE-C", "subject": "JavaScript" }
+      { "semester": "5", "section": "CSE-C", "subject": "Web Tech", "type": "Theory" },
+      { "semester": "5", "section": "CSE-C", "subject": "JavaScript", "type": "Practical" }
     ],
     "feedbackForms": [],
     "role": "faculty",
@@ -136,8 +136,8 @@
     "sections": ["CSE-A", "CSE-C"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-A", "subject": "Python" },
-      { "semester": "5", "section": "CSE-C", "subject": "AI" }
+      { "semester": "5", "section": "CSE-A", "subject": "Python", "type": "Practical" },
+      { "semester": "5", "section": "CSE-C", "subject": "AI", "type": "Theory" }
     ],
     "feedbackForms": [],
     "role": "faculty",
@@ -152,8 +152,8 @@
     "sections": ["CSE-B"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-B", "subject": "ML" },
-      { "semester": "5", "section": "CSE-B", "subject": "Cloud Computing" }
+      { "semester": "5", "section": "CSE-B", "subject": "ML", "type": "Theory" },
+      { "semester": "5", "section": "CSE-B", "subject": "Cloud Computing", "type": "Practical" }
     ],
     "feedbackForms": [],
     "role": "faculty",
@@ -168,8 +168,8 @@
     "sections": ["CSE-A", "CSE-B"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-A", "subject": "CN" },
-      { "semester": "5", "section": "CSE-B", "subject": "Cyber Security" }
+      { "semester": "5", "section": "CSE-A", "subject": "CN", "type": "Theory" },
+      { "semester": "5", "section": "CSE-B", "subject": "Cyber Security", "type": "Theory" }
     ],
     "feedbackForms": [],
     "role": "faculty",
@@ -184,8 +184,8 @@
     "sections": ["CSE-C"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-C", "subject": "Ethical Hacking" },
-      { "semester": "5", "section": "CSE-C", "subject": "Web Dev" }
+      { "semester": "5", "section": "CSE-C", "subject": "Ethical Hacking", "type": "Theory" },
+      { "semester": "5", "section": "CSE-C", "subject": "Web Dev", "type": "Practical" }
     ],
     "feedbackForms": [],
     "role": "faculty",
@@ -200,8 +200,8 @@
     "sections": ["CSE-B"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-B", "subject": "Ethical Hacking" },
-      { "semester": "5", "section": "CSE-B", "subject": "Web Dev" }
+      { "semester": "5", "section": "CSE-B", "subject": "Ethical Hacking", "type": "Theory" },
+      { "semester": "5", "section": "CSE-B", "subject": "Web Dev", "type": "Practical" }
     ],
     "feedbackForms": [],
     "role": "faculty",
@@ -216,8 +216,8 @@
     "sections": ["CSE-A"],
     "semesters": ["5"],
     "teachingAssignments": [
-      { "semester": "5", "section": "CSE-A", "subject": "Ethical Hacking" },
-      { "semester": "5", "section": "CSE-A", "subject": "Web Dev" }
+      { "semester": "5", "section": "CSE-A", "subject": "Ethical Hacking", "type": "Theory" },
+      { "semester": "5", "section": "CSE-A", "subject": "Web Dev", "type": "Practical" }
     ],
     "feedbackForms": [],
     "role": "faculty",

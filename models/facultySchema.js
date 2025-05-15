@@ -15,6 +15,11 @@ const teachingAssignmentSchema = new mongoose.Schema({
   subject: {
     type: String,
     required: true
+  },
+  type: {
+    type: String,
+    enum: ["Theory", "Practical", "Tutorial"],
+    required: true
   }
 }, { _id: false });
 
@@ -38,7 +43,6 @@ const facultySchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  // For backward compatibility or separate access
   subjects: {
     type: [String],
     required: false
@@ -51,7 +55,6 @@ const facultySchema = new mongoose.Schema({
     type: [String],
     required: false
   },
-  // New field for mapping semester-section-subject
   teachingAssignments: {
     type: [teachingAssignmentSchema],
     required: false,
@@ -86,31 +89,31 @@ facultySchema.methods.verifyPassword = async function (password) {
 };
 
 // Helper method to check if faculty teaches a specific subject in a specific semester and section
-facultySchema.methods.teachesSubject = function(semester, section, subject) {
+facultySchema.methods.teachesSubject = function (semester, section, subject) {
   return this.teachingAssignments.some(
-    assignment => 
-      assignment.semester === semester && 
-      assignment.section === section && 
+    assignment =>
+      assignment.semester === semester &&
+      assignment.section === section &&
       assignment.subject === subject
   );
 };
 
 // Helper method to get all teaching assignments for a specific semester
-facultySchema.methods.getAssignmentsForSemester = function(semester) {
+facultySchema.methods.getAssignmentsForSemester = function (semester) {
   return this.teachingAssignments.filter(
     assignment => assignment.semester === semester
   );
 };
 
 // Helper method to get all teaching assignments for a specific section
-facultySchema.methods.getAssignmentsForSection = function(section) {
+facultySchema.methods.getAssignmentsForSection = function (section) {
   return this.teachingAssignments.filter(
     assignment => assignment.section === section
   );
 };
 
 // Helper method to get all teaching assignments for a specific subject
-facultySchema.methods.getAssignmentsForSubject = function(subject) {
+facultySchema.methods.getAssignmentsForSubject = function (subject) {
   return this.teachingAssignments.filter(
     assignment => assignment.subject === subject
   );
@@ -131,6 +134,11 @@ const teachingAssignmentValidationSchema = Joi.object({
   subject: Joi.string().required().messages({
     "any.required": "Subject is required for teaching assignment",
     "string.empty": "Subject cannot be empty"
+  }),
+  type: Joi.string().valid("Theory", "Practical", "Tutorial").required().messages({
+    "any.required": "Type is required for teaching assignment",
+    "any.only": "Type must be one of: theory, lab, tutorial",
+    "string.empty": "Type cannot be empty"
   })
 });
 
@@ -170,12 +178,12 @@ const validateFaculty = (data) => {
   return schema.validate(data, { abortEarly: false });
 };
 
-// Validation schema for updating faculty (without requiring password)
+// Joi schema for updates (password optional)
 const validateFacultyUpdate = (data) => {
   const schema = Joi.object({
     name: Joi.string().trim(),
     email: Joi.string().email().trim().messages({
-      "string.email": "Invalid email format"
+      "string.email": "Invalid email format" 
     }),
     branch: Joi.string().trim(),
     subjects: Joi.array().items(Joi.string().trim()),
@@ -191,8 +199,8 @@ const validateFacultyUpdate = (data) => {
   return schema.validate(data, { abortEarly: false });
 };
 
-module.exports = { 
-  Faculty, 
+module.exports = {
+  Faculty,
   validateFaculty,
-  validateFacultyUpdate 
+  validateFacultyUpdate
 };

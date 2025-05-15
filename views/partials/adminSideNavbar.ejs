@@ -26,6 +26,9 @@
     <div class="nav-item" id="faculty-nav">
         <a href="/admin/faculty-page" style="text-decoration: none; color: white;"><i class="fas fa-chalkboard-teacher me-2"></i> Faculty</a>
     </div>
+     <div class="nav-item" id="subject-nav">
+        <a href="/admin/subjects" style="text-decoration: none; color: white;"><i class="fas fa-book me-2"></i> Subject</a>
+    </div>
     <div class="nav-item">
         <a href="/admin/logout" style="text-decoration: none; color: white;"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
     </div>
@@ -332,6 +335,8 @@
         document.getElementById('dashboard-nav').classList.add('active');
     } else if (currentPath.includes('/admin/faculty-page')) {
         document.getElementById('faculty-nav').classList.add('active');
+    } else if (currentPath.includes('/admin/subjects')) {
+        document.getElementById('subject-nav').classList.add('active');
     }
     
     // Function to toggle sidebar

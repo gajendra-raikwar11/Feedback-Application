@@ -487,6 +487,10 @@
                 <strong>Semester:</strong>
                 <%= form.commonSemester %>
               </p>
+               <p class="card-text">
+                <strong>Subject:</strong>
+                 <%= form.assignedFacultySubject || 'Not assigned' %>
+              </p>
 
               <% const deadlineDate = new Date(form.deadline); const today = new
               Date(); const daysLeft = Math.ceil((deadlineDate - today) / (1000
@@ -504,9 +508,6 @@
                 </span>
               </p>
 
-              <!-- <p class="card-text">
-                <strong>Questions:</strong>
-              </p> -->
 
               <div class="d-flex justify-content-between mt-4">
                 <% if (form.hasSubmitted) { %>

@@ -55,6 +55,7 @@ const writeFacultyJSON = (data) => {
 
 // Render faculty login page
 router.get("/login", (req, res) => {
+  console.log("Session data being set:", req.session.faculty);
   res.render("facultyLogin", { messages: req.flash ? req.flash() : {} });
 });
 

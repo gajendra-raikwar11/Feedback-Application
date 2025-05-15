@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subject Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .error-msg {
+            color: red;
+            font-size: 0.8rem;
+        }
+        .success-msg {
+            color: green;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+         <!-- Topbar -->
+              <%- include('partials/adminTopNavbar', { admin: adminData }) %>
+     <!-- Sidebar -->
+    <%- include('./partials/adminSideNavbar', { path: currentPath ,admin: adminData  }) %>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="mb-0">Add New Subject</h2>
+                    </div>
+                    <div class="card-body">
+                        <% if(locals.successMsg) { %>
+                            <div class="alert alert-success"><%= successMsg %></div>
+                        <% } %>
+
+                        <form action="/admin/subjects" method="POST">
+                            <div class="mb-3">
+                                <label for="subjectCode" class="form-label">Subject Code*</label>
+                                <input type="text" class="form-control" id="subjectCode" name="subjectCode" value="<%= locals.formData ? formData.subjectCode : '' %>" required>
+                                <% if(locals.errors && errors.subjectCode) { %>
+                                    <div class="text-danger"><%= errors.subjectCode %></div>
+                                <% } %>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="subjectName" class="form-label">Subject Name*</label>
+                                <input type="text" class="form-control" id="subjectName" name="subjectName" value="<%= locals.formData ? formData.subjectName : '' %>" required>
+                                <% if(locals.errors && errors.subjectName) { %>
+                                    <div class="text-danger"><%= errors.subjectName %></div>
+                                <% } %>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Type*</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="theoryType" name="type" value="Theory" 
+                                    <%= locals.formData && Array.isArray(formData.type) && formData.type.includes('Theory') ? 'checked' : '' %>
+                                    <%= locals.formData && !Array.isArray(formData.type) && formData.type === 'Theory' ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="theoryType">Theory</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="practicalType" name="type" value="Practical"
+                                    <%= locals.formData && Array.isArray(formData.type) && formData.type.includes('Practical') ? 'checked' : '' %>
+                                    <%= locals.formData && !Array.isArray(formData.type) && formData.type === 'Practical' ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="practicalType">Practical</label>
+                                </div>
+                                <% if(locals.errors && errors.type) { %>
+                                    <div class="text-danger"><%= errors.type %></div>
+                                <% } %>
+                                <small class="form-text text-muted">You can select both options if the subject has both theory and practical components.</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="semester" class="form-label">Semester*</label>
+                                <select class="form-select" id="semester" name="semester" required>
+                                    <option value="" disabled <%= !locals.formData ? 'selected' : '' %>>Select Semester</option>
+                                    <% for(let i=1; i<=8; i++) { %>
+                                        <option value="<%= i %>" <%= locals.formData && Number(formData.semester) === i ? 'selected' : '' %>><%= i %></option>
+                                    <% } %>
+                                </select>
+                                <% if(locals.errors && errors.semester) { %>
+                                    <div class="text-danger"><%= errors.semester %></div>
+                                <% } %>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="department" class="form-label">Department</label>
+                                <input type="text" class="form-control" id="department" name="department" value="<%= locals.formData ? formData.department : '' %>">
+                                <% if(locals.errors && errors.department) { %>
+                                    <div class="text-danger"><%= errors.department %></div>
+                                <% } %>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Add Subject</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- List of Subjects -->
+                <div class="card mt-4">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="mb-0">All Subjects</h3>
+                    </div>
+                    <div class="card-body">
+                        <% if(subjects.length === 0) { %>
+                            <p class="text-muted">No subjects found in the database.</p>
+                        <% } else { %>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Semester</th>
+                                            <th>Credits</th>
+                                            <th>Department</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% subjects.forEach(subject => { %>
+                                            <tr>
+                                                <td><%= subject.subjectCode %></td>
+                                                <td><%= subject.subjectName %></td>
+                                                <td><%= Array.isArray(subject.type) ? subject.type.join(', ') : subject.type %></td>
+                                                <td><%= subject.semester %></td>
+                                                <td><%= subject.credits || '-' %></td>
+                                                <td><%= subject.department || '-' %></td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add validation to ensure at least one type is selected
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const theoryChecked = document.getElementById('theoryType').checked;
+            const practicalChecked = document.getElementById('practicalType').checked;
+            
+            if (!theoryChecked && !practicalChecked) {
+                e.preventDefault();
+                alert('Please select at least one type (Theory or Practical)');
+            }
+        });
+    </script>
+</body>
+</html>

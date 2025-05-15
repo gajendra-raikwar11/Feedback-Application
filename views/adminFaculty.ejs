@@ -217,12 +217,11 @@
 </style>
 </head>
 <body>
-    <!-- Top Navbar Placeholder (Will be replaced with partial) -->
-    <%- include('partials/adminTopNavbar', { admin: adminData }) %>
-
+     <!-- Topbar -->
+              <%- include('partials/adminTopNavbar', { admin: adminData }) %>
+     <!-- Sidebar -->
     <%- include('./partials/adminSideNavbar', { path: currentPath ,admin: adminData  }) %>
-
-<div class="main-content">
+    <div class="main-content">
     <div class="container-fluid">
         <!-- Page Header -->
         <div class="row mb-4">
@@ -321,6 +320,7 @@
                                 <th>Sections</th>
                                 <th>Semesters</th>
                                 <th>Teaching Assignments</th>
+                                <th>Role</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -332,875 +332,1005 @@
             </div>
         </div>
     </div>
-</div>
+    </div>
 
-<!-- Faculty Modal -->
-<div class="modal fade" id="facultyModal" tabindex="-1" aria-labelledby="facultyModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="facultyModalLabel">Add/Edit Faculty</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="facultyForm">
-                    <input type="hidden" id="facultyId">
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="facultyName" class="form-label">Faculty Name</label>
-                            <input type="text" class="form-control" id="facultyName" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="facultyIdNumber" class="form-label">ID Number</label>
-                            <input type="text" class="form-control" id="facultyIdNumber" required>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="facultyEmail" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="facultyEmail" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="facultyBranch" class="form-label">Branch</label>
-                            <input type="text" class="form-control" id="facultyBranch" required>
-                        </div>
-                    </div>
-                    
-                    <hr>
-                    
-                    <!-- Subjects Section -->
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <h5>Subjects</h5>
-                            <div class="input-group mb-2">
-                                <input type="text" class="form-control" id="newSubject" placeholder="Enter subject name (eg. DBMS , DSA etc)">
-                                <button class="btn btn-primary" type="button" id="addSubjectBtn">Add</button>
+    <!-- Faculty Modal -->
+    <div class="modal fade" id="facultyModal" tabindex="-1" aria-labelledby="facultyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="facultyModalLabel">Add/Edit Faculty</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="facultyForm">
+                        <input type="hidden" id="facultyId">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="facultyName" class="form-label">Faculty Name</label>
+                                <input type="text" class="form-control" id="facultyName" required>
                             </div>
-                            <div id="subjectsList" class="mb-3"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Sections Section -->
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <h5>Sections</h5>
-                            <div class="input-group mb-2">
-                                <input type="text" class="form-control" id="newSection" placeholder="Enter section name ( eg. CSE-A etc)">
-                                <button class="btn btn-primary" type="button" id="addSectionBtn">Add</button>
+                            <div class="col-md-6">
+                                <label for="facultyIdNumber" class="form-label">ID Number</label>
+                                <input type="text" class="form-control" id="facultyIdNumber" required>
                             </div>
-                            <div id="sectionsList" class="mb-3"></div>
                         </div>
-                    </div>
-                    
-                    <!-- Semesters Section -->
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <h5>Semesters</h5>
-                            <div class="input-group mb-2">
-                                <input type="text" class="form-control" id="newSemester" placeholder="Enter semester number (eg. 1,2,3 ect)">
-                                <button class="btn btn-primary" type="button" id="addSemesterBtn">Add</button>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="facultyEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="facultyEmail" required>
                             </div>
-                            <div id="semestersList" class="mb-3"></div>
+                            <div class="col-md-6">
+                                <label for="facultyBranch" class="form-label">Branch</label>
+                                <input type="text" class="form-control" id="facultyBranch" required>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <hr>
-                    
-                    <!-- Assignments Mapping -->
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <h5>Teaching Assignments</h5>
-                            <div class="row mb-2">
-                                <div class="col-md-4">
-                                    <select class="form-select" id="mapSubject">
-                                        <option value="" selected disabled>Select Subject</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <select class="form-select" id="mapSection">
-                                        <option value="" selected disabled>Select Section</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <select class="form-select" id="mapSemester">
-                                        <option value="" selected disabled>Select Semester</option>
-                                    </select>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="isCoordinator">
+                                    <label class="form-check-label" for="isCoordinator">
+                                        Assign as Coordinator
+                                    </label>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-primary mb-3" id="addMappingBtn">Add Assignment</button>
-                            <div id="assignmentsList" class="assignments-container"></div>
                         </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="saveFacultyBtn">Save Faculty</button>
+                        
+                        <hr>
+                        
+                        <!-- UPDATED ORDER: First Semesters, then Subjects, then Sections -->
+                        
+                        <!-- Semesters Section -->
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <h5>Semesters</h5>
+                                    <div id="semestersCheckboxes" class="checkbox-container mb-3">
+                                        <!-- Will be populated dynamically -->
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        <!-- Subjects Section -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h5>Subjects</h5>
+                                <div id="subjectsCheckboxes" class="checkbox-container mb-3">
+                                    <!-- Will be populated based on branch and semester -->
+                                    <div class="text-muted">Select semester(s) first to see available subjects</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sections Section -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h5>Sections</h5>
+                                <div id="sectionsCheckboxes" class="checkbox-container mb-3">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input section-checkbox" type="checkbox" id="section-CSE-A" value="CSE-A">
+                                        <label class="form-check-label" for="section-CSE-A">CSE-A</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input section-checkbox" type="checkbox" id="section-CSE-B" value="CSE-B">
+                                        <label class="form-check-label" for="section-CSE-B">CSE-B</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input section-checkbox" type="checkbox" id="section-CSE-C" value="CSE-C">
+                                        <label class="form-check-label" for="section-CSE-C">CSE-C</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input section-checkbox" type="checkbox" id="section-CSE-D" value="CSE-D">
+                                        <label class="form-check-label" for="section-CSE-D">CSE-D</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Assignments Mapping -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h5>Teaching Assignments</h5>
+                                <div class="row mb-2">
+                                    <div class="col-md-3">
+                                        <select class="form-select" id="mapSubject">
+                                            <option value="" selected disabled>Select Subject</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" id="mapSection">
+                                            <option value="" selected disabled>Select Section</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" id="mapSemester">
+                                            <option value="" selected disabled>Select Semester</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" id="mapType">
+                                            <option value="" selected disabled>Select Type</option>
+                                            <option value="Theory">Theory</option>
+                                            <option value="Practical">Practical</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary mb-3" id="addMappingBtn">Add Assignment</button>
+                                <div id="assignmentsList" class="assignments-container"></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveFacultyBtn">Save Faculty</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Confirmation Modal -->
-<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="confirmationModalBody">
-                <!-- Content will be dynamically set -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="confirmationModalBody">
+                    <!-- Content will be dynamically set -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Add Faculty Modal Button (Hidden trigger for the facultyModal) -->
-<div id="addFacultyModal" style="display: none;"></div>
+    <!-- Add Faculty Modal Button (Hidden trigger for the facultyModal) -->
+    <div id="addFacultyModal" style="display: none;"></div>
 
-<!-- Pass faculty data from server to client -->
-<script>
-    // Initialize faculty data from server
-    window.initialFacultyData = '<%- facultyData %>';
-</script>
+    <!-- Pass faculty data from server to client -->
+    <script>
+        // Initialize faculty data from server
+        window.initialFacultyData = '<%- facultyData %>';
+        // Initialize subjects data from server
+        window.subjectsData = '<%- subjectsData %>';
+    </script>
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        const facultyTableBody = document.getElementById('facultyTableBody');
+        const facultyCountElement = document.getElementById('facultyCount');
+        const subjectCountElement = document.getElementById('subjectCount');
+        const sectionCountElement = document.getElementById('sectionCount');
         
-        // DOM Elements
-const facultyTableBody = document.getElementById('facultyTableBody');
-const facultyCountElement = document.getElementById('facultyCount');
-const subjectCountElement = document.getElementById('subjectCount');
-const sectionCountElement = document.getElementById('sectionCount');
-const facultyModal = new bootstrap.Modal(document.getElementById('facultyModal'));
-const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-
-// Form elements
-const facultyForm = document.getElementById('facultyForm');
-const facultyIdField = document.getElementById('facultyId');
-const facultyNameField = document.getElementById('facultyName');
-const facultyIdNumberField = document.getElementById('facultyIdNumber');
-const facultyEmailField = document.getElementById('facultyEmail');
-const facultyBranchField = document.getElementById('facultyBranch');
-
-// Lists and mapping selectors
-const subjectsList = document.getElementById('subjectsList');
-const sectionsList = document.getElementById('sectionsList');
-const semestersList = document.getElementById('semestersList');
-const assignmentsList = document.getElementById('assignmentsList');
-const mapSubject = document.getElementById('mapSubject');
-const mapSection = document.getElementById('mapSection');
-const mapSemester = document.getElementById('mapSemester');
-
-// Buttons
-const addSubjectBtn = document.getElementById('addSubjectBtn');
-const addSectionBtn = document.getElementById('addSectionBtn');
-const addSemesterBtn = document.getElementById('addSemesterBtn');
-const addMappingBtn = document.getElementById('addMappingBtn');
-const saveFacultyBtn = document.getElementById('saveFacultyBtn');
-const confirmActionBtn = document.getElementById('confirmActionBtn');
-const searchFacultyInput = document.getElementById('searchFaculty');
-
-// Application state
-let facultyData = [];
-let currentFacultyId = null;
-let currentSubjects = [];
-let currentSections = [];
-let currentSemesters = [];
-let currentAssignments = [];
-
-// Initialize the dashboard
-document.addEventListener('DOMContentLoaded', function() {
-    // Load faculty data from server
-    loadFacultyData();
-    
-    // Setup event listeners
-    addSubjectBtn.addEventListener('click', addSubject);
-    addSectionBtn.addEventListener('click', addSection);
-    addSemesterBtn.addEventListener('click', addSemester);
-    addMappingBtn.addEventListener('click', addAssignment);
-    saveFacultyBtn.addEventListener('click', saveFaculty);
-    searchFacultyInput.addEventListener('input', filterFacultyTable);
-    
-    // Add event listener for "Add New Faculty" button
-    document.querySelector('[data-bs-target="#addFacultyModal"]').addEventListener('click', function() {
-        addNewFaculty();
-    });
-});
-
-// Load faculty data from server
-async function loadFacultyData() {
-    try {
-        // Check if we have data embedded in the page
-        if (window.initialFacultyData) {
-            facultyData = JSON.parse(window.initialFacultyData);
-            updateDashboardCounts();
-            renderFacultyTable();
-            return;
+        // Form elements
+        const facultyForm = document.getElementById('facultyForm');
+        const facultyIdField = document.getElementById('facultyId');
+        const facultyNameField = document.getElementById('facultyName');
+        const facultyIdNumberField = document.getElementById('facultyIdNumber');
+        const facultyEmailField = document.getElementById('facultyEmail');
+        const facultyBranchField = document.getElementById('facultyBranch');
+        const isCoordinatorCheckbox = document.getElementById('isCoordinator');
+        
+        // Lists and mapping selectors
+        const assignmentsList = document.getElementById('assignmentsList');
+        const mapSubject = document.getElementById('mapSubject');
+        const mapSection = document.getElementById('mapSection');
+        const mapSemester = document.getElementById('mapSemester');
+        const mapType = document.getElementById('mapType');
+        
+        // Buttons
+        const addMappingBtn = document.getElementById('addMappingBtn');
+        const saveFacultyBtn = document.getElementById('saveFacultyBtn');
+        const searchFacultyInput = document.getElementById('searchFaculty');
+        
+        // Application state
+        let facultyData = [];
+        let subjectsData = []; 
+        let currentFacultyId = null;
+        let currentSubjects = [];
+        let currentSections = [];
+        let currentSemesters = [];
+        let currentAssignments = [];
+        let isCoordinator = false;
+        
+        // Initialize Bootstrap modals properly
+        const facultyModal = new bootstrap.Modal(document.getElementById('facultyModal'));
+        const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        
+        // Add event listener for the coordinator checkbox
+        isCoordinatorCheckbox.addEventListener('change', function() {
+            isCoordinator = this.checked;
+        });
+        
+        // Event listener for branch changes
+        facultyBranchField.addEventListener('input', function() {
+            filterSubjectsForSelection();
+            updateSubjectsCheckboxes();
+        });
+        
+        // Initialize the subject-type mapping object
+        window.subjectTypeMapping = {};
+        
+        // Event listeners for buttons
+        if (saveFacultyBtn) {
+            saveFacultyBtn.addEventListener('click', saveFaculty);
         }
         
-        // Otherwise fetch from API
-        const response = await fetch('/admin/api/faculty');
-        if (!response.ok) {
-            throw new Error('Failed to fetch faculty data');
+        if (searchFacultyInput) {
+            searchFacultyInput.addEventListener('input', filterFacultyTable);
         }
         
-        facultyData = await response.json();
-        updateDashboardCounts();
-        renderFacultyTable();
-    } catch (error) {
-        console.error('Error loading faculty data:', error);
-        alert('Error loading faculty data. Please refresh the page or contact support.');
-    }
-}
-
-// Update dashboard counts
-function updateDashboardCounts() {
-    facultyCountElement.textContent = facultyData.length;
-    
-    // Count unique subjects across all faculty
-    const allSubjects = new Set();
-    facultyData.forEach(faculty => {
-        faculty.subjects.forEach(subject => allSubjects.add(subject));
-    });
-    subjectCountElement.textContent = allSubjects.size;
-    
-    // Count unique sections across all faculty
-    const allSections = new Set();
-    facultyData.forEach(faculty => {
-        faculty.sections.forEach(section => allSections.add(section));
-    });
-    sectionCountElement.textContent = allSections.size;
-}
-
-// Render faculty table with all data
-function renderFacultyTable() {
-    facultyTableBody.innerHTML = '';
-    
-    facultyData.forEach(faculty => {
-        const row = document.createElement('tr');
+        if (addMappingBtn) {
+            addMappingBtn.addEventListener('click', addAssignment);
+        }
         
-        // Create table cells
-        row.innerHTML = `
-            <td>${faculty.name}</td>
-            <td>${faculty.idNumber}</td>
-            <td>${faculty.email}</td>
-            <td>${faculty.branch}</td>
-            <td>${renderBadges(faculty.subjects, 'badge-subject')}</td>
-            <td>${renderBadges(faculty.sections, 'badge-section')}</td>
-            <td>${renderBadges(faculty.semesters, 'badge-semester')}</td>
-            <td>${renderAssignments(faculty.teachingAssignments)}</td>
-            <td class="actions-column">
-                <button class="btn btn-sm btn-primary edit-faculty" data-id="${faculty._id}">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger delete-faculty" data-id="${faculty._id}">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        `;
+        // Fix: Properly attach event handler for Add New Faculty button
+        const addNewFacultyBtn = document.querySelector('button[data-bs-target="#addFacultyModal"]');
+        if (addNewFacultyBtn) {
+            addNewFacultyBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                addNewFaculty();
+            });
+        }
         
-        facultyTableBody.appendChild(row);
-    });
-    
-    // Add event listeners to the edit and delete buttons
-    document.querySelectorAll('.edit-faculty').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const facultyId = this.getAttribute('data-id');
-            editFaculty(facultyId);
-        });
-    });
-    
-    document.querySelectorAll('.delete-faculty').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const facultyId = this.getAttribute('data-id');
-            showDeleteConfirmation(facultyId);
-        });
-    });
-}
-
-// Helper function to render badges for subjects, sections, semesters
-function renderBadges(items, badgeClass) {
-    if (!items || items.length === 0) return '<span class="text-muted">None</span>';
-    
-    return items.map(item => 
-        `<span class="badge ${badgeClass} me-1">${item}</span>`
-    ).join(' ');
-}
-
-// Helper function to render teaching assignments
-function renderAssignments(assignments) {
-    if (!assignments || assignments.length === 0) return '<span class="text-muted">None</span>';
-    
-    return assignments.map(assignment => 
-        `<div class="assignment-badge">
-            Sem ${assignment.semester} | ${assignment.section} | ${assignment.subject}
-        </div>`
-    ).join(' ');
-}
-
-// Open modal to edit faculty
-function editFaculty(facultyId) {
-    const faculty = facultyData.find(f => f._id === facultyId);
-    if (!faculty) return;
-    
-    // Set current faculty ID
-    currentFacultyId = facultyId;
-    
-    // Populate form fields
-    facultyIdField.value = faculty._id;
-    facultyNameField.value = faculty.name;
-    facultyIdNumberField.value = faculty.idNumber;
-    facultyEmailField.value = faculty.email;
-    facultyBranchField.value = faculty.branch;
-    
-    // Set current lists
-    currentSubjects = [...faculty.subjects];
-    currentSections = [...faculty.sections];
-    currentSemesters = [...faculty.semesters];
-    currentAssignments = [...faculty.teachingAssignments];
-    
-    // Render lists
-    renderSubjectsList();
-    renderSectionsList();
-    renderSemestersList();
-    renderAssignmentsList();
-    
-    // Update mapping dropdowns
-    updateMappingDropdowns();
-    
-    // Show modal
-    document.getElementById('facultyModalLabel').textContent = 'Edit Faculty';
-    facultyModal.show();
-}
-
-// Show modal to add new faculty
-function addNewFaculty() {
-    // Reset form
-    facultyForm.reset();
-    currentFacultyId = null;
-    
-    // Clear lists
-    currentSubjects = [];
-    currentSections = [];
-    currentSemesters = [];
-    currentAssignments = [];
-    
-    // Render empty lists
-    renderSubjectsList();
-    renderSectionsList();
-    renderSemestersList();
-    renderAssignmentsList();
-    
-    // Update mapping dropdowns
-    updateMappingDropdowns();
-    
-    // Show modal
-    document.getElementById('facultyModalLabel').textContent = 'Add New Faculty';
-    facultyModal.show();
-}
-
-// Render subjects list in the form
-function renderSubjectsList() {
-    subjectsList.innerHTML = '';
-    
-    currentSubjects.forEach(subject => {
-        const badge = document.createElement('span');
-        badge.className = 'badge bg-primary me-1 p-2';
-        badge.innerHTML = `
-            ${subject}
-            <button type="button" class="btn-close btn-close-white ms-2" 
-                    style="font-size: 0.65rem;" data-value="${subject}"></button>
-        `;
+        // Load initial data
+        loadFacultyData();
         
-        subjectsList.appendChild(badge);
-    });
-    
-    // Add event listeners to remove buttons
-    subjectsList.querySelectorAll('.btn-close').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const value = this.getAttribute('data-value');
-            removeSubject(value);
-        });
-    });
-    
-    // Update dropdown options
-    updateMappingDropdowns();
-}
-
-// Render sections list in the form
-function renderSectionsList() {
-    sectionsList.innerHTML = '';
-    
-    currentSections.forEach(section => {
-        const badge = document.createElement('span');
-        badge.className = 'badge bg-info me-1 p-2';
-        badge.innerHTML = `
-            ${section}
-            <button type="button" class="btn-close btn-close-white ms-2" 
-                    style="font-size: 0.65rem;" data-value="${section}"></button>
-        `;
-        
-        sectionsList.appendChild(badge);
-    });
-    
-    // Add event listeners to remove buttons
-    sectionsList.querySelectorAll('.btn-close').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const value = this.getAttribute('data-value');
-            removeSection(value);
-        });
-    });
-    
-    // Update dropdown options
-    updateMappingDropdowns();
-}
-
-// Render semesters list in the form
-function renderSemestersList() {
-    semestersList.innerHTML = '';
-    
-    currentSemesters.forEach(semester => {
-        const badge = document.createElement('span');
-        badge.className = 'badge bg-success me-1 p-2';
-        badge.innerHTML = `
-            ${semester}
-            <button type="button" class="btn-close btn-close-white ms-2" 
-                    style="font-size: 0.65rem;" data-value="${semester}"></button>
-        `;
-        
-        semestersList.appendChild(badge);
-    });
-    
-    // Add event listeners to remove buttons
-    semestersList.querySelectorAll('.btn-close').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const value = this.getAttribute('data-value');
-            removeSemester(value);
-        });
-    });
-    
-    // Update dropdown options
-    updateMappingDropdowns();
-}
-
-// Render assignments list in the form
-function renderAssignmentsList() {
-    assignmentsList.innerHTML = '';
-    
-    if (currentAssignments.length === 0) {
-        assignmentsList.innerHTML = `<div class="text-muted" id="noAssignmentsMsg">No assignments added yet</div>`;
-        return;
-    }
-    
-    currentAssignments.forEach((assignment, index) => {
-        const item = document.createElement('div');
-        item.className = 'assignment-item';
-        item.innerHTML = `
-            <div>
-                <span class="badge badge-subject">${assignment.subject}</span>
-                <span class="badge badge-section">${assignment.section}</span>
-                <span class="badge badge-semester">Semester ${assignment.semester}</span>
-            </div>
-            <button type="button" class="btn btn-sm btn-danger remove-assignment" data-index="${index}">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        assignmentsList.appendChild(item);
-    });
-    
-    // Add event listeners to remove buttons
-    assignmentsList.querySelectorAll('.remove-assignment').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const index = parseInt(this.getAttribute('data-index'));
-            removeAssignment(index);
-        });
-    });
-}
-
-// Update dropdown options for mapping
-function updateMappingDropdowns() {
-    // Clear existing options
-    mapSubject.innerHTML = '<option value="" selected disabled>Select Subject</option>';
-    mapSection.innerHTML = '<option value="" selected disabled>Select Section</option>';
-    mapSemester.innerHTML = '<option value="" selected disabled>Select Semester</option>';
-    
-    // Add subject options
-    currentSubjects.forEach(subject => {
-        const option = document.createElement('option');
-        option.value = subject;
-        option.textContent = subject;
-        mapSubject.appendChild(option);
-    });
-    
-    // Add section options
-    currentSections.forEach(section => {
-        const option = document.createElement('option');
-        option.value = section;
-        option.textContent = section;
-        mapSection.appendChild(option);
-    });
-    
-    // Add semester options
-    currentSemesters.forEach(semester => {
-        const option = document.createElement('option');
-        option.value = semester;
-        option.textContent = `Semester ${semester}`;
-        mapSemester.appendChild(option);
-    });
-}
-
-// Add a new subject
-function addSubject() {
-    const newSubjectInput = document.getElementById('newSubject');
-    const subject = newSubjectInput.value.trim();
-    
-    if (!subject) return;
-    
-    if (!currentSubjects.includes(subject)) {
-        currentSubjects.push(subject);
-        renderSubjectsList();
-        newSubjectInput.value = '';
-    } else {
-        alert('This subject already exists!');
-    }
-}
-
-// Remove a subject
-function removeSubject(subject) {
-    // Check if subject is used in any assignment
-    const inUse = currentAssignments.some(a => a.subject === subject);
-    
-    if (inUse) {
-        // Show warning
-        document.getElementById('confirmationModalBody').innerHTML = `
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-triangle"></i> This subject is used in teaching assignments.
-                Removing it will also remove all associated assignments.
-            </div>
-            <p>Do you want to continue?</p>
-        `;
-        
-        confirmActionBtn.onclick = function() {
-            // Remove assignments using this subject
-            currentAssignments = currentAssignments.filter(a => a.subject !== subject);
+        // Filter subjects based on branch and selected semesters
+        function filterSubjectsForSelection() {
+            const selectedBranch = facultyBranchField.value.trim();
             
-            // Remove the subject
-            currentSubjects = currentSubjects.filter(s => s !== subject);
+            // Get the subject dropdown
+            const subjectDropdown = document.getElementById('mapSubject');
             
-            // Update UI
-            renderSubjectsList();
+            // Clear current options
+            subjectDropdown.innerHTML = '<option value="" selected disabled>Select Subject</option>';
+            
+            // Parse the subjects data if it's a string
+            let subjects = window.subjectsData;
+            if (typeof subjects === 'string') {
+                try {
+                    subjects = JSON.parse(subjects);
+                } catch (error) {
+                    console.error('Error parsing subjects data:', error);
+                    return;
+                }
+            }
+            
+            // Only proceed if we have subjects and branch is set
+            if (!subjects || !selectedBranch) {
+                return;
+            }
+            
+            // Filter subjects based on branch and if any of the current semesters match
+            const filteredSubjects = subjects.filter(subject => {
+                let branchMatches = false;
+                
+                // Check branch - case-insensitive string comparison
+                if (selectedBranch && subject.department) {
+                    // Try to match either branch or department field
+                    if (subject.department.toString().toLowerCase() === selectedBranch.toLowerCase() || 
+                        (subject.branch && subject.branch.toString().toLowerCase() === selectedBranch.toLowerCase())) {
+                        branchMatches = true;
+                    }
+                }
+                
+                // For semester matching, check if subject's semester is in our currentSemesters list
+                let semesterMatches = false;
+                
+                // If we have semesters to check against and subject has a semester
+                if (currentSemesters.length > 0 && subject.semester !== undefined) {
+                    semesterMatches = currentSemesters.includes(subject.semester.toString());
+                } else if (currentSemesters.length === 0) {
+                    // If no semesters are selected yet, don't filter by semester
+                    semesterMatches = true;
+                }
+                
+                return branchMatches && semesterMatches;
+            });
+            
+            // Add filtered subjects to dropdown
+            filteredSubjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject.subjectName || subject.name || subject;
+                option.textContent = subject.subjectName || subject.name || subject;
+                subjectDropdown.appendChild(option);
+            });
+        }
+        
+        // Load faculty data from server
+        async function loadFacultyData() {
+            try {
+                // Check if we have data embedded in the page
+                if (window.initialFacultyData) {
+                    try {
+                        facultyData = JSON.parse(window.initialFacultyData);
+                        updateDashboardCounts();
+                        renderFacultyTable();
+                    } catch (error) {
+                        console.error('Error parsing window.initialFacultyData:', error);
+                    }
+                }
+                
+                // Load subjects data from window if available
+                if (window.subjectsData) {
+                    try {
+                        subjectsData = JSON.parse(window.subjectsData);
+                    } catch (error) {
+                        console.error('Error parsing window.subjectsData:', error);
+                    }
+                }
+                
+                // Otherwise fetch from API
+                if (!facultyData.length) {
+                    const response = await fetch('/admin/api/faculty');
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch faculty data');
+                    }
+                    
+                    facultyData = await response.json();
+                    updateDashboardCounts();
+                    renderFacultyTable();
+                }
+                
+                // If subjects data not available, fetch from API
+                if (!subjectsData.length) {
+                    const response = await fetch('/admin/api/subjects');
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch subjects data');
+                    }
+                    
+                    subjectsData = await response.json();
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Error loading data. Please refresh the page or contact support.');
+            }
+        }
+        
+        // Update dashboard counts
+        function updateDashboardCounts() {
+            facultyCountElement.textContent = facultyData.length;
+            
+            // Count unique subjects across all faculty
+            const allSubjects = new Set();
+            facultyData.forEach(faculty => {
+                if (faculty.subjects && Array.isArray(faculty.subjects)) {
+                    faculty.subjects.forEach(subject => allSubjects.add(subject));
+                }
+            });
+            subjectCountElement.textContent = allSubjects.size;
+            
+            // Count unique sections across all faculty
+            const allSections = new Set();
+            facultyData.forEach(faculty => {
+                if (faculty.sections && Array.isArray(faculty.sections)) {
+                    faculty.sections.forEach(section => allSections.add(section));
+                }
+            });
+            sectionCountElement.textContent = allSections.size;
+        }
+        
+        // Render faculty table with all data
+        function renderFacultyTable() {
+            if (!facultyTableBody) return;
+            
+            facultyTableBody.innerHTML = '';
+            
+            facultyData.forEach(faculty => {
+                const row = document.createElement('tr');
+                
+                // Create table cells
+                row.innerHTML = `
+                    <td>${faculty.name}</td>
+                    <td>${faculty.idNumber}</td>
+                    <td>${faculty.email}</td>
+                    <td>${faculty.branch}</td>
+                    <td>${renderBadges(faculty.subjects, 'badge-subject')}</td>
+                    <td>${renderBadges(faculty.sections, 'badge-section')}</td>
+                    <td>${renderBadges(faculty.semesters, 'badge-semester')}</td>
+                    <td>${renderAssignments(faculty.teachingAssignments)}</td>
+                    <td>${faculty.isCoordinator ? '<span class="badge bg-warning">Coordinator</span>' : ''}</td>
+                    <td class="actions-column">
+                        <button class="btn btn-sm btn-primary edit-faculty" data-id="${faculty._id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-faculty" data-id="${faculty._id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                facultyTableBody.appendChild(row);
+            });
+            
+            // Add event listeners to the edit and delete buttons
+            // Fix: Add proper event listeners for dynamic content
+            document.querySelectorAll('.edit-faculty').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const facultyId = this.getAttribute('data-id');
+                    editFaculty(facultyId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-faculty').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const facultyId = this.getAttribute('data-id');
+                    showDeleteConfirmation(facultyId);
+                });
+            });
+        }
+        
+        // Helper function to render badges for subjects, sections, semesters
+        function renderBadges(items, badgeClass) {
+            if (!items || items.length === 0) return '<span class="text-muted">None</span>';
+            
+            return items.map(item => 
+                `<span class="badge ${badgeClass} me-1">${item}</span>`
+            ).join(' ');
+        }
+        
+        // Helper function to render teaching assignments
+        function renderAssignments(assignments) {
+            if (!assignments || assignments.length === 0) return '<span class="text-muted">None</span>';
+            
+            return assignments.map(assignment => {
+                // Include type if available
+                const typeInfo = assignment.type ? ` | ${assignment.type}` : '';
+                
+                return `<div class="assignment-badge">
+                    Sem ${assignment.semester} | ${assignment.section} | ${assignment.subject}${typeInfo}
+                </div>`;
+            }).join(' ');
+        }
+        
+        // Edit faculty function
+        function editFaculty(facultyId) {
+            const faculty = facultyData.find(f => f._id === facultyId);
+            if (!faculty) return;
+            
+            // Set current faculty ID
+            currentFacultyId = facultyId;
+            
+            // Populate form fields
+            facultyIdField.value = faculty._id;
+            facultyNameField.value = faculty.name;
+            facultyIdNumberField.value = faculty.idNumber;
+            facultyEmailField.value = faculty.email;
+            facultyBranchField.value = faculty.branch;
+            
+            // Set checkbox state
+            isCoordinator = faculty.isCoordinator || false;
+            isCoordinatorCheckbox.checked = isCoordinator;
+            
+            // Set current lists
+            currentSubjects = Array.isArray(faculty.subjects) ? [...faculty.subjects] : [];
+            currentSections = Array.isArray(faculty.sections) ? [...faculty.sections] : [];
+            currentSemesters = Array.isArray(faculty.semesters) ? [...faculty.semesters] : [];
+            currentAssignments = Array.isArray(faculty.teachingAssignments) ? [...faculty.teachingAssignments] : [];
+            
+            // Populate checkboxes for semesters, subjects, and sections
+            populateSemesterCheckboxes();
+            updateSubjectsCheckboxes();
+            setupSectionCheckboxes();
+            
+            // Render assignments list
             renderAssignmentsList();
             
-            confirmationModal.hide();
-        };
-        
-        confirmationModal.show();
-    } else {
-        // Just remove the subject
-        currentSubjects = currentSubjects.filter(s => s !== subject);
-        renderSubjectsList();
-    }
-}
-
-// Add a new section
-function addSection() {
-    const newSectionInput = document.getElementById('newSection');
-    const section = newSectionInput.value.trim();
-    
-    if (!section) return;
-    
-    if (!currentSections.includes(section)) {
-        currentSections.push(section);
-        renderSectionsList();
-        newSectionInput.value = '';
-    } else {
-        alert('This section already exists!');
-    }
-}
-
-// Remove a section
-function removeSection(section) {
-    // Check if section is used in any assignment
-    const inUse = currentAssignments.some(a => a.section === section);
-    
-    if (inUse) {
-        // Show warning
-        document.getElementById('confirmationModalBody').innerHTML = `
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-triangle"></i> This section is used in teaching assignments.
-                Removing it will also remove all associated assignments.
-            </div>
-            <p>Do you want to continue?</p>
-        `;
-        
-        confirmActionBtn.onclick = function() {
-            // Remove assignments using this section
-            currentAssignments = currentAssignments.filter(a => a.section !== section);
+            // Update mapping dropdowns
+            updateMappingDropdowns();
             
-            // Remove the section
-            currentSections = currentSections.filter(s => s !== section);
+            // Show modal
+            document.getElementById('facultyModalLabel').textContent = 'Edit Faculty';
+            facultyModal.show();
+        }
+        
+        // Add new faculty function
+        function addNewFaculty() {
+            // Reset form
+            facultyForm.reset();
+            currentFacultyId = null;
             
-            // Update UI
-            renderSectionsList();
+            // Clear lists
+            currentSubjects = [];
+            currentSections = [];
+            currentSemesters = [];
+            currentAssignments = [];
+            isCoordinator = false;
+            
+            // Setup checkboxes
+            populateSemesterCheckboxes();
+            updateSubjectsCheckboxes();
+            setupSectionCheckboxes();
+            
+            // Render empty assignments list
             renderAssignmentsList();
             
-            confirmationModal.hide();
-        };
-        
-        confirmationModal.show();
-    } else {
-        // Just remove the section
-        currentSections = currentSections.filter(s => s !== section);
-        renderSectionsList();
-    }
-}
-
-// Add a new semester
-function addSemester() {
-    const newSemesterInput = document.getElementById('newSemester');
-    const semester = newSemesterInput.value.trim();
-    
-    if (!semester) return;
-    
-    if (!currentSemesters.includes(semester)) {
-        currentSemesters.push(semester);
-        renderSemestersList();
-        newSemesterInput.value = '';
-    } else {
-        alert('This semester already exists!');
-    }
-}
-
-// Remove a semester
-function removeSemester(semester) {
-    // Check if semester is used in any assignment
-    const inUse = currentAssignments.some(a => a.semester === semester);
-    
-    if (inUse) {
-        // Show warning
-        document.getElementById('confirmationModalBody').innerHTML = `
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-triangle"></i> This semester is used in teaching assignments.
-                Removing it will also remove all associated assignments.
-            </div>
-            <p>Do you want to continue?</p>
-        `;
-        
-        confirmActionBtn.onclick = function() {
-            // Remove assignments using this semester
-            currentAssignments = currentAssignments.filter(a => a.semester !== semester);
+            // Update mapping dropdowns
+            updateMappingDropdowns();
             
-            // Remove the semester
-            currentSemesters = currentSemesters.filter(s => s !== semester);
+            // Show modal with correct title
+            document.getElementById('facultyModalLabel').textContent = 'Add New Faculty';
+            facultyModal.show();
+        }
+        
+        // Update mapping dropdowns based on current selections
+        function updateMappingDropdowns() {
+            // Clear existing options
+            mapSubject.innerHTML = '<option value="" selected disabled>Select Subject</option>';
+            mapSection.innerHTML = '<option value="" selected disabled>Select Section</option>';
+            mapSemester.innerHTML = '<option value="" selected disabled>Select Semester</option>';
+            mapType.innerHTML = '<option value="" selected disabled>Select Type</option><option value="Theory">Theory</option><option value="Practical">Practical</option>';
+            
+            // Add subjects to dropdown - only use the subjects that were selected in checkboxes
+            currentSubjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                mapSubject.appendChild(option);
+            });
+            
+            // Add sections to dropdown - only use the sections that were selected in checkboxes
+            currentSections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section;
+                option.textContent = section;
+                mapSection.appendChild(option);
+            });
+            
+            // Add semesters to dropdown - only use the semesters that were selected in checkboxes
+            currentSemesters.forEach(semester => {
+                const option = document.createElement('option');
+                option.value = semester;
+                option.textContent = semester;
+                mapSemester.appendChild(option);
+            });
+            
+            // Auto-select type based on subject selection
+            mapSubject.addEventListener('change', function() {
+                const selectedSubject = this.value;
+                
+                // Auto-select the appropriate type based on the subject
+                const subjectTypeMapping = window.subjectTypeMapping || {};
+                const subjectType = subjectTypeMapping[selectedSubject] || 'Theory';
+                
+                // Select the appropriate type
+                mapType.value = subjectType;
+            });
+        }
+        
+        // Render assignments list in the form
+        function renderAssignmentsList() {
+            if (!assignmentsList) return;
+            
+            assignmentsList.innerHTML = '';
+            
+            if (currentAssignments.length === 0) {
+                assignmentsList.innerHTML = `<div class="text-muted" id="noAssignmentsMsg">No assignments added yet</div>`;
+                return;
+            }
+            
+            currentAssignments.forEach((assignment, index) => {
+                const item = document.createElement('div');
+                item.className = 'assignment-item';
+                
+                // Include type if available
+                const typeDisplay = assignment.type ? 
+                    `<span class="badge badge-type">${assignment.type}</span>` : '';
+                
+                item.innerHTML = `
+                    <div>
+                        <span class="badge badge-subject">${assignment.subject}</span>
+                        <span class="badge badge-section">${assignment.section}</span>
+                        <span class="badge badge-semester">Semester ${assignment.semester}</span>
+                        ${typeDisplay}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger remove-assignment" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                assignmentsList.appendChild(item);
+            });
+            
+            // Add event listeners to remove buttons
+            assignmentsList.querySelectorAll('.remove-assignment').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    removeAssignment(index);
+                });
+            });
+        }
+        
+        // Add teaching assignment mapping
+        function addAssignment() {
+            const subject = mapSubject.value;
+            const section = mapSection.value;
+            const semester = mapSemester.value;
+            const type = mapType.value;
+            
+            if (!subject || !section || !semester || !type) {
+                alert('Please select all fields for the teaching assignment.');
+                return;
+            }
+            
+            // Check if this exact assignment already exists
+            const exists = currentAssignments.some(a => 
+                a.subject === subject && 
+                a.section === section && 
+                a.semester === semester &&
+                a.type === type
+            );
+            
+            if (exists) {
+                alert('This teaching assignment already exists.');
+                return;
+            }
+            
+            // Add assignment
+            currentAssignments.push({
+                subject,
+                section,
+                semester,
+                type
+            });
+            
+            // Clear selection
+            mapSubject.selectedIndex = 0;
+            mapSection.selectedIndex = 0;
+            mapSemester.selectedIndex = 0;
+            mapType.selectedIndex = 0;
             
             // Update UI
-            renderSemestersList();
             renderAssignmentsList();
+        }
+        
+        // Remove assignment by index
+        function removeAssignment(index) {
+            if (index >= 0 && index < currentAssignments.length) {
+                currentAssignments.splice(index, 1);
+                renderAssignmentsList();
+            }
+        }
+        
+        // Populate semester checkboxes
+        function populateSemesterCheckboxes() {
+            const semestersContainer = document.getElementById('semestersCheckboxes');
+            if (!semestersContainer) return;
             
-            confirmationModal.hide();
-        };
+            semestersContainer.innerHTML = '';
+            
+            // Create checkboxes for semesters 1-8 (typical engineering degree)
+            for (let i = 1; i <= 8; i++) {
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'form-check form-check-inline';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'form-check-input semester-checkbox';
+                checkbox.id = `semester-${i}`;
+                checkbox.value = i.toString();
+                
+                // Check if this semester is already selected
+                if (currentSemesters.includes(i.toString())) {
+                    checkbox.checked = true;
+                }
+                
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = `semester-${i}`;
+                label.textContent = i.toString();
+                
+                checkboxDiv.appendChild(checkbox);
+                checkboxDiv.appendChild(label);
+                semestersContainer.appendChild(checkboxDiv);
+                
+                // Add event listener for checkbox changes
+                checkbox.addEventListener('change', function() {
+                    const semester = this.value;
+                    if (this.checked) {
+                        // Add semester if not already in the list
+                        if (!currentSemesters.includes(semester)) {
+                            currentSemesters.push(semester);
+                        }
+                    } else {
+                        // Remove semester
+                        currentSemesters = currentSemesters.filter(s => s !== semester);
+                        
+                        // Also remove any assignments that use this semester
+                        currentAssignments = currentAssignments.filter(a => a.semester !== semester);
+                    }
+                    
+                    // This is key - update both subjects and mapping dropdowns
+                    filterSubjectsForSelection();
+                    updateSubjectsCheckboxes();
+                    updateMappingDropdowns(); // Update the dropdown options when semesters change
+                });
+            }
+        }
         
-        confirmationModal.show();
-    } else {
-        // Just remove the semester
-        currentSemesters = currentSemesters.filter(s => s !== semester);
-        renderSemestersList();
-    }
-}
+        // Update subjects with checkboxes
+        function updateSubjectsCheckboxes() {
+            const subjectsContainer = document.getElementById('subjectsCheckboxes');
+            if (!subjectsContainer) return;
+            
+            subjectsContainer.innerHTML = '';
+            
+            const selectedBranch = facultyBranchField.value.trim();
+            
+            // If no branch or semesters selected, show message
+            if (!selectedBranch || currentSemesters.length === 0) {
+                subjectsContainer.innerHTML = '<div class="text-muted">Select branch and semester(s) first to see available subjects</div>';
+                return;
+            }
+            
+            // Parse the subjects data if needed
+            let subjects = window.subjectsData;
+            if (typeof subjects === 'string') {
+                try {
+                    subjects = JSON.parse(subjects);
+                } catch (error) {
+                    console.error('Error parsing subjects data:', error);
+                    return;
+                }
+            }
+            
+            // Filter subjects based on branch and semesters
+            const filteredSubjects = subjects.filter(subject => {
+                let branchMatches = false;
+                
+                // Check branch - case-insensitive string comparison
+                if (selectedBranch && subject.department) {
+                    if (subject.department.toString().toLowerCase() === selectedBranch.toLowerCase() || 
+                        (subject.branch && subject.branch.toString().toLowerCase() === selectedBranch.toLowerCase())) {
+                        branchMatches = true;
+                    }
+                }
+                
+                let semesterMatches = false;
+                if (currentSemesters.length > 0 && subject.semester !== undefined) {
+                    semesterMatches = currentSemesters.includes(subject.semester.toString());
+                }
+                
+                return branchMatches && semesterMatches;
+            });
+            
+            // If no subjects found
+            if (filteredSubjects.length === 0) {
+                subjectsContainer.innerHTML = '<div class="text-muted">No subjects found for the selected branch and semester(s)</div>';
+                return;
+            }
+            
+            // Create checkboxes for each subject
+            filteredSubjects.forEach(subject => {
+                const subjectName = subject.subjectName || subject.name || subject;
+                const subjectType = subject.type || 'Theory'; // Default to Theory if type not specified
+                
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'form-check';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'form-check-input subject-checkbox';
+                checkbox.id = `subject-${subjectName.replace(/\s+/g, '-')}`;
+                checkbox.value = subjectName;
+                checkbox.dataset.type = subjectType; // Store the subject type as data attribute
+                
+                // Check if this subject is already selected
+                if (currentSubjects.includes(subjectName)) {
+                    checkbox.checked = true;
+                }
+                
+                const label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = `subject-${subjectName.replace(/\s+/g, '-')}`;
+                label.textContent = `${subjectName} (${subjectType})`;
+                
+                checkboxDiv.appendChild(checkbox);
+                checkboxDiv.appendChild(label);
+                subjectsContainer.appendChild(checkboxDiv);
+                
+                // Add event listener for checkbox changes
+                checkbox.addEventListener('change', function() {
+                    const subject = this.value;
+                    const subjectType = this.dataset.type;
+                    
+                    if (this.checked) {
+                        // Add subject if not already in the list
+                        if (!currentSubjects.includes(subject)) {
+                            currentSubjects.push(subject);
+                            // Store subject type mapping
+                            window.subjectTypeMapping = window.subjectTypeMapping || {};
+                            window.subjectTypeMapping[subject] = subjectType;
+                        }
+                    } else {
+                        // Remove subject
+                        currentSubjects = currentSubjects.filter(s => s !== subject);
+                        
+                        // Also remove any assignments that use this subject
+                        currentAssignments = currentAssignments.filter(a => a.subject !== subject);
+                    }
+                    
+                    // Update the assignment dropdown options when subjects change
+                    updateMappingDropdowns();
+                });
+            });
+        }
+        
+        // Set up section checkboxes event listeners
+        function setupSectionCheckboxes() {
+            document.querySelectorAll('.section-checkbox').forEach(checkbox => {
+                // Check if this section is already selected
+                if (currentSections.includes(checkbox.value)) {
+                    checkbox.checked = true;
+                } else {
+                    checkbox.checked = false; // Make sure it's unchecked if not in currentSections
+                }
+                
+                checkbox.addEventListener('change', function() {
+                    const section = this.value;
+                    if (this.checked) {
+                        // Add section if not already in the list
+                        if (!currentSections.includes(section)) {
+                            currentSections.push(section);
+                        }
+                    } else {
+                        // Remove section
+                        currentSections = currentSections.filter(s => s !== section);
+                        
+                        // Also remove any assignments that use this section
+                        currentAssignments = currentAssignments.filter(a => a.section !== section);
+                    }
+                    
+                    // Update the dropdown options when sections change
+                    updateMappingDropdowns();
+                });
+            });
+        }
+        
+        // Filter faculty table based on search input
+        function filterFacultyTable() {
+            const searchTerm = searchFacultyInput.value.toLowerCase();
+            const rows = facultyTableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const name = row.cells[0].textContent.toLowerCase();
+                const idNumber = row.cells[1].textContent.toLowerCase();
+                const email = row.cells[2].textContent.toLowerCase();
+                const branch = row.cells[3].textContent.toLowerCase();
+                
+                if (name.includes(searchTerm) || idNumber.includes(searchTerm) || 
+                    email.includes(searchTerm) || branch.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // Save faculty data
+        async function saveFaculty() {
+            // Validate form
+            if (!facultyNameField.value || !facultyIdNumberField.value || !facultyEmailField.value || !facultyBranchField.value) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Create faculty object
+            const faculty = {
+                name: facultyNameField.value,
+                idNumber: facultyIdNumberField.value,
+                email: facultyEmailField.value,
+                branch: facultyBranchField.value,
+                isCoordinator: isCoordinator,
+                subjects: currentSubjects,
+                sections: currentSections,
+                semesters: currentSemesters,
+                teachingAssignments: currentAssignments
+            };
+            
+            try {
+                let response;
+                
+                if (currentFacultyId) {
+                    // Update existing faculty
+                    faculty._id = currentFacultyId;
+                    response = await fetch(`/admin/api/faculty/${currentFacultyId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(faculty)
+                    });
+                } else {
+                    // Add new faculty
+                    response = await fetch('/admin/api/faculty', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(faculty)
+                    });
+                }
+                
+                if (!response.ok) {
+                    throw new Error('Failed to save faculty data');
+                }
+                
+                // Show success message
+                alert(currentFacultyId ? 'Faculty updated successfully!' : 'Faculty added successfully!');
+                
+                // Close modal
+                facultyModal.hide();
+                
+                // Refresh the page
+                window.location.reload();
+                
+            } catch (error) {
+                console.error('Error saving faculty:', error);
+                alert('Error saving faculty data. Please try again.');
+            }
+        }
+        
 
-// Add new teaching assignment mapping
-function addAssignment() {
-    const subject = mapSubject.value;
-    const section = mapSection.value;
-    const semester = mapSemester.value;
-    
-    if (!subject || !section || !semester) {
-        alert('Please select subject, section and semester for the assignment');
-        return;
-    }
-    
-    // Check if this assignment already exists
-    const exists = currentAssignments.some(
-        a => a.subject === subject && a.section === section && a.semester === semester
-    );
-    
-    if (exists) {
-        alert('This assignment combination already exists!');
-        return;
-    }
-    
-    // Add new assignment
-    currentAssignments.push({
-        subject,
-        section,
-        semester
+    // Show delete confirmation modal
+        function showDeleteConfirmation(facultyId) {
+            const faculty = facultyData.find(f => f._id === facultyId);
+            if (!faculty) return;
+            
+            // Set confirmation message
+            document.getElementById('confirmationModalBody').innerHTML = `
+                Are you sure you want to delete faculty member <strong>${faculty.name}</strong>?
+                This action cannot be undone.
+            `;
+            
+            // Set up confirm button
+            const confirmActionBtn = document.getElementById('confirmActionBtn');
+            confirmActionBtn.onclick = async () => {
+                try {
+                    const response = await fetch(`/admin/api/faculty/${facultyId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to delete faculty');
+                    }
+                    
+                    // Refresh data
+                    await loadFacultyData();
+                    
+                    // Hide modal
+                    confirmationModal.hide();
+                    
+                    // Show success message
+                    alert('Faculty deleted successfully!');
+                } catch (error) {
+                    console.error('Error deleting faculty:', error);
+                    alert('Error deleting faculty. Please try again.');
+                }
+            };
+            
+            // Show modal
+            confirmationModal.show();
+        }
     });
-    
-    // Update UI
-    renderAssignmentsList();
-}
-
-// Remove a teaching assignment
-function removeAssignment(index) {
-    currentAssignments.splice(index, 1);
-    renderAssignmentsList();
-}
-
-// Save faculty data
-// Save faculty data
-async function saveFaculty() {
-    // Get form values
-    const name = facultyNameField.value.trim();
-    const idNumber = facultyIdNumberField.value.trim();
-    const email = facultyEmailField.value.trim();
-    const branch = facultyBranchField.value.trim();
-    
-    // Validate required fields
-    if (!name || !idNumber || !email || !branch) {
-        alert('Please fill in all required fields');
-        return;
-    }
-    
-    try {
-        // Show loading indicator
-        saveFacultyBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
-        saveFacultyBtn.disabled = true;
-        
-        // Prepare faculty data with explicit copy of arrays to ensure they're included
-        const faculty = {
-            name,
-            idNumber,
-            email,
-            branch,
-            subjects: currentSubjects.slice(), // Use slice to create a new array
-            sections: currentSections.slice(),
-            semesters: currentSemesters.slice(),
-            teachingAssignments: currentAssignments.map(assignment => ({
-                subject: assignment.subject,
-                section: assignment.section,
-                semester: assignment.semester
-            })),
-            role: "faculty",
-            password: "111111" // Default password for new faculty
-        };
-        
-        // If editing existing faculty, add the ID
-        if (currentFacultyId) {
-            faculty._id = currentFacultyId;
-        }
-        
-        console.log("Sending faculty data:", faculty); // Debug log
-        
-        // Send data to server
-        const response = await fetch('/admin/api/faculty', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(faculty)
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`Failed to save faculty data: ${errorData.details || response.statusText}`);
-        }
-        
-        const savedFaculty = await response.json();
-        console.log("Received response:", savedFaculty); // Debug log
-        
-        // Refresh faculty data
-        await loadFacultyData();
-        
-        // Close modal
-        facultyModal.hide();
-        
-        // Show success message
-        alert(currentFacultyId ? 'Faculty updated successfully!' : 'New faculty added successfully!');
-    } catch (error) {
-        console.error('Error saving faculty data:', error);
-        alert('Error saving faculty data: ' + error.message);
-    } finally {
-        // Reset button state
-        saveFacultyBtn.innerHTML = 'Save Faculty';
-        saveFacultyBtn.disabled = false;
-    }
-}
-// Show confirmation for deleting a faculty
-function showDeleteConfirmation(facultyId) {
-    const faculty = facultyData.find(f => f._id === facultyId);
-    if (!faculty) return;
-    
-    document.getElementById('confirmationModalBody').innerHTML = `
-        <div class="alert alert-danger">
-            <i class="fas fa-exclamation-triangle"></i> You are about to delete the following faculty member:
-        </div>
-        <p><strong>${faculty.name}</strong> (ID: ${faculty.idNumber})</p>
-        <p>This action cannot be undone. Do you want to continue?</p>
-    `;
-    
-    confirmActionBtn.onclick = function() {
-        deleteFaculty(facultyId);
-        confirmationModal.hide();
-    };
-    
-    confirmationModal.show();
-}
-
-// Delete a faculty
-async function deleteFaculty(facultyId) {
-    try {
-        // Show loading indicator
-        confirmActionBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...';
-        confirmActionBtn.disabled = true;
-        
-        const response = await fetch(`/admin/api/faculty/${facultyId}`, {
-            method: 'DELETE'
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to delete faculty');
-        }
-        
-        // Refresh faculty data
-        await loadFacultyData();
-        
-        // Show success message
-        alert('Faculty deleted successfully!');
-    } catch (error) {
-        console.error('Error deleting faculty:', error);
-        alert('Error deleting faculty: ' + error.message);
-    } finally {
-        // Reset button state
-        confirmActionBtn.innerHTML = 'Confirm';
-        confirmActionBtn.disabled = false;
-    }
-}
-
-// Filter faculty table based on search input
-function filterFacultyTable() {
-    const searchText = searchFacultyInput.value.toLowerCase();
-    const rows = facultyTableBody.querySelectorAll('tr');
-    
-    rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        if (text.includes(searchText)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
     </script>
+    
 </body>
 </html>

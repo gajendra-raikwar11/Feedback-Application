@@ -18,6 +18,7 @@ const fs = require('fs');
 const { FeedbackForm, validateFeedbackForm } = require('../models/feedbackForm');
 const { FeedbackResponse } = require("../models/feedbackResponse");
 const { FormTemplate, validateFormTemplate } = require('../models/FormTemplate');
+const { Subject, validateSubject } = require('../models/subjectSchema');
 
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
@@ -2350,14 +2351,20 @@ router.get("/faculty-page", async (req, res) => {
     // Fetch all faculty members from the database
     const facultyData = await Faculty.find({});
     
+    // Fetch all subjects from the database
+    const subjectsData = await Subject.find({});
+
+    // console.log("subject list:" , subjectsData);
+    
     res.render("adminFaculty", {
       currentPath,
       adminData,
-      facultyData: JSON.stringify(facultyData) // Pass faculty data to the template
+      facultyData: JSON.stringify(facultyData),
+      subjectsData: JSON.stringify(subjectsData) // Pass subjects data to the template
     });
   } catch (error) {
-    console.error("Error fetching faculty data:", error);
-    res.status(500).send("Server error while loading faculty data");
+    console.error("Error fetching data:", error);
+    res.status(500).send("Server error while loading data");
   }
 });
 
@@ -2372,44 +2379,188 @@ router.get("/api/faculty", async (req, res) => {
   }
 });
 
-// API endpoint to add/update faculty
-router.post("/api/faculty", async (req, res) => {
+// API endpoint to get all subjects data
+router.get("/api/subjects", async (req, res) => {
+  try {
+    const subjectsData = await Subject.find({});
+    res.json(subjectsData);
+  } catch (error) {
+    console.error("Error fetching subjects data:", error);
+    res.status(500).json({ error: "Server error while fetching subjects data" });
+  }
+});
+
+// // API endpoint to add/update faculty
+// router.post("/api/faculty", async (req, res) => {
+//   try {
+//     const facultyData = req.body;
+//     console.log("Received faculty data:", JSON.stringify(facultyData, null, 2)); // Logging for debugging
+    
+//     // Check if faculty already exists (update) or is new (create)
+//     if (facultyData._id) {
+//       // Update existing faculty
+//       const updatedFaculty = await Faculty.findByIdAndUpdate(
+//         facultyData._id,
+//         {
+//           name: facultyData.name,
+//           idNumber: facultyData.idNumber,
+//           email: facultyData.email,
+//           branch: facultyData.branch,
+//           subjects: facultyData.subjects,
+//           sections: facultyData.sections,
+//           semesters: facultyData.semesters,
+//           teachingAssignments: facultyData.teachingAssignments,
+//           role: facultyData.role || 'faculty',
+//           password: facultyData.password || '111111'
+//         },
+//         { new: true }
+//       );
+//       console.log("Updated faculty:", JSON.stringify(updatedFaculty, null, 2)); // Logging after update
+//       res.json(updatedFaculty);
+//     } else {
+//       // Create new faculty
+//       delete facultyData._id; // Remove empty ID if present
+//       const newFaculty = new Faculty(facultyData);
+//       const savedFaculty = await newFaculty.save();
+//       console.log("Saved new faculty:", JSON.stringify(savedFaculty, null, 2)); // Logging after save
+//       res.json(savedFaculty);
+//     }
+//   } catch (error) {
+//     console.error("Error saving faculty data:", error);
+//     res.status(500).json({ error: "Server error while saving faculty data", details: error.message });
+//   }
+// });
+
+// FRONTEND: Update saveFaculty function
+async function saveFaculty() {
+    // Validate form
+    if (!facultyNameField.value || !facultyIdNumberField.value || !facultyEmailField.value || !facultyBranchField.value) {
+        alert('Please fill in all required fields.');
+        return;
+    }
+    
+    // Create faculty object
+    const faculty = {
+        name: facultyNameField.value,
+        idNumber: facultyIdNumberField.value,
+        email: facultyEmailField.value,
+        branch: facultyBranchField.value,
+        isCoordinator: isCoordinator,
+        subjects: currentSubjects,
+        sections: currentSections,
+        semesters: currentSemesters,
+        teachingAssignments: currentAssignments
+    };
+    
+    try {
+        // Both create and update use the same endpoint with POST method
+        if (currentFacultyId) {
+            // Update existing faculty - add ID to the faculty object
+            faculty._id = currentFacultyId;
+        }
+            
+        // Use the same endpoint for both create and update
+        const response = await fetch('/api/faculty', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(faculty)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to save faculty data');
+        }
+        
+        // Refresh data
+        await loadFacultyData();
+        
+        // Close modal
+        facultyModal.hide();
+        
+        // Show success message
+        alert(currentFacultyId ? 'Faculty updated successfully!' : 'Faculty added successfully!');
+    } catch (error) {
+        console.error('Error saving faculty:', error);
+        alert(`Error saving faculty data: ${error.message}`);
+    }
+}
+
+router.post('/api/faculty', async (req, res) => {
   try {
     const facultyData = req.body;
-    console.log("Received faculty data:", JSON.stringify(facultyData, null, 2)); // Logging for debugging
-    
-    // Check if faculty already exists (update) or is new (create)
-    if (facultyData._id) {
-      // Update existing faculty
-      const updatedFaculty = await Faculty.findByIdAndUpdate(
-        facultyData._id,
-        {
-          name: facultyData.name,
-          idNumber: facultyData.idNumber,
-          email: facultyData.email,
-          branch: facultyData.branch,
-          subjects: facultyData.subjects,
-          sections: facultyData.sections,
-          semesters: facultyData.semesters,
-          teachingAssignments: facultyData.teachingAssignments, // Make sure this is explicitly included
-          role: facultyData.role || 'faculty',
-          password: facultyData.password || '111111'
-        },
-        { new: true }
-      );
-      console.log("Updated faculty:", JSON.stringify(updatedFaculty, null, 2)); // Logging after update
-      res.json(updatedFaculty);
-    } else {
-      // Create new faculty
-      delete facultyData._id; // Remove empty ID if present
-      const newFaculty = new Faculty(facultyData);
-      const savedFaculty = await newFaculty.save();
-      console.log("Saved new faculty:", JSON.stringify(savedFaculty, null, 2)); // Logging after save
-      res.json(savedFaculty);
+
+    // ✅ Validate required fields
+    if (!facultyData.name || !facultyData.idNumber || !facultyData.email || !facultyData.branch) {
+      return res.status(400).json({ message: 'Missing required fields' });
     }
+
+    // ✅ Default password
+    const plainPassword = "111111";
+
+    // ✅ Hash the password using bcrypt
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(plainPassword, saltRounds);
+
+    // ✅ Include hashed password
+    facultyData.password = hashedPassword;
+
+    // ✅ Save to DB
+    const newFaculty = new Faculty(facultyData);
+    await newFaculty.save();
+
+    res.status(201).json({ message: 'Faculty added successfully', faculty: newFaculty });
   } catch (error) {
-    console.error("Error saving faculty data:", error);
-    res.status(500).json({ error: "Server error while saving faculty data", details: error.message });
+    console.error('Error adding faculty:', error);
+    res.status(500).json({ message: 'Failed to add faculty' });
+  }
+});
+// Add this to your backend routes:
+router.put("/api/faculty/:id", async (req, res) => {
+  try {
+    const facultyId = req.params.id;
+    const facultyData = req.body;
+
+    // Validate required fields
+    const requiredFields = ['name', 'idNumber', 'email', 'branch'];
+    for (const field of requiredFields) {
+      if (!facultyData[field]) {
+        return res.status(400).json({ error: `Missing required field: ${field}` });
+      }
+    }
+
+    console.log(`Updating faculty with ID ${facultyId}:`, JSON.stringify(facultyData, null, 2));
+
+    const updatedFaculty = await Faculty.findByIdAndUpdate(
+      facultyId,
+      {
+        name: facultyData.name,
+        idNumber: facultyData.idNumber,
+        email: facultyData.email,
+        branch: facultyData.branch,
+        subjects: facultyData.subjects || [],
+        sections: facultyData.sections || [],
+        semesters: facultyData.semesters || [],
+        teachingAssignments: facultyData.teachingAssignments || [],
+        role: facultyData.role || 'faculty'
+        // Note: Not updating password in PUT request for security reasons
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedFaculty) {
+      return res.status(404).json({ error: `Faculty with ID ${facultyId} not found` });
+    }
+
+    console.log("Updated faculty:", JSON.stringify(updatedFaculty, null, 2));
+    return res.json(updatedFaculty);
+  } catch (error) {
+    console.error("Error updating faculty:", error);
+    return res.status(500).json({
+      error: "Server error while updating faculty data",
+      details: error.message
+    });
   }
 });
 
@@ -2426,7 +2577,102 @@ router.delete("/api/faculty/:id", async (req, res) => {
     res.status(500).json({ error: "Server error while deleting faculty" });
   }
 });
+//
 
+//----------------------------------subject related routes----------------------------------------
+
+// GET route for subject form
+router.get('/subjects', async (req, res) => {
+  try {
+    // Get admin data from the session
+    const adminData = req.session.admin;
+    const currentPath = req.path;
+    
+    // Fetch subjects from the database
+    const subjects = await Subject.find().sort({ semester: 1, subjectCode: 1 });
+    
+    // Render the view with all required data
+    res.render('addSubject', { 
+      subjects,
+      formData: null,
+      errors: null,
+      successMsg: null,
+      adminData: adminData, // Pass admin data from session
+      currentPath:currentPath// Set current page for active menu highlight
+    });
+  } catch (error) {
+    console.error('Error fetching subjects:', error);
+    res.status(500).send('An error occurred while fetching subjects');
+  }
+});
+
+
+// POST route for adding a new subject
+router.post('/subjects', async (req, res) => {
+  try {
+    // Process the input data
+    const subjectData = { ...req.body };
+    
+    // Validate the request body
+    const { error, value } = validateSubject(subjectData);
+    
+    // If validation error, render the form with errors
+    if (error) {
+      const subjects = await Subject.find().sort({ semester: 1, subjectCode: 1 });
+      
+      // Format the validation errors for display
+      const errorDetails = {};
+      error.details.forEach(detail => {
+        // Extract the field name from the path
+        const field = detail.path[0];
+        errorDetails[field] = detail.message;
+      });
+      
+      return res.render('addSubject', {
+        subjects,
+        formData: req.body,
+        errors: errorDetails,
+        successMsg: null
+      });
+    }
+    
+    // Check if subject code already exists
+    const existingSubject = await Subject.findOne({ subjectCode: value.subjectCode });
+    if (existingSubject) {
+      const subjects = await Subject.find().sort({ semester: 1, subjectCode: 1 });
+      return res.render('addSubject', {
+        subjects,
+        formData: req.body,
+        errors: { subjectCode: 'Subject code already exists' },
+        successMsg: null
+      });
+    }
+    
+    // Create and save the new subject
+    const newSubject = new Subject(value);
+    await newSubject.save();
+    
+    // Fetch updated list of subjects and render the form with success message
+    const subjects = await Subject.find().sort({ semester: 1, subjectCode: 1 });
+    res.render('addSubject', {
+      subjects,
+      formData: null,
+      errors: null,
+      successMsg: 'Subject added successfully!'
+    });
+    
+  } catch (error) {
+    console.error('Error adding subject:', error);
+    
+    const subjects = await Subject.find().sort({ semester: 1, subjectCode: 1 });
+    res.render('addSubject', {
+      subjects,
+      formData: req.body,
+      errors: { general: 'An error occurred while adding the subject' },
+      successMsg: null
+    });
+  }
+});
 
 //
 
