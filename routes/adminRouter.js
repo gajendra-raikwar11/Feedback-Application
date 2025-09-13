@@ -733,6 +733,72 @@ router.get("/adminStudentPage", validateAdmin, async (req, res) => {
 
 //---------------------------------------------Admin Home Form Realted all routes--------------------------------------------------------------------
 //form related all routes
+// router.get('/adminHome/forms/getFacultyBySemesters', async (req, res) => {
+//     try {
+//         // const { semesters, assignmentType } = req.query;
+//         const semsters=[6,5,4,3]
+//         // const assignmentType = 'Thoery';
+
+//         console.log('[API] Called with query:', req.query);
+
+//         if (!semesters || (typeof semesters !== 'string' && !Array.isArray(semesters))) {
+//             console.warn('[Validation Error] No semesters provided');
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'Please provide at least one semester'
+//             });
+//         }
+
+//         const semestersArray = Array.isArray(semesters) ? semesters : [semesters];
+//         console.log('[Parsed] semestersArray:', semestersArray);
+
+//         // Fetch all faculty (filtering done in-memory)
+//         const allFaculties = await Faculty.find().lean();
+//         console.log(`[DB] Total faculties found: ${allFaculties.length}`);
+
+//         // Filter faculty based on teachingAssignments
+//         const matchedFaculties = allFaculties.filter(faculty => {
+//             const matchedAssignments = faculty.teachingAssignments?.filter(assign => {
+//                 const matchesSemester = semestersArray.includes(assign.semester);
+//                 const matchesType = assignmentType ? assign.type === assignmentType : true;
+//                 return matchesSemester && matchesType;
+//             });
+//             return matchedAssignments?.length > 0;
+//         });
+
+//         // Final response mapping
+//         const result = matchedFaculties.map(faculty => {
+//             const relevantAssignments = faculty.teachingAssignments.filter(assign => {
+//                 const matchesSemester = semestersArray.includes(assign.semester);
+//                 const matchesType = assignmentType ? assign.type === assignmentType : true;
+//                 return matchesSemester && matchesType;
+//             });
+
+//             return {
+//                 name: faculty.name,
+//                 idNumber: faculty.idNumber,
+//                 email: faculty.email,
+//                 branch: faculty.branch,
+//                 subjects: faculty.subjects || [],
+//                 sections: faculty.sections || [],
+//                 semesters: [...new Set(relevantAssignments.map(a => a.semester))],
+//                 teachingAssignments: relevantAssignments,
+//                 feedbackForms: faculty.feedbackForms || [],
+//                 role: faculty.role
+//             };
+//         });
+
+//         console.log('[Result] Filtered faculties:', result.length);
+//         return res.json({ success: true, data: result });
+
+//     } catch (error) {
+//         console.error('[Error] Failed to fetch faculty data:', error);
+//         return res.status(500).json({
+//             success: false,
+//             message: 'Server error. Please try again later.'
+//         });
+//     }
+// });
 router.get('/adminHome/forms/create/:formType', validateAdmin, async (req, res) => {
   try {
     let { formType } = req.params;

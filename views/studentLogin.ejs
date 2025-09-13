@@ -67,6 +67,30 @@
     .login-button:hover {
       background: #4338ca;
     }
+    .back {
+            background: #9333ea;
+            transition: all 0.3s ease;
+            color: white;
+            padding: 12px 24px;
+            font-weight: 500;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 20px;
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(147, 51, 234, 0.2);
+        }
+
+        .back:hover {
+            background: #7e22ce;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(147, 51, 234, 0.3);
+        }
+
+        .back:active {
+            transform: translateY(0);
+        }
   </style>
 </head>
 <body>
@@ -90,6 +114,12 @@
         class="w-full text-white font-semibold py-3 rounded-lg login-button">
         Login
       </button>
+
+      <div class="mt-2">
+                            <a href="/" class="back">
+                                <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                            </a>
+              </div>
     </form>
   </div>
 </body>

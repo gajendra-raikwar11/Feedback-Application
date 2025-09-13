@@ -1896,3 +1896,1037 @@
     </script>
 </body>
 </html>
+
+
+    <!-- <script>
+        $(document).ready(function() {
+    // Initialize variables
+    let sectionCounter = 0;
+    let questionCounter = 0;
+    
+    // Bootstrap modals
+    const addSectionModal = new bootstrap.Modal(document.getElementById('addSectionModal'));
+    const addQuestionModal = new bootstrap.Modal(document.getElementById('addQuestionModal'));
+    
+    // Toggle status text
+    $('#formStatus').change(function () {
+        $('.status-text').text($(this).is(':checked') ? 'Active' : 'Inactive');
+        $(this).val($(this).is(':checked') ? 'active' : 'closed');
+    });
+
+    // *********** NEW CODE - SEMESTER CHECKBOX HANDLING WITH FACULTY FETCHING ***********
+    $('.semester-checkbox').change(function() {
+        updateSemesterTags();
+        
+        // Fetch faculty data based on selected semesters
+        fetchFacultyDataForSelectedSemesters();
+    });
+    
+    $('#selectAllSemestersBtn').click(function() {
+        $('.semester-checkbox').prop('checked', true);
+        updateSemesterTags();
+        
+        // Fetch faculty data based on selected semesters
+        fetchFacultyDataForSelectedSemesters();
+    });
+    
+    $('#clearAllSemestersBtn').click(function() {
+        $('.semester-checkbox').prop('checked', false);
+        updateSemesterTags();
+        
+        // Clear faculty data as no semesters are selected
+        $('#assignedFaculties').empty();
+        $('#emptyFacultiesMessage').show();
+        
+        // Clear sections and subjects as well
+        $('#assignedSections').empty();
+        $('#emptySectionsMessage').show();
+        
+        $('#assignedSubjects').empty();
+        $('#emptySubjectsMessage').show();
+    });
+    
+    function updateSemesterTags() {
+        // Clear current tags
+        $('#assignedSemesters').empty();
+        
+        let selectedCount = 0;
+        
+        // Create tags for each selected semester
+        $('.semester-checkbox:checked').each(function() {
+            selectedCount++;
+            const semesterValue = $(this).val();
+            
+            const semesterHtml = `
+            <div class="assigned-item" data-semester="${semesterValue}">
+                <i class="fas fa-graduation-cap me-1"></i>
+                ${semesterValue}
+                <button type="button" class="btn btn-sm text-danger remove-assigned-item" data-semester="${semesterValue}">
+                    <i class="fas fa-times"></i>
+                </button>
+                <input type="hidden" name="semesters[]" value="${semesterValue}">
+            </div>
+            `;
+            
+            $('#assignedSemesters').append(semesterHtml);
+        });
+        
+        // Show empty message if no semesters selected
+        if (selectedCount === 0) {
+            $('#assignedSemesters').html(`
+                <div class="empty-container" id="emptySemestersMessage">
+                    <i class="fas fa-graduation-cap"></i>
+                    <p>No semesters have been selected yet. Please check the boxes above.</p>
+                </div>
+            `);
+        }
+    }
+    
+    // *********** NEW CODE - FETCH FACULTY DATA FOR SELECTED SEMESTERS ***********
+    function fetchFacultyDataForSelectedSemesters() {
+        // Get all selected semesters
+        const selectedSemesters = [];
+        $('.semester-checkbox:checked').each(function() {
+            selectedSemesters.push($(this).val());
+        });
+        
+        // Get form type for academic forms
+        const formType = $('#formType').val();
+        const assignmentType = formType === 'Academic' ? $('#academicType').val() : null; // Theory or Practical
+        
+        if (selectedSemesters.length > 0) {
+            // Make AJAX call to fetch faculty data
+            $.ajax({
+                url: '/admin/adminHome/forms/getFacultyBySemesters',
+                type: 'GET',
+                data: { 
+                    semesters: selectedSemesters,
+                    assignmentType: assignmentType 
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Clear current faculty assignments
+                        $('#assignedFaculties').empty();
+                        
+                        // Also clear sections and subjects
+                        $('#assignedSections').empty();
+                        $('#assignedSubjects').empty();
+                        
+                        const faculties = response.data;
+                        
+                        if (faculties.length > 0) {
+                            // Hide empty messages
+                            $('#emptyFacultiesMessage').hide();
+                            $('#emptySectionsMessage').hide();
+                            $('#emptySubjectsMessage').hide();
+                            
+                            // Track unique sections and subjects
+                            const uniqueSections = new Set();
+                            const uniqueSubjects = new Set();
+                            
+                            // Add each faculty
+                            faculties.forEach(function(faculty) {
+                                const facultyHtml = `
+                                <div class="assigned-item" data-id="${faculty._id}">
+                                    <i class="fas fa-user-tie me-1"></i>
+                                    ${faculty.name}
+                                    <button type="button" class="btn btn-sm text-danger remove-assigned-item">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <input type="hidden" name="facultyAssigned[]" value="${faculty._id}">
+                                </div>
+                                `;
+                                
+                                $('#assignedFaculties').append(facultyHtml);
+                                
+                                // Add sections and subjects from teaching assignments
+                                if (faculty.teachingAssignments && faculty.teachingAssignments.length > 0) {
+                                    faculty.teachingAssignments.forEach(function(assignment) {
+                                        // Only add assignments for selected semesters and matching assignment type
+                                        if (
+                                            selectedSemesters.includes(assignment.semester) && 
+                                            (!assignmentType || assignment.type === assignmentType)
+                                        ) {
+                                            uniqueSections.add(assignment.section);
+                                            uniqueSubjects.add(assignment.subject);
+                                        }
+                                    });
+                                }
+                            });
+                            
+                            // Add unique sections
+                            uniqueSections.forEach(function(section) {
+                                const sectionHtml = `
+                                <div class="assigned-item" data-section="${section}">
+                                    <i class="fas fa-layer-group me-1"></i>
+                                    ${section}
+                                    <button type="button" class="btn btn-sm text-danger remove-assigned-item">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <input type="hidden" name="sectionsAssigned[]" value="${section}">
+                                </div>
+                                `;
+                                
+                                $('#assignedSections').append(sectionHtml);
+                            });
+                            
+                            // Add unique subjects (for academic forms)
+                            if (formType === 'Academic') {
+                                uniqueSubjects.forEach(function(subject) {
+                                    const subjectHtml = `
+                                    <div class="assigned-item" data-subject="${subject}">
+                                        <i class="fas fa-book me-1"></i>
+                                        ${subject}
+                                        <button type="button" class="btn btn-sm text-danger remove-assigned-item">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <input type="hidden" name="subjects[]" value="${subject}">
+                                    </div>
+                                    `;
+                                    
+                                    $('#assignedSubjects').append(subjectHtml);
+                                });
+                            }
+                        } else {
+                            // No faculties found for selected semesters
+                            $('#emptyFacultiesMessage').show();
+                            $('#emptySectionsMessage').show();
+                            if (formType === 'Academic') {
+                                $('#emptySubjectsMessage').show();
+                            }
+                        }
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while fetching faculty data');
+                }
+            });
+        } else {
+            // No semesters selected, clear faculty, sections, and subjects
+            $('#assignedFaculties').empty();
+            $('#emptyFacultiesMessage').show();
+            
+            $('#assignedSections').empty();
+            $('#emptySectionsMessage').show();
+            
+            $('#assignedSubjects').empty();
+            $('#emptySubjectsMessage').show();
+        }
+    }
+    
+    // *********** NEW CODE - FILTER FACULTY WHEN ACADEMIC TYPE CHANGES ***********
+    $('#academicType').change(function() {
+        // Re-fetch faculty data based on the new academic type
+        fetchFacultyDataForSelectedSemesters();
+    });
+    
+    // Section checkbox handling
+    $('.section-checkbox').change(function() {
+        updateSectionTags();
+    });
+    
+    $('#selectAllSectionsBtn').click(function() {
+        $('.section-checkbox').prop('checked', true);
+        updateSectionTags();
+    });
+    
+    $('#clearAllSectionsBtn').click(function() {
+        $('.section-checkbox').prop('checked', false);
+        updateSectionTags();
+    });
+    
+    function updateSectionTags() {
+        // Clear current tags
+        $('#assignedSections').empty();
+        
+        let selectedCount = 0;
+        
+        // Create tags for each selected section
+        $('.section-checkbox:checked').each(function() {
+            selectedCount++;
+            const sectionValue = $(this).val();
+            
+            const sectionHtml = `
+            <div class="assigned-item" data-section="${sectionValue}">
+                <i class="fas fa-layer-group me-1"></i>
+                ${sectionValue}
+                <button type="button" class="btn btn-sm text-danger remove-assigned-item" data-section="${sectionValue}">
+                    <i class="fas fa-times"></i>
+                </button>
+                <input type="hidden" name="sectionsAssigned[]" value="${sectionValue}">
+            </div>
+            `;
+            
+            $('#assignedSections').append(sectionHtml);
+        });
+        
+        // Show empty message if no sections selected
+        if (selectedCount === 0) {
+            $('#assignedSections').html(`
+                <div class="empty-container" id="emptySectionsMessage">
+                    <i class="fas fa-layer-group"></i>
+                    <p>No sections have been selected yet. Please check the boxes above.</p>
+                </div>
+            `);
+        }
+    }
+
+    // Auto-generate session label when academic year or semester type changes
+    $('#academicSession, #semesterType').change(function() {
+        const session = $('#academicSession').val();
+        const semesterType = $('#semesterType').val();
+        
+        if (session && semesterType) {
+            const semesterPeriod = semesterType === "Odd" ? "July-Dec" : "Jan-June";
+            const generatedLabel = `${session} ${semesterPeriod}`;
+            
+            // Only auto-fill if user hasn't manually entered something
+            if (!$('#sessionLabel').val() || $('#sessionLabel').data('auto-generated')) {
+                $('#sessionLabel').val(generatedLabel);
+                $('#sessionLabel').data('auto-generated', true);
+            }
+        }
+    });
+
+    // Mark session label as manual when user modifies it
+    $('#sessionLabel').on('input', function() {
+        if ($(this).val() !== '') {
+            $(this).data('auto-generated', false);
+        }
+    });
+
+    // Add faculty member (manual addition)
+    $('#addFacultyBtn').click(function () {
+         const facultySelect = $('#facultySelect');
+         const facultyId = facultySelect.val();
+
+        if (facultyId) {
+            const facultyName = facultySelect.find('option:selected').text();
+            const facultyHtml = `
+            <div class="assigned-item" data-id="${facultyId}">
+                <i class="fas fa-user-tie me-1"></i>
+                ${facultyName}
+                <button type="button" class="btn btn-sm text-danger remove-assigned-item">
+                    <i class="fas fa-times"></i>
+                </button>
+                <input type="hidden" name="facultyAssigned[]" value="${facultyId.toString()}">
+            </div>
+            `;
+            
+            // Hide empty message if it's visible
+            $('#emptyFacultiesMessage').hide();
+            $('#assignedFaculties').append(facultyHtml);
+            facultySelect.val('');
+        }
+    });
+  
+    // Remove assigned item (faculty, section, semester) when the X is clicked
+    $(document).on('click', '.remove-assigned-item', function () {
+        const container = $(this).closest('.assigned-item').parent();
+        
+        // If it's a semester item, uncheck the corresponding checkbox
+        const semesterValue = $(this).closest('.assigned-item').data('semester');
+        if (semesterValue) {
+            $(`.semester-checkbox[value="${semesterValue}"]`).prop('checked', false);
+            // Update faculty data since semester changed
+            if ($(this).data('semester')) {
+                fetchFacultyDataForSelectedSemesters();
+            }
+        }
+        
+        // If it's a section item, uncheck the corresponding checkbox
+        const sectionValue = $(this).closest('.assigned-item').data('section');
+        if (sectionValue) {
+            $(`.section-checkbox[value="${sectionValue}"]`).prop('checked', false);
+        }
+        
+        $(this).closest('.assigned-item').remove();
+        
+        // Show empty message if no items are assigned
+        if (container.attr('id') === 'assignedFaculties' && container.find('.assigned-item').length === 0) {
+            $('#emptyFacultiesMessage').show();
+        }
+        else if (container.attr('id') === 'assignedSections' && container.find('.assigned-item').length === 0) {
+            $('#emptySectionsMessage').show();
+        }
+        else if (container.attr('id') === 'assignedSemesters' && container.find('.assigned-item').length === 0) {
+            $('#emptySemestersMessage').show();
+        }
+        else if (container.attr('id') === 'assignedSubjects' && container.find('.assigned-item').length === 0) {
+            $('#emptySubjectsMessage').show();
+        }
+    });
+
+    // Manual section assignment
+    $('#addSectionBtn').click(function () {
+        const sectionSelect = $('#sectionSelect');
+        const sectionValue = sectionSelect.val();
+        
+        if (sectionValue) {
+            const sectionHtml = `
+            <div class="assigned-item" data-section="${sectionValue}">
+                <i class="fas fa-layer-group me-1"></i>
+                ${sectionValue}
+                <button type="button" class="btn btn-sm text-danger remove-assigned-item">
+                    <i class="fas fa-times"></i>
+                </button>
+                <input type="hidden" name="sectionsAssigned[]" value="${sectionValue}">
+            </div>
+            `;
+            
+            // Hide empty message if it's visible
+            $('#emptySectionsMessage').hide();
+            $('#assignedSections').append(sectionHtml);
+            sectionSelect.val('');
+        }
+    });
+
+    // Subject assignment (for Academic forms only)
+    $('#addSubjectBtn').click(function () {
+        const subjectSelect = $('#subjectSelect');
+        const subjectValue = subjectSelect.val();
+        
+        if (subjectValue) {
+            const subjectHtml = `
+            <div class="assigned-item" data-subject="${subjectValue}">
+                <i class="fas fa-book me-1"></i>
+                ${subjectValue}
+                <button type="button" class="btn btn-sm text-danger remove-assigned-item">
+                    <i class="fas fa-times"></i>
+                </button>
+                <input type="hidden" name="subjects[]" value="${subjectValue}">
+            </div>
+            `;
+            
+            // Hide empty message if it's visible
+            $('#emptySubjectsMessage').hide();
+            $('#assignedSubjects').append(subjectHtml);
+            subjectSelect.val('');
+        }
+    });
+
+    // Form type toggle functionality with academic type handling
+    $('#formType').change(function() {
+        const formType = $(this).val();
+        
+        // Show/hide relevant sections based on form type
+        if (formType === 'Academic') {
+            $('.academic-form-fields').show();
+            $('.general-form-fields').hide();
+        } else {
+            $('.academic-form-fields').hide();
+            $('.general-form-fields').show();
+        }
+        
+        // Re-fetch faculty data if semesters are selected
+        if ($('.semester-checkbox:checked').length > 0) {
+            fetchFacultyDataForSelectedSemesters();
+        }
+    });
+
+    // Form Section Management
+    $('#addFormSectionBtn').click(function() {
+        // Show the add section modal
+        $('#sectionTitle').val('');
+        $('#sectionDescription').val('');
+        addSectionModal.show();
+    });
+
+    $('#saveSectionBtn').click(function() {
+        const sectionTitle = $('#sectionTitle').val().trim();
+        if (sectionTitle) {
+            sectionCounter++;
+            const sectionId = `section-${sectionCounter}`;
+            const description = $('#sectionDescription').val().trim();
+            
+            const sectionHtml = `
+            <div class="form-section-container" id="${sectionId}" data-section-index="${sectionCounter-1}">
+                <div class="section-header">
+                    <h5>${sectionTitle}</h5>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-outline-primary add-question-btn" data-section="${sectionId}">
+                            <i class="fas fa-plus"></i> Add Question
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-section-btn">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="section-description mb-3">
+                    ${description ? `<p class="text-muted">${description}</p>` : ''}
+                </div>
+                <input type="hidden" name="sections[${sectionCounter-1}][title]" value="${sectionTitle}">
+                <input type="hidden" name="sections[${sectionCounter-1}][description]" value="${description}">
+                <div class="questions-container">
+                    <div class="empty-container section-empty-message">
+                        <i class="fas fa-question-circle"></i>
+                        <p>No questions have been added to this section yet.</p>
+                    </div>
+                </div>
+            </div>
+            `;
+            
+            // Hide empty message and add the section
+            $('#emptySectionsContainerMessage').hide();
+            $('#formSectionsContainer').append(sectionHtml);
+            
+            // Close the modal
+            addSectionModal.hide();
+        }
+    });
+
+    // Remove a section
+    $(document).on('click', '.remove-section-btn', function() {
+        // Remove the section
+        $(this).closest('.form-section-container').remove();
+        
+        // Re-index the remaining sections
+        $('#formSectionsContainer .form-section-container').each(function(index) {
+            const sectionId = $(this).attr('id');
+            $(this).attr('data-section-index', index);
+            
+            // Update hidden inputs for section
+            $(this).find('input[name^="sections["]').each(function() {
+                const fieldName = $(this).attr('name').split(/[\[\]]/)[2]; // Extract field name (title or description)
+                $(this).attr('name', `sections[${index}][${fieldName}]`);
+            });
+            
+            // Update questions indexing
+            $(this).find('.question-item').each(function(qIndex) {
+                $(this).find('input[name^="sections["]').each(function() {
+                    const parts = $(this).attr('name').split(/[\[\]]/);
+                    if (parts.length >= 5) {
+                        const questionField = parts[4]; // Extract question field name
+                        $(this).attr('name', `sections[${index}][questions][${qIndex}][${questionField}]`);
+                    } else if (parts.length >= 7 && parts[4] === 'gridOptions') {
+                        // Handle grid options specifically
+                        const gridPart = parts[6]; // Rows or columns
+                        $(this).attr('name', `sections[${index}][questions][${qIndex}][gridOptions][${gridPart}][]`);
+                    } else if (parts[3] === 'questions' && parts[5] === 'options') {
+                        // Handle question options
+                        $(this).attr('name', `sections[${index}][questions][${qIndex}][options][]`);
+                    }
+                });
+            });
+        });
+        
+        // Show empty message if no sections exist
+        if ($('#formSectionsContainer .form-section-container').length === 0) {
+            $('#emptySectionsContainerMessage').show();
+        }
+    });
+
+    // Show Add Question Modal
+    $(document).on('click', '.add-question-btn', function() {
+        const sectionId = $(this).data('section');
+        $('#currentSectionId').val(sectionId);
+        $('#questionText').val('');
+        $('#questionType').val('rating');
+        $('#questionRequired').prop('checked', true);
+        $('#optionsText').val('1, 2, 3, 4, 5');
+        $('#gridRows').val('');
+        $('#gridColumns').val('');
+        
+        // Show/hide options based on question type
+        toggleQuestionOptions('rating');
+        
+        addQuestionModal.show();
+    });
+
+    // Toggle question options based on type
+    $('#questionType').change(function() {
+        const type = $(this).val();
+        toggleQuestionOptions(type);
+    });
+
+    function toggleQuestionOptions(type) {
+        $('#questionOptions').hide();
+        $('#gridOptions').hide();
+        
+        if (type === 'mcq' || type === 'dropdown') {
+            $('#questionOptions').show();
+            $('#optionsText').val('Option 1, Option 2, Option 3');
+        } else if (type === 'grid') {
+            $('#gridOptions').show();
+        } else if (type === 'rating') {
+            $('#questionOptions').show();
+            $('#optionsText').val('1, 2, 3, 4, 5');
+        }
+    }
+
+    // Save Question
+    $('#saveQuestionBtn').click(function() {
+        const sectionId = $('#currentSectionId').val();
+        const questionText = $('#questionText').val().trim();
+        const questionType = $('#questionType').val();
+        const isRequired = $('#questionRequired').is(':checked');
+        
+        if (questionText) {
+            questionCounter++;
+            const sectionElement = $(`#${sectionId}`);
+            const sectionIndex = sectionElement.data('section-index');
+            const questionsContainer = sectionElement.find('.questions-container');
+            const questionCount = questionsContainer.find('.question-item').length;
+            const questionIndex = questionCount; // Zero-based index for the new question
+            
+            const questionHtml = createQuestionHtml(sectionIndex, questionIndex, questionText, questionType, isRequired);
+            
+            // Find the questions container and add the question
+            questionsContainer.find('.section-empty-message').hide();
+            questionsContainer.append(questionHtml);
+            
+            // Close the modal
+            addQuestionModal.hide();
+        }
+    });
+    
+    // Create question HTML with options
+    function createQuestionHtml(sectionIndex, questionIndex, questionText, questionType, isRequired, 
+                       existingOptions, existingGridOptions) {
+        let optionsHtml = '';
+        let hiddenInputs = `
+            <input type="hidden" name="sections[${sectionIndex}][questions][${questionIndex}][questionText]" value="${questionText}">
+            <input type="hidden" name="sections[${sectionIndex}][questions][${questionIndex}][questionType]" value="${questionType}">
+            <input type="hidden" name="sections[${sectionIndex}][questions][${questionIndex}][required]" value="${isRequired}">
+        `;
+        
+        // Handle different question types
+        if (questionType === 'mcq' || questionType === 'dropdown' || questionType === 'rating') {
+            let options = [];
+            
+            // Use existing options if available, otherwise use values from the form
+            if (existingOptions && existingOptions.length > 0) {
+                options = existingOptions;
+            } else {
+                const optionsText = $('#optionsText').val();
+                options = optionsText.split(',').map(opt => opt.trim()).filter(opt => opt);
+            }
+            
+            // Add options preview
+            if (options.length > 0) {
+                optionsHtml = `<div class="question-options mt-2 mb-2">
+                    <div class="badge bg-light text-dark me-1">Options: ${options.join(', ')}</div>
+                </div>`;
+                
+                // Add hidden inputs for options
+                options.forEach((opt) => {
+                    hiddenInputs += `<input type="hidden" name="sections[${sectionIndex}][questions][${questionIndex}][options][]" value="${opt}">`;
+                });
+            }
+        } else if (questionType === 'grid') {
+            let rows = [], cols = [];
+            
+            // Use existing grid options if available
+            if (existingGridOptions && existingGridOptions.rows && existingGridOptions.columns) {
+                rows = existingGridOptions.rows;
+                cols = existingGridOptions.columns;
+            } else {
+                rows = $('#gridRows').val().split(',').map(r => r.trim()).filter(r => r);
+                cols = $('#gridColumns').val().split(',').map(c => c.trim()).filter(c => c);
+            }
+            
+            if (rows.length > 0 && cols.length > 0) {
+                optionsHtml = `<div class="question-options mt-2 mb-2">
+                    <div class="badge bg-light text-dark me-1">Rows: ${rows.join(', ')}</div>
+                    <div class="badge bg-light text-dark">Columns: ${cols.join(', ')}</div>
+                </div>`;
+                
+                // Add hidden inputs for grid options
+                rows.forEach((row) => {
+                    hiddenInputs += `<input type="hidden" name="sections[${sectionIndex}][questions][${questionIndex}][gridOptions][rows][]" value="${row}">`;
+                });
+                
+                cols.forEach((col) => {
+                    hiddenInputs += `<input type="hidden" name="sections[${sectionIndex}][questions][${questionIndex}][gridOptions][columns][]" value="${col}">`;
+                });
+            }
+        } else if (questionType === 'yes_no') {
+            // Add hidden inputs for yes/no options
+            hiddenInputs += `<input type="hidden" name="sections[${sectionIndex}][questions][${questionIndex}][options][]" value="Yes">`;
+            hiddenInputs += `<input type="hidden" name="sections[${sectionIndex}][questions][${questionIndex}][options][]" value="No">`;
+        }
+        
+        return `
+        <div class="field-item question-item" data-question-index="${questionIndex}">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge ${isRequired ? 'bg-danger' : 'bg-secondary'} me-2">
+                            ${isRequired ? 'Required' : 'Optional'}
+                        </span>
+                        <span class="badge bg-primary">${questionType.replace('_', ' ').toUpperCase()}</span>
+                    </div>
+                    <h5 class="mt-2">${questionText}</h5>
+                    ${optionsHtml}
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-question-btn">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            ${hiddenInputs}
+        </div>
+        `;
+    }
+    
+    // Remove Question
+    $(document).on('click', '.remove-question-btn', function() {
+        const questionItem = $(this).closest('.question-item');
+        const sectionContainer = questionItem.closest('.form-section-container');
+        const sectionIndex = sectionContainer.data('section-index');
+        
+        // Remove the question
+        questionItem.remove();
+        
+        // Re-index the remaining questions in this section
+        sectionContainer.find('.question-item').each(function(index) {
+            $(this).attr('data-question-index', index);
+            
+            // Update hidden inputs for question
+            $(this).find('input[name^="sections["]').each(function() {
+                const parts = $(this).attr('name').split(/[\[\]]/);
+                if (parts.length >= 5) {
+                    const questionField = parts[4]; // Extract question field name
+                    $(this).attr('name', `sections[${sectionIndex}][questions][${index}][${questionField}]`);
+                } else if (parts.length >= 7 && parts[4] === 'gridOptions') {
+                    // Handle grid options specifically
+                    const gridPart = parts[6]; // Rows or columns
+                    $(this).attr('name', `sections[${sectionIndex}][questions][${index}][gridOptions][${gridPart}][]`);
+                } else if (parts[3] === 'questions' && parts[5] === 'options') {
+                    // Handle question options
+                    $(this).attr('name', `sections[${sectionIndex}][questions][${index}][options][]`);
+                }
+            });
+        });
+        
+        // Show empty message if no questions exist in this section
+        if (sectionContainer.find('.question-item').length === 0) {
+            sectionContainer.find('.section-empty-message').show();
+        }
+    });
+
+    // Form submission
+    $('#createFormForm').submit(function(e) {
+        e.preventDefault();
+    
+        // Validate required fields
+        if (!$('#formTitle').val().trim()) {
+            alert('Form title is required');
+            return;
+        }
+        
+        if (!$('#formDeadline').val()) {
+            alert('Submission deadline is required');
+            return;
+        }
+        
+        // Validate session fields
+        if (!$('#academicSession').val()) {
+            alert('Academic year is required');
+            return;
+        }
+        
+        if (!$('#semesterType').val()) {
+            alert('Semester type is required');
+            return;
+        }
+        
+       // Validate at least one faculty is assigned
+        if ($('#assignedFaculties .assigned-item').length === 0) {
+            alert('At least one faculty member must be assigned to the form');
+            return;
+        }
+        
+        // Validate at least one section is assigned
+        if ($('#assignedSections .assigned-item').length === 0) {
+            alert('At least one section must be assigned to the form');
+            return;
+        }
+        
+        // For academic forms, validate subject selection
+        if ($('#formType').val() === 'Academic' && $('#assignedSubjects .assigned-item').length === 0) {
+            alert('At least one subject must be assigned to academic forms');
+            return;
+        }
+        
+        // Validate form sections
+        if ($('#formSectionsContainer .form-section-container').length === 0) {
+            alert('Please add at least one section to the form');
+            return;
+        }
+        
+        // Check if each section has at least one question
+        let emptySections = false;
+        $('#formSectionsContainer .form-section-container').each(function() {
+            if ($(this).find('.question-item').length === 0) {
+                const sectionTitle = $(this).find('.section-header h5').text();
+                alert(`Section "${sectionTitle}" has no questions. Please add at least one question to each section.`);
+                emptySections = true;
+                return false; // Break the loop
+            }
+        });
+        
+        if (emptySections) {
+            return;
+        }
+        
+        // Prepare to submit the form
+        const formData = new FormData(this);
+        
+        // Disable submit button to prevent multiple submissions
+        $('#submitFormBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...');
+        
+        // Submit the form using AJAX
+        $.ajax({
+            url: '/admin/adminHome/forms/createForm',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                if (response.success) {
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Form Created Successfully',
+                        text: 'Your form has been created and is now available to assigned faculties.',
+                        confirmButtonText: 'View All Forms'
+                    }).then((result) => {
+                        // Redirect to forms list page
+                        window.location.href = '/admin/adminHome/forms';
+                    });
+                } else {
+                    // Show error message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'An error occurred while creating the form',
+                        confirmButtonText: 'Try Again'
+                    });
+                    $('#submitFormBtn').prop('disabled', false).html('Create Form');
+                }
+            },
+            error: function(xhr) {
+                // Parse error message if available
+                let errorMessage = 'An error occurred while creating the form';
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    errorMessage = response.message || errorMessage;
+                } catch (e) {
+                    console.error('Error parsing response:', e);
+                }
+                
+                // Show error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMessage,
+                    confirmButtonText: 'Try Again'
+                });
+                $('#submitFormBtn').prop('disabled', false).html('Create Form');
+            }
+        });
+    });
+
+    // Preview functionality
+    $('#previewFormBtn').click(function() {
+        // Validate if there are any sections and questions
+        if ($('#formSectionsContainer .form-section-container').length === 0) {
+            alert('Please add at least one section before previewing the form');
+            return;
+        }
+        
+        let hasQuestions = false;
+        $('#formSectionsContainer .form-section-container').each(function() {
+            if ($(this).find('.question-item').length > 0) {
+                hasQuestions = true;
+                return false; // Break the loop if we found questions
+            }
+        });
+        
+        if (!hasQuestions) {
+            alert('Please add at least one question before previewing the form');
+            return;
+        }
+        
+        // Get form data
+        const formTitle = $('#formTitle').val() || 'Untitled Form';
+        const formDescription = $('#formDescription').val() || '';
+        
+        // Create preview content
+        let previewHtml = `
+        <div class="form-preview-container">
+            <div class="form-preview-header">
+                <h3>${formTitle}</h3>
+                ${formDescription ? `<p class="text-muted">${formDescription}</p>` : ''}
+            </div>
+            <div class="form-preview-body">
+        `;
+        
+        // Add sections and questions
+        $('#formSectionsContainer .form-section-container').each(function() {
+            const sectionTitle = $(this).find('.section-header h5').text();
+            const sectionDescription = $(this).find('.section-description p').text() || '';
+            
+            previewHtml += `
+            <div class="form-preview-section mb-4">
+                <h4>${sectionTitle}</h4>
+                ${sectionDescription ? `<p class="text-muted">${sectionDescription}</p>` : ''}
+            `;
+            
+            // Add questions
+            $(this).find('.question-item').each(function() {
+                const questionText = $(this).find('h5').text();
+                const questionType = $(this).find('.badge.bg-primary').text().toLowerCase();
+                const isRequired = $(this).find('.badge:first').text().trim() === 'Required';
+                
+                previewHtml += `
+                <div class="form-preview-question mb-3">
+                    <div class="question-text">
+                        ${questionText} ${isRequired ? '<span class="text-danger">*</span>' : ''}
+                    </div>
+                `;
+                
+                // Render different input types based on question type
+                if (questionType.includes('text')) {
+                    previewHtml += `<input type="text" class="form-control" placeholder="Your answer" disabled>`;
+                } else if (questionType.includes('textarea') || questionType.includes('long text')) {
+                    previewHtml += `<textarea class="form-control" rows="3" placeholder="Your answer" disabled></textarea>`;
+                } else if (questionType.includes('rating')) {
+                    previewHtml += `<div class="rating-preview">`;
+                    const options = [];
+                    $(this).find('input[name$="[options][]"]').each(function() {
+                        options.push($(this).val());
+                    });
+                    
+                    options.forEach(option => {
+                        previewHtml += `
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" disabled>
+                            <label class="form-check-label">${option}</label>
+                        </div>`;
+                    });
+                    previewHtml += `</div>`;
+                } else if (questionType.includes('mcq')) {
+                    const options = [];
+                    $(this).find('input[name$="[options][]"]').each(function() {
+                        options.push($(this).val());
+                    });
+                    
+                    options.forEach(option => {
+                        previewHtml += `
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" disabled>
+                            <label class="form-check-label">${option}</label>
+                        </div>`;
+                    });
+                } else if (questionType.includes('dropdown')) {
+                    previewHtml += `<select class="form-select" disabled><option>Select an option</option>`;
+                    const options = [];
+                    $(this).find('input[name$="[options][]"]').each(function() {
+                        options.push($(this).val());
+                    });
+                    
+                    options.forEach(option => {
+                        previewHtml += `<option>${option}</option>`;
+                    });
+                    previewHtml += `</select>`;
+                } else if (questionType.includes('yes_no') || questionType.includes('yes no')) {
+                    previewHtml += `
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" disabled>
+                        <label class="form-check-label">Yes</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" disabled>
+                        <label class="form-check-label">No</label>
+                    </div>`;
+                } else if (questionType.includes('grid')) {
+                    // Get rows and columns
+                    const rows = [];
+                    const cols = [];
+                    
+                    $(this).find('input[name$="[gridOptions][rows][]"]').each(function() {
+                        rows.push($(this).val());
+                    });
+                    
+                    $(this).find('input[name$="[gridOptions][columns][]"]').each(function() {
+                        cols.push($(this).val());
+                    });
+                    
+                    if (rows.length > 0 && cols.length > 0) {
+                        previewHtml += `<table class="table table-bordered grid-preview">
+                            <thead>
+                                <tr>
+                                    <th></th>`;
+                                    
+                        cols.forEach(col => {
+                            previewHtml += `<th>${col}</th>`;
+                        });
+                        
+                        previewHtml += `</tr>
+                            </thead>
+                            <tbody>`;
+                            
+                        rows.forEach(row => {
+                            previewHtml += `<tr>
+                                <td>${row}</td>`;
+                                
+                            cols.forEach(() => {
+                                previewHtml += `<td><input type="radio" disabled></td>`;
+                            });
+                            
+                            previewHtml += `</tr>`;
+                        });
+                        
+                        previewHtml += `</tbody>
+                        </table>`;
+                    }
+                }
+                
+                previewHtml += `</div>`;
+            });
+            
+            previewHtml += `</div>`;
+        });
+        
+        previewHtml += `
+            </div>
+            <div class="form-preview-footer">
+                <button type="button" class="btn btn-primary" disabled>Submit</button>
+            </div>
+        </div>
+        `;
+        
+        // Show preview in modal
+        $('#formPreviewContent').html(previewHtml);
+        $('#formPreviewModal').modal('show');
+    });
+
+    // Form type initialization
+    const initialFormType = $('#formType').val();
+    if (initialFormType === 'Academic') {
+        $('.academic-form-fields').show();
+        $('.general-form-fields').hide();
+    } else {
+        $('.academic-form-fields').hide();
+        $('.general-form-fields').show();
+    }
+
+    // Initialize datepicker for deadline
+    flatpickr("#formDeadline", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        minDate: "today"
+    });
+
+    // Initialize Select2 for dropdowns
+    $('.select2').select2({
+        theme: 'bootstrap-5',
+        width: '100%'
+    });
+});
+    </script> -->

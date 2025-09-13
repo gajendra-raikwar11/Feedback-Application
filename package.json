@@ -1,7 +1,6 @@
 {
   "name": "major-project",
   "version": "1.0.0",
-  "description": "",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
@@ -34,5 +33,6 @@
     "path": "^0.12.7",
     "router": "^2.1.0",
     "xlsx": "^0.18.5"
-  }
+  },
+  "description": ""
 }
